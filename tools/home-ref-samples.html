@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>主页示例 A/B · 明日方舟/终末地 · 女神异闻录</title>
+<style>
+:root{
+  --bg:#06080b;--text:#f2f4ef;--dim:#9aa3a1;--faint:#646d69;
+  --acc:#e8ff2a;--orange:#ff8a1e;--blue:#1f9dff;--red:#ff2f24;--gold:#ffc94a;--teal:#22e3c6;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Cascadia Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#050607;color:var(--text);font:15px/1.5 -apple-system,"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif}
+.cap{display:flex;align-items:baseline;gap:12px;padding:14px 22px 6px;font:11px/1 var(--mono);letter-spacing:.2em;color:var(--faint)}
+.cap b{color:var(--acc);letter-spacing:.1em;font-size:12px}
+.cap span{color:#4d5652}
+
+/* =====================================================================
+   示例 A —— 参照「明日方舟主界面 / 终末地」
+   结构对照：左上图标行 · 右上资源条 · 左侧圆形等级徽章 · 右侧白色大板
+             · 蓝色功能组 · 底部一行更暗的板 · 左下 BREAKING NEWS
+   ===================================================================== */
+.a{position:relative;height:760px;overflow:hidden;margin:8px 16px 26px;
+   /* 背景：无外部图片 ⇒ 用分层渐变 + 结构线做出"工业甲板"的明暗关系 */
+   background:
+     radial-gradient(ellipse 900px 420px at 78% 18%,rgba(120,170,210,.20),transparent 70%),
+     radial-gradient(ellipse 700px 420px at 18% 88%,rgba(255,150,60,.14),transparent 72%),
+     linear-gradient(180deg,#0d1418 0%,#0a1013 46%,#060a0c 100%)}
+/* 甲板结构：横梁 / 立柱 / 斜撑 / 警戒条纹（全部 CSS） */
+.a .beam{position:absolute;left:0;right:0;height:26px;background:linear-gradient(180deg,#1a2429,#0d1417 60%,#131c20);border-top:1px solid #26343a;border-bottom:1px solid #060a0c}
+.a .beam.t1{top:34px}.a .beam.t2{top:150px;height:14px;opacity:.7}
+.a .col{position:absolute;top:0;bottom:0;width:16px;background:linear-gradient(90deg,#111a1e,#1c262b 50%,#0b1114);border-left:1px solid #243137;border-right:1px solid #080d0f}
+.a .col.c1{left:46%}.a .col.c2{right:12%;width:22px}.a .col.c3{right:4%;width:10px;opacity:.6}
+.a .brace{position:absolute;left:46%;top:0;width:2px;height:100%;background:linear-gradient(180deg,transparent,#2a3b43 30%,#2a3b43 70%,transparent);transform:rotate(6deg);transform-origin:top center;opacity:.5}
+.a .hazard{position:absolute;left:0;bottom:0;width:300px;height:54px;opacity:.5;
+  background:repeating-linear-gradient(135deg,#1a1f1c 0 12px,#2c2a12 12px 24px)}
+.a .vign{position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,transparent 40%,rgba(2,4,5,.72) 100%)}
+.a .grid{position:absolute;inset:0;opacity:.14;
+  background-image:linear-gradient(rgba(120,170,200,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(120,170,200,.5) 1px,transparent 1px);background-size:64px 64px}
+
+/* 左上：4 个扁平图标（方舟那排） */
+.a .tools{position:absolute;left:26px;top:22px;display:flex;gap:16px;z-index:9}
+.a .tool{width:40px;height:40px;position:relative;opacity:.92;filter:drop-shadow(0 2px 6px #000)}
+.a .tool::before,.a .tool::after{content:"";position:absolute;background:#eef2ee}
+.a .tool.gear::before{inset:8px;border:3px solid #eef2ee;background:transparent;border-radius:50%}
+.a .tool.gear::after{inset:17px;border-radius:50%}
+.a .tool.warn::before{left:6px;top:14px;width:28px;height:4px;background:#eef2ee}
+.a .tool.warn::after{left:6px;top:24px;width:28px;height:4px}
+.a .tool.mail::before{inset:10px 8px;border:3px solid #eef2ee;background:transparent}
+.a .tool.mail::after{left:9px;top:12px;width:22px;height:3px;transform:rotate(24deg)}
+.a .tool.cal::before{inset:11px 9px;border:3px solid #eef2ee;background:transparent}
+.a .tool.cal::after{left:9px;top:18px;width:22px;height:3px}
+/* 右上：资源条（方舟的数字 + 彩色小图标） */
+.a .res{position:absolute;right:26px;top:20px;display:flex;gap:26px;z-index:9;
+  font:600 22px/1 var(--mono);color:#f4f7f2;text-shadow:0 2px 8px #000,0 0 2px #000}
+.a .res div{display:flex;align-items:center;gap:8px}
+.a .res i{width:14px;height:14px;display:block;transform:rotate(45deg)}
+.a .res .i1{background:var(--blue);box-shadow:0 0 10px rgba(31,157,255,.7)}
+.a .res .i2{background:var(--red);box-shadow:0 0 10px rgba(255,47,36,.6)}
+.a .res .i3{background:var(--gold);box-shadow:0 0 10px rgba(255,201,74,.6)}
+.a .res small{font:10px/1 var(--mono);color:#c9d2cc;letter-spacing:.12em}
+
+/* 左侧：圆形等级徽章（方舟左下那个） */
+.a .lvbadge{position:absolute;left:34px;bottom:120px;width:132px;height:132px;z-index:9}
+.a .lvbadge .ring{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(var(--acc) 0 68%,rgba(255,255,255,.10) 68% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 66%,#000 67%);mask:radial-gradient(circle,transparent 66%,#000 67%)}
+.a .lvbadge .in{position:absolute;inset:10px;border-radius:50%;background:rgba(8,12,14,.82);
+  border:1px solid #2b383e;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.a .lvbadge .n{font:800 46px/1 var(--mono)}
+.a .lvbadge .l{font:10px/1 var(--mono);letter-spacing:.2em;color:#c8d2cc;margin-top:2px}
+.a .idname{position:absolute;left:34px;bottom:92px;z-index:9;font:600 13px/1.4 var(--mono);color:#dfe6e1}
+.a .idname small{display:block;font:10px/1.4 var(--mono);color:#8e9a94;letter-spacing:.1em}
+
+/* 右侧：白色大板（方舟的签名：纯白板 + 超重字） */
+.a .plates{position:absolute;right:26px;top:74px;width:820px;display:grid;grid-template-columns:repeat(6,1fr);gap:12px;z-index:10}
+.a .plate{background:rgba(244,246,242,.94);color:#0b0f10;padding:16px 18px;position:relative;
+  box-shadow:0 18px 40px -26px #000;transition:transform .18s ease,background .18s ease}
+.a .plate:hover{transform:translateY(-2px);background:#fff}
+.a .plate .t{font-weight:900;letter-spacing:-.02em;line-height:1.05}
+.a .plate .sub{font:11px/1.4 var(--mono);color:#4a5250;margin-top:6px;letter-spacing:.06em}
+.a .plate .n{font:900 54px/1 var(--mono);letter-spacing:-.03em}
+.a .plate .chip{display:inline-block;background:#111517;color:#eef2ee;font:10px/1 var(--mono);padding:5px 8px;letter-spacing:.08em}
+/* 作战板（最大，右上） */
+.a .plate.combat{grid-column:1 / 7;display:grid;grid-template-columns:150px 1fr auto;gap:18px;align-items:center;padding:18px 22px}
+.a .plate.combat .numwrap{position:relative;padding-left:34px}
+.a .plate.combat .numwrap::before{content:"+";position:absolute;left:-6px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;border:2px solid #0b0f10;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 18px/1 var(--mono)}
+.a .plate.combat .t{font-size:52px}
+.a .plate.combat .after{width:100%;height:4px;background:var(--orange);position:absolute;left:0;bottom:0}
+.a .plate.c2{grid-column:1 / 4}.a .plate.c3{grid-column:4 / 7}
+/* 蓝色功能组（方舟"招募"那块） */
+.a .plate.blue{background:var(--blue);color:#fff}
+.a .plate.blue .sub{color:rgba(255,255,255,.82)}
+.a .plate.blue.ghost{background:rgba(31,157,255,.16);color:#dff1ff;border:1px solid rgba(31,157,255,.55)}
+.a .plate.c4{grid-column:1 / 4}.a .plate.c5{grid-column:4 / 7}
+/* 底部一行：更暗的板（方舟 仓库/基建/情报） */
+.a .plate.dim{background:rgba(244,246,242,.62)}
+.a .plate.dim .t{font-size:22px}
+.a .plate.c6{grid-column:1 / 3}.a .plate.c7{grid-column:3 / 5}.a .plate.c8{grid-column:5 / 7;background:rgba(244,246,242,.30);color:#c9d2cc}
+/* 左下：BREAKING NEWS */
+.a .news{position:absolute;left:26px;bottom:26px;display:flex;align-items:stretch;z-index:11;
+  background:rgba(10,14,16,.92);border:1px solid #33434a;max-width:560px}
+.a .news .tag{background:var(--red);color:#fff;font:700 10px/1 var(--mono);letter-spacing:.14em;padding:10px;display:flex;align-items:center}
+.a .news .txt{padding:9px 12px;font:11px/1.5 var(--mono);color:#c9d2cc}
+.a .news .txt b{color:#fff;font-size:13px}
+
+/* =====================================================================
+   示例 B —— 参照「女神异闻录 5 菜单」
+   结构对照：左侧巨大黑白图形切出画外 · 斜切菜单栈（选中项红牌）
+             · 左上白色币值小卡 · 右缘三个斜切小框 · 右下按键提示 · 半调点纹理
+   ===================================================================== */
+.b{position:relative;height:760px;overflow:hidden;margin:0 16px 30px;
+   background:linear-gradient(120deg,#0a2740 0%,#0f4a6e 38%,#12628a 62%,#0b3550 100%)}
+/* 左侧巨大黑白图形（Persona 的漫画特写 → 我们用几何/剪影代替，不伪造人物） */
+.b .shape{position:absolute;left:-6%;top:-10%;width:58%;height:120%;background:#f2f4ef;
+  clip-path:polygon(0 0,72% 0,58% 26%,78% 46%,52% 62%,70% 100%,0 100%);opacity:.97}
+.b .shape2{position:absolute;left:8%;top:6%;width:34%;height:70%;background:#05070a;
+  clip-path:polygon(0 0,58% 12%,42% 38%,66% 56%,30% 74%,0 100%)}
+.b .halftone{position:absolute;inset:0;opacity:.16;mix-blend-mode:screen;
+  background-image:radial-gradient(#eaf6ff 1px,transparent 1px);background-size:9px 9px}
+.b .jag{position:absolute;left:0;bottom:0;width:64%;height:38%;background:#05070a;
+  clip-path:polygon(0 24%,12% 8%,26% 30%,38% 4%,52% 26%,64% 0,74% 100%,0 100%)}
+.b .slashbg{position:absolute;left:30%;top:0;width:26%;height:100%;background:rgba(255,255,255,.06);transform:skewX(-18deg)}
+/* 左上白色币值小卡（Persona 的 current wallet） */
+.b .wallet{position:absolute;left:22px;top:20px;background:#f4f6f2;color:#0b0f10;padding:6px 10px;
+  font:700 15px/1 var(--mono);transform:skewX(-8deg);box-shadow:0 8px 18px -10px #000;z-index:9}
+.b .wallet small{display:block;font:9px/1.4 var(--mono);color:#5a625f;letter-spacing:.1em;transform:skewX(8deg)}
+/* 斜切菜单栈 */
+.b .menu{position:absolute;right:9%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;
+  align-items:flex-end;gap:2px;z-index:10}
+.b .mi{display:flex;align-items:baseline;gap:14px;text-decoration:none;color:#eaf6ff;
+  transform:skewX(-9deg);padding:2px 10px 2px 14px;transition:transform .18s ease,color .18s ease}
+.b .mi .en{font:800 30px/1 var(--mono);letter-spacing:-.02em;text-transform:uppercase}
+.b .mi .cn{font-size:12px;color:rgba(234,246,255,.7);letter-spacing:.08em}
+.b .mi:nth-child(1) .en{font-size:22px;opacity:.75}
+.b .mi:nth-child(2) .en{font-size:26px;opacity:.85}
+.b .mi:nth-child(3) .en{font-size:40px}
+.b .mi:nth-child(4) .en{font-size:30px;opacity:.9}
+.b .mi:nth-child(5) .en{font-size:24px;opacity:.75}
+.b .mi:nth-child(6) .en{font-size:20px;opacity:.6}
+.b .mi.sel{background:#ff2f24;color:#fff;padding:4px 18px 6px 20px;transform:skewX(-9deg) translateX(-6px);
+  box-shadow:0 18px 40px -18px rgba(0,0,0,.7)}
+.b .mi.sel .en{font-size:46px;font-style:italic}
+.b .mi.sel .cn{color:rgba(255,255,255,.85)}
+.b .mi.sel::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:3px;background:#f4f6f2;transform:skewX(9deg)}
+.b .mi:hover{transform:skewX(-9deg) translateX(-10px);color:#fff}
+.b .mi:hover .en{text-shadow:0 0 18px rgba(255,255,255,.5)}
+/* 右缘三个斜切小框（Persona 的队友头像位） */
+.b .party{position:absolute;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:9}
+.b .pc{width:86px;height:44px;background:rgba(10,40,60,.75);border:1px solid rgba(180,230,255,.5);
+  transform:skewX(-10deg);display:flex;flex-direction:column;justify-content:center;padding:0 8px}
+.b .pc b{font:800 15px/1 var(--mono);color:#eaf6ff}
+.b .pc small{font:9px/1.4 var(--mono);color:rgba(200,235,255,.7);letter-spacing:.08em}
+/* 右下按键提示 */
+.b .keys{position:absolute;right:22px;bottom:20px;text-align:right;font:11px/1.6 var(--mono);color:rgba(234,246,255,.75);z-index:9}
+.b .keys b{color:#fff}
+.b .keys .k{display:inline-block;border:1px solid rgba(234,246,255,.55);padding:1px 6px;margin-left:6px;font-size:10px}
+/* 左下角标题块 */
+.b .title{position:absolute;left:24px;bottom:26px;z-index:11;color:#0b0f10}
+.b .title .box{background:var(--acc);padding:6px 12px;display:inline-block;transform:skewX(-9deg)}
+.b .title .box b{font:800 20px/1 var(--mono);letter-spacing:-.02em}
+.b .title small{display:block;margin-top:8px;font:10px/1.5 var(--mono);color:rgba(255,255,255,.8);letter-spacing:.12em}
+@media (max-width:1180px){
+  .a,.b{height:auto;padding:18px 16px 100px}
+  .a .tools,.a .res,.a .lvbadge,.a .idname{position:static;margin:0 0 14px}
+  .a .plates{position:static;width:auto;grid-template-columns:1fr}
+  .a .plate{grid-column:auto!important}
+  .a .news,.b .menu,.b .party,.b .keys,.b .wallet,.b .title{position:static;margin:14px 0}
+  .b .menu{align-items:flex-start}.b .mi.sel .en{font-size:34px}
+  .b .shape,.b .shape2,.b .jag,.b .slashbg{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cap"><b>示例 A</b><span>明日方舟 / 终末地 —— 白色大板 · HUD 图标行 · 资源条 · 圆形等级徽章 · 蓝色功能组 · BREAKING NEWS</span></div>
+<section class="a">
+  <div class="beam t1"></div><div class="beam t2"></div>
+  <div class="col c1"></div><div class="col c2"></div><div class="col c3"></div>
+  <div class="brace"></div><div class="grid"></div><div class="vign"></div><div class="hazard"></div>
+
+  <div class="tools"><span class="tool gear"></span><span class="tool warn"></span><span class="tool mail"></span><span class="tool cal"></span></div>
+
+  <div class="res">
+    <div><i class="i1"></i><span>/*__TOTAL__*/0</span><small>ITEMS</small></div>
+    <div><i class="i2"></i><span>/*__REC__*/0</span><small>REC</small></div>
+    <div><i class="i3"></i><span>/*__PLANS__*/0</span><small>PLANS</small></div>
+  </div>
+
+  <div class="lvbadge"><div class="ring"></div><div class="in"><span class="n">01</span><span class="l">LEVEL</span></div></div>
+  <div class="idname">ARCHIVE INDEX<small>ID: /*__TOTAL__*/0 · 本地只读档案</small></div>
+
+  <div class="plates">
+    <a class="plate combat" href="#/picks">
+      <div class="numwrap"><span class="n">/*__REC__*/0</span></div>
+      <div><div class="t">每日精选</div><div class="chip">LATEST /*__LATEST__*/</div></div>
+      <div class="sub">日报与精选同一件事<br>按天看新增 · 按档位看精品</div>
+      <div class="after"></div>
+    </a>
+    <a class="plate c2" href="#/all"><div class="t" style="font-size:34px">完整项目库</div><div class="sub">分类 / 标签 / 徽章 / 风险</div><div class="n" style="font-size:28px;margin-top:8px">/*__TOTAL__*/0</div></a>
+    <a class="plate c3" href="#/plans"><div class="t" style="font-size:34px">计划与工作区</div><div class="sub">按需求配好的组合</div><div class="n" style="font-size:28px;margin-top:8px">/*__PLANS__*/0</div></a>
+    <a class="plate blue c4" href="#/legend"><div class="t" style="font-size:26px">图例与标准</div><div class="sub">小窗打开 · ESC 关闭</div></a>
+    <a class="plate blue ghost c5" href="#/all?q="><div class="t" style="font-size:26px">搜索</div><div class="sub">按 / 聚焦 · 说人话</div></a>
+    <a class="plate dim c6" href="#/all?badge=gem"><div class="t">🧊 冷门优质</div><div class="sub">/*__GEM__*/0 条</div></a>
+    <a class="plate dim c7" href="#/all?badge=org"><div class="t">🏢 官方出品</div><div class="sub">/*__ORG__*/0 条</div></a>
+    <div class="plate dim c8"><div class="t">近 7 天事件</div><div class="sub">/*__EVENTS__*/0 条</div></div>
+  </div>
+
+  <div class="news"><span class="tag">LATEST</span><span class="txt"><b>/*__LATEST__*/</b> 精选已入库 · 共 /*__REC__*/0 条推荐</span></div>
+</section>
+
+<div class="cap"><b>示例 B</b><span>女神异闻录 —— 斜切菜单栈 · 选中项红牌 · 左侧巨型黑白图形 · 半调纹理 · 右下按键提示</span></div>
+<section class="b">
+  <div class="shape"></div><div class="shape2"></div><div class="jag"></div>
+  <div class="slashbg"></div><div class="halftone"></div>
+
+  <div class="wallet">/*__TOTAL__*/0<small>ARCHIVE ITEMS</small></div>
+
+  <div class="menu">
+    <a class="mi" href="#/plans"><span class="en">PLANS</span><span class="cn">计划与工作区</span></a>
+    <a class="mi" href="#/all"><span class="en">LIBRARY</span><span class="cn">完整项目库</span></a>
+    <a class="mi sel" href="#/picks"><span class="en">DAILY</span><span class="cn">每日精选</span></a>
+    <a class="mi" href="#/all?badge=gem"><span class="en">GEMS</span><span class="cn">冷门优质</span></a>
+    <a class="mi" href="#/legend"><span class="en">SPEC</span><span class="cn">图例与标准</span></a>
+    <a class="mi" href="#/all?q="><span class="en">SEARCH</span><span class="cn">搜索</span></a>
+  </div>
+
+  <div class="party">
+    <div class="pc"><b>/*__TOTAL__*/0</b><small>ITEMS</small></div>
+    <div class="pc"><b>/*__REC__*/0</b><small>REC</small></div>
+    <div class="pc"><b>/*__PLANS__*/0</b><small>PLANS</small></div>
+  </div>
+
+  <div class="keys"><b>查看详情 / 进入</b><span class="k">ENTER</span><br><b>关闭</b><span class="k">ESC</span></div>
+  <div class="title"><span class="box"><b>ARCHIVE 档案</b></span><small>LOCAL · OFFLINE · /*__LATEST__*/</small></div>
+</section>
+
+</body>
+</html>

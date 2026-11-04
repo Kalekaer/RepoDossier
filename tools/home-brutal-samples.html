@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>主界面示例 · 后朋克 × 粗野主义 × 游戏交互</title>
+<style>
+/* ============================================================================
+   设计依据（不是自己定的）：
+   · 视觉语言 ← 用户提供的参考卡「1. 后朋克 × 粗野主义」
+       黑白高反差 / 荧光色 / 巨大标题 / 不对称分割 / 杂志拼贴
+       「重点观察：大标题怎样建立第一视觉焦点、图片怎样打破规则网格、醒目色怎样引导视线」
+   · 压缩巨字 ← 本站已有资产 assets/anton-latin.woff2（OFL，THIRD-PARTY.md 已登记）
+   · 游戏交互 ← 明日方舟/Persona 的"选中态 + 指令条 + 硬切动效"，token 参考 ak-ui
+   · 数据 ← 真实：229 项目 / 39 推荐 / 11 方案 / 410 事件 / 83 冷门 / 8 官方 / 2026-10-16
+   ============================================================================ */
+@font-face{
+  font-family:"Anton";src:url("anton-latin.woff2") format("woff2");
+  font-weight:400;font-display:swap;
+}
+:root{
+  --ink:#0a0a0a; --ink-2:#141414; --paper:#f5f5f0; --paper-2:#e8e8e2;
+  --fluoro:#e9ff2e;      /* 荧光黄：引导视线，永配黑字 */
+  --magenta:#ff1f6b;     /* 品红：第二焦点 / 选中态 */
+  --cyan:#2ef2d0;        /* 氰：极少量，做"数据活着"的信号 */
+  --grey:#8a8a86;
+  --rule:8px;            /* 粗野主义：硬线要粗 */
+  --snap:90ms; --snap-ease:linear;   /* 游戏手感：硬吸附，不用缓动渐变 */
+  --anton:"Anton","Arial Narrow",Impact,sans-serif;
+  --mono:SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Noto Sans SC","Microsoft YaHei UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ink);color:var(--paper);font:15px/1.45 var(--sans)}
+.cap{padding:14px 22px 6px;font:11px/1 var(--mono);letter-spacing:.18em;color:#5f5f5a}
+.cap b{color:var(--fluoro);letter-spacing:.06em;font-size:12px}
+/* 巨字基类：Anton 负责拉丁，中文靠 900 字重 + 负字距 */
+.giant{font-family:var(--anton);font-weight:400;line-height:.82;letter-spacing:-.02em;text-transform:uppercase}
+.cn-giant{font-weight:900;line-height:.95;letter-spacing:-.045em}
+.mono{font:600 10px/1.5 var(--mono);letter-spacing:.18em;text-transform:uppercase}
+
+/* ============================ 示例 A · 后朋克主界面 ============================ */
+.a{position:relative;height:780px;margin:6px 16px 28px;background:var(--ink);overflow:hidden;
+   border:var(--rule) solid var(--paper)}
+.a .toprule{position:absolute;left:0;right:0;top:0;height:var(--rule);background:var(--fluoro)}
+.a .meta{position:absolute;left:18px;right:18px;top:20px;display:flex;justify-content:space-between;
+   font:600 10px/1 var(--mono);letter-spacing:.2em;color:var(--grey);text-transform:uppercase}
+.a .meta b{color:var(--paper)}
+/* 左侧：一个巨物 —— 第一视觉焦点 */
+.a .hero{position:absolute;left:14px;top:64px;width:60%}
+.a .hero .kick{display:inline-block;background:var(--magenta);color:#fff;font:600 10px/1 var(--mono);
+   letter-spacing:.2em;padding:5px 8px;margin-bottom:14px;text-transform:uppercase}
+.a .hero .word{font-size:150px;margin:0}
+.a .hero .word em{font-style:normal;color:var(--fluoro)}
+.a .hero .cn{font-size:54px;margin:2px 0 0;color:var(--paper)}
+.a .hero .cn i{font-style:normal;color:var(--magenta)}
+/* 巨数 + 斜切荧光条：打破规则网格 */
+.a .stats{display:flex;gap:0;margin-top:20px;border-top:var(--rule) solid var(--paper);width:96%}
+.a .stats div{flex:1;padding:12px 10px 8px;border-right:1px solid #2a2a28}
+.a .stats div:last-child{border-right:0}
+.a .stats b{display:block;font-family:var(--anton);font-size:44px;line-height:1;color:var(--fluoro)}
+.a .stats span{font:600 9px/1.4 var(--mono);letter-spacing:.16em;color:var(--grey);text-transform:uppercase}
+.a .slash{position:absolute;left:-40px;top:430px;width:70%;height:26px;background:var(--fluoro);
+   transform:skewX(-18deg)}
+.a .sticker{position:absolute;left:34%;top:150px;transform:rotate(-7deg);background:var(--paper);color:var(--ink);
+   padding:7px 12px;font:800 12px/1 var(--sans);letter-spacing:.02em;box-shadow:10px 10px 0 var(--magenta)}
+.a .sticker span{display:block;font:600 9px/1.5 var(--mono);letter-spacing:.16em;margin-top:3px;color:#4a4a46}
+/* 右侧：硬白板列表（游戏"选项"感：选中态反白/品红） */
+.a .slots{position:absolute;right:14px;top:64px;width:35%;display:flex;flex-direction:column;gap:6px}
+.a .slot{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;text-decoration:none;
+   background:var(--paper);color:var(--ink);padding:12px 12px 11px;border:0;
+   transition:transform var(--snap) var(--snap-ease),background var(--snap) var(--snap-ease),color var(--snap) var(--snap-ease)}
+.a .slot .no{font-family:var(--anton);font-size:24px;line-height:1}
+.a .slot .t{font:900 20px/1.05 var(--sans);letter-spacing:-.03em}
+.a .slot .t small{display:block;font:600 9px/1.5 var(--mono);letter-spacing:.14em;color:#5a5a54;margin-top:3px;text-transform:uppercase}
+.a .slot .go{font:600 10px/1 var(--mono);letter-spacing:.1em}
+.a .slot:hover{transform:translateX(-6px)}
+.a .slot.sel{background:var(--magenta);color:#fff}
+.a .slot.sel .t small{color:rgba(255,255,255,.8)}
+.a .slot.sel .go::after{content:"◀"}
+.a .slot.ghost{background:transparent;color:var(--paper);border:2px solid var(--paper)}
+.a .slot.ghost .t small{color:var(--grey)}
+.a .slot.ghost:hover{background:var(--fluoro);color:var(--ink);border-color:var(--fluoro)}
+.a .slot.ghost:hover .t small{color:#3d3d38}
+/* 底部：指令条（游戏手感） */
+.a .cmd{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:18px;
+   padding:10px 16px;border-top:2px solid var(--paper);background:var(--ink-2)}
+.a .cmd .k{font:600 10px/1 var(--mono);letter-spacing:.16em;color:var(--paper)}
+.a .cmd .k b{display:inline-block;background:var(--paper);color:var(--ink);padding:2px 6px;margin-right:6px}
+.a .cmd .sp{flex:1}
+.a .cmd .hint{font:600 10px/1 var(--mono);letter-spacing:.16em;color:var(--grey)}
+.a .cmd .hint i{color:var(--fluoro);font-style:normal}
+
+/* ============================ 示例 B · HUD 终端 ============================ */
+.b{position:relative;height:780px;margin:0 16px 30px;background:var(--ink);overflow:hidden;
+   border:var(--rule) solid var(--fluoro)}
+/* 顶部黄底黑字横带（粗野主义招牌位） */
+.b .band{display:flex;align-items:center;gap:16px;background:var(--fluoro);color:var(--ink);padding:8px 14px}
+.b .band .big{font-family:var(--anton);font-size:34px;line-height:1;letter-spacing:-.01em}
+.b .band .sub{font:700 10px/1.3 var(--mono);letter-spacing:.16em;text-transform:uppercase}
+.b .band .sp{flex:1}
+.b .band .r{font:700 10px/1 var(--mono);letter-spacing:.16em}
+/* 中部：选中视口 + 右侧遥测 */
+.b .main{display:grid;grid-template-columns:1fr 268px;gap:0;height:520px}
+.b .view{position:relative;border-right:var(--rule) solid var(--paper);padding:22px 24px;overflow:hidden}
+.b .view::after{content:"";position:absolute;right:-60px;bottom:-60px;width:260px;height:260px;
+   background:var(--magenta);transform:rotate(18deg);opacity:.9}
+.b .view .no{font-family:var(--anton);font-size:100px;line-height:.8;color:var(--fluoro);position:relative;z-index:2}
+.b .view h2{position:relative;z-index:2;margin:6px 0 10px;font-size:62px;font-weight:900;line-height:.92;letter-spacing:-.045em}
+.b .view p{position:relative;z-index:2;margin:0;max-width:52ch;font:13px/1.7 var(--mono);color:#c9c9c2}
+.b .view .tag{position:relative;z-index:2;display:inline-block;margin-top:16px;background:var(--ink);color:var(--fluoro);
+   border:2px solid var(--fluoro);font:700 10px/1 var(--mono);letter-spacing:.18em;padding:6px 9px}
+/* 遥测列（游戏 HUD 的数据位） */
+.b .tele{border-left:0;background:var(--ink-2);padding:16px 14px;display:flex;flex-direction:column;gap:12px}
+.b .tele .row{border-bottom:1px solid #262624;padding-bottom:9px}
+.b .tele .row b{display:block;font-family:var(--anton);font-size:30px;line-height:1;color:var(--paper)}
+.b .tele .row span{font:600 9px/1.4 var(--mono);letter-spacing:.16em;color:var(--grey);text-transform:uppercase}
+.b .tele .row.hot b{color:var(--cyan)}
+/* 槽位行（选中态品红） */
+.b .slots{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-top:var(--rule) solid var(--paper)}
+.b .slot{position:relative;padding:14px 12px 16px;border-right:1px solid #2a2a28;text-decoration:none;color:var(--paper);
+   transition:background var(--snap) var(--snap-ease),color var(--snap) var(--snap-ease),transform var(--snap) var(--snap-ease)}
+.b .slot:last-child{border-right:0}
+.b .slot .no{font-family:var(--anton);font-size:26px;line-height:1;color:var(--grey)}
+.b .slot .t{display:block;margin-top:6px;font:900 17px/1.05 var(--sans);letter-spacing:-.02em}
+.b .slot .s{display:block;margin-top:4px;font:600 9px/1.4 var(--mono);letter-spacing:.14em;color:var(--grey);text-transform:uppercase}
+.b .slot:hover{background:var(--fluoro);color:var(--ink)}
+.b .slot:hover .no,.b .slot:hover .s{color:#3d3d38}
+.b .slot.sel{background:var(--magenta);color:#fff}
+.b .slot.sel .no{color:#fff}
+.b .slot.sel .s{color:rgba(255,255,255,.82)}
+.b .slot.sel::after{content:"";position:absolute;left:0;right:0;top:-8px;height:8px;background:var(--magenta)}
+/* 底部指令 */
+.b .cmd{display:flex;align-items:center;gap:16px;padding:9px 14px;background:var(--paper);color:var(--ink)}
+.b .cmd .k{font:700 10px/1 var(--mono);letter-spacing:.16em}
+.b .cmd .k b{background:var(--ink);color:var(--paper);padding:2px 6px;margin-right:6px}
+.b .cmd .sp{flex:1}
+.b .cmd .note{font:600 9px/1 var(--mono);letter-spacing:.14em;color:#55554f}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:1180px){
+  .a,.b{height:auto;border-width:4px}
+  .a .hero,.a .slots,.a .meta,.a .slash,.a .sticker{position:static;width:auto;transform:none;margin:12px 16px}
+  .a .hero .word{font-size:64px}.a .hero .cn{font-size:32px}
+  .a .stats{flex-wrap:wrap}
+  .b .main{grid-template-columns:1fr;height:auto}
+  .b .view h2{font-size:36px}.b .view .no{font-size:64px}
+  .b .slots{grid-template-columns:repeat(2,1fr)}
+  .b .cmd{flex-wrap:wrap;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<div class="cap"><b>示例 A</b> 后朋克主界面 · 一个巨物 + 硬白板 + 荧光斜条 + 指令条</div>
+<section class="a">
+  <div class="toprule"></div>
+  <div class="meta"><span>ARCHIVE<span style="color:var(--fluoro">//</span>INDEX</span><span>LOCAL · OFFLINE · <b>/*__LATEST__*/</b></span></div>
+
+  <div class="hero">
+    <span class="kick">LATEST ISSUE /*__LATEST__*/</span>
+    <h1 class="word giant">ARCH<em>I</em>VE</h1>
+    <h2 class="cn cn-giant">本地项目档案</h2>
+    <div class="stats">
+      <div><b>/*__TOTAL__*/0</b><span>条目 ITEMS</span></div>
+      <div><b>/*__REC__*/0</b><span>推荐 REC</span></div>
+      <div><b>/*__PLANS__*/0</b><span>方案 PLANS</span></div>
+    </div>
+  </div>
+  <div class="slash"></div>
+  <div class="sticker">每日精选<span>DAILY · 01 ENTRY</span></div>
+
+  <div class="slots">
+    <a class="slot sel" href="#/picks"><span class="no">01</span><span class="t">每日精选<small>DAILY / 工作日更</small></span><span class="go">◀</span></a>
+    <a class="slot" href="#/all"><span class="no">02</span><span class="t">完整项目库<small>/*__TOTAL__*/0 ITEMS</small></span><span class="go">→</span></a>
+    <a class="slot" href="#/plans"><span class="no">03</span><span class="t">计划与工作区<small>/*__PLANS__*/0 PLANS</small></span><span class="go">→</span></a>
+    <a class="slot ghost" href="#/legend"><span class="no">04</span><span class="t">图例与标准<small>小窗 · ESC 关闭</small></span><span class="go">→</span></a>
+  </div>
+
+  <div class="cmd">
+    <span class="k"><b>↑↓</b>选择</span><span class="k"><b>ENTER</b>进入</span><span class="k"><b>ESC</b>关闭小窗</span>
+    <span class="sp"></span><span class="hint">重点：<i>一个大字 + 一个荧光斜条</i>，其余全部降级</span>
+  </div>
+</section>
+
+<div class="cap"><b>示例 B</b> HUD 终端 · 选中视口 + 遥测列 + 六槽位（游戏背包感）</div>
+<section class="b">
+  <div class="band">
+    <span class="big">ARCHIVE//INDEX</span>
+    <span class="sub">后朋克 × 粗野主义 × 游戏交互</span>
+    <span class="sp"></span>
+    <span class="r">SYNC /*__LATEST__*/ · 229/229 OK</span>
+  </div>
+  <div class="main">
+    <div class="view">
+      <div class="no">01</div>
+      <h2>每日精选</h2>
+      <p>日报与精选是同一件事：按天看新增，按档位看精品。<br>点下方槽位切换二级页面；图例走小窗，不占页面。</p>
+      <span class="tag">SELECTED · /*__REC__*/0 条已推荐</span>
+    </div>
+    <div class="tele">
+      <div class="row"><b>/*__TOTAL__*/0</b><span>ITEMS 条目</span></div>
+      <div class="row"><b>/*__REC__*/0</b><span>REC 推荐</span></div>
+      <div class="row"><b>/*__PLANS__*/0</b><span>PLANS 方案</span></div>
+      <div class="row hot"><b>/*__EVENTS__*/0</b><span>EVENTS 事件</span></div>
+    </div>
+  </div>
+  <div class="slots">
+    <a class="slot sel" href="#/picks"><span class="no">01</span><span class="t">每日精选</span><span class="s">DAILY</span></a>
+    <a class="slot" href="#/all"><span class="no">02</span><span class="t">完整项目库</span><span class="s">LIBRARY</span></a>
+    <a class="slot" href="#/plans"><span class="no">03</span><span class="t">计划与工作区</span><span class="s">PLANS</span></a>
+    <a class="slot" href="#/all"><span class="no">04</span><span class="t">冷门优质</span><span class="s">/*__GEM__*/0 GEMS</span></a>
+    <a class="slot" href="#/legend"><span class="no">05</span><span class="t">图例</span><span class="s">MODAL</span></a>
+    <a class="slot" href="#/all"><span class="no">06</span><span class="t">搜索</span><span class="s">SEARCH /</span></a>
+  </div>
+  <div class="cmd">
+    <span class="k"><b>↑↓</b>选择</span><span class="k"><b>ENTER</b>进入</span><span class="k"><b>/</b>搜索</span>
+    <span class="sp"></span><span class="note">NO SOUND · 按系统减少动态效果则关闭全部动效</span>
+  </div>
+</section>
+
+</body>
+</html>

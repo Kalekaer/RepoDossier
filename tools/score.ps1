@@ -88,7 +88,10 @@ function Test-HardExclude {
     [int]$Stars = 0,
     [double]$ForkRatio = -1,
     [int]$DaysSincePush = 0,
-    [int]$DaysSincePushMax = 180
+    [int]$DaysSincePushMax = 180,
+    [switch]$StarSpike,
+    [switch]$HasRelease,
+    [switch]$HasDiscussion
   )
   $hits = @()
   if ([string]::IsNullOrWhiteSpace($Description) -and [string]::IsNullOrWhiteSpace($Id)) { $hits += '无描述且无标识' }
@@ -106,7 +109,7 @@ function Test-HardExclude {
     if ($low.Contains('awesome') -and ($low -match 'list|collection|curated|resources')) { $hits += '资源合集迹象：awesome + list/collection' }
     foreach ($kw in @('roadmap', 'interview-questions', 'books')) { if ($low.Contains($kw)) { $hits += ('资源合集迹象：' + $kw) } }
   }
-  if ($Stars -ge 1000 -and $ForkRatio -ge 0 -and $ForkRatio -lt 0.02) { $hits += ('刷星迹象：fork/star=' + [math]::Round($ForkRatio, 4)) }
+  if ($StarSpike -and $ForkRatio -ge 0 -and $ForkRatio -lt 0.02 -and -not $HasRelease -and -not $HasDiscussion) { $hits += ('刷星复合迹象：star spike, no release/discussion, fork/star=' + [math]::Round($ForkRatio, 4)) }
   return $hits
 }
 

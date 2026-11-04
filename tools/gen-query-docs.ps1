@@ -55,6 +55,7 @@ function Cell-Q($q) {
     $u = "q=$(Url-Q $q.q)"
     if ($q.sort) { $u += "&sort=$($q.sort)&order=$($q.order)" }
     $u += "&per_page=$($q.per_page)"
+    if($q.page){$u+="&page=$($q.page)"}
     return '`' + $u + '`'
   }
   if ($q.mode -eq 'repo') { return '逐个 `GET ' + $q.q + '`，每次最多 ' + $q.per_page + ' 个' }
@@ -65,6 +66,7 @@ function Cell-Q($q) {
 function Cell-Count($q) {
   if ($q.mode -eq 'probe') { return '15 探针 / 出 ≤5 名' }
   if ($q.mode -eq 'repo') { return '≤' + $q.per_page }
+  if($q.acquisition){return "$($q.per_page)/响应；预算 $($q.acquisition.max_requests) 请求"}
   return [string]$q.per_page
 }
 
@@ -81,8 +83,8 @@ $dailyIds = @($spec.queries | Where-Object { $_.frequency -eq 'daily' } | ForEac
 $order = ($dailyIds -join ' → ')
 $wd = $spec.weekdays
 $extras = @()
-foreach ($k in @('3', '4', '6')) {
-  if ($wd.$k.extras) { $wn = @{'3'='周三';'4'='周四';'6'='周六'}; $extras += ($wn[$k] + ' + ' + (@($wd.$k.extras) -join '、')) }
+foreach ($k in @('1','2','3','4','5','6','7')) {
+    if ($wd.$k.extras) { $wn = @{'1'='周一';'2'='周二';'3'='周三';'4'='周四';'5'='周五';'6'='周六';'7'='周日'}; $extras += ($wn[$k] + ' + ' + (@($wd.$k.extras) -join '、')) }
 }
 $orderText = "当天顺序：$order（$($extras -join '；')；Q3 新面孔 <3 或 total_count <10 时加跑 Q3s）。"
 $promptBlock = "<!-- QGEN:ORDER:START -->`n   $orderText`n   <!-- QGEN:ORDER:END -->"
@@ -107,6 +109,7 @@ foreach ($q in $spec.queries) {
   $u = 'https://api.github.com/search/repositories?q=' + (Url-Q $q.q)
   if ($q.sort) { $u += "&sort=$($q.sort)&order=$($q.order)" }
   $u += "&per_page=$($q.per_page)"
+  if($q.page){$u+="&page=$($q.page)"}
   $refRows += ('| {0} | {1} | `{2}` |' -f $q.id, $q.per_page, $u)
 }
 

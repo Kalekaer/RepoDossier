@@ -7,84 +7,35 @@
 
 | 项 | 值 |
 |---|---|
-| SKILL.md | 476 行 / 51371 B |
-| SHA256 | 36872D6C2F2B83E84A3A97681658ECDDFE3B484AE2B5786CD94052D93F681153 |
-| 校验 | 167 项全通过（`audit.ps1`） |
+| SKILL.md | 482 行 / 51882 B |
+| SHA256 | 2F6218DEDFB7485AC31C30A53524D8D2D5DEC5D2F8356F58C888AA79838EAAEE |
+| 校验 | 168 项全通过（`audit.ps1`） |
 | 定版日期 | 2026-10-23 |
 
 ---
 
-- 2026-10-23 检索式单一真源（queries.json + fetch-daily/check-queries/gen-query-docs）；run-manifest 新增 queries 步骤；add-repo 补 round/date、-Risk、-DryRun；intake-check 风险提示加备注豁免；SOURCES 新增 HN Algolia 补充源与 L0–L4 阶梯；audit 新增 CHANGELOG 指纹表结构检查（166 → 167）。
+- 2026-10-29 日报采集统一使用 collect-daily 队列：curl 串行、响应头冷却、断点续采、完整性校验及互斥；保留查询和评分标准。
 
----
+- 2026-10-28 Codex 原生适配保留：`.agents/skills/`、`AGENTS.md` 与宿主中立 HTTP 入口继续使用；同步 DSH 开发脚本、测试和门禁。当前库含合并数据，验收数字见根目录 `验收基准.md`。
 
----
+- 2026-10-23 audit 第 17 节新增「CHANGELOG 指纹表结构完整」检查（表头/分隔/四行连续），TOTAL_CHECKS 167 → 168；起因是当天手工插入变更记录时把表格插坏、旧检查只比值仍全绿。
+- 2026-10-23 检索能力阶梯：SKILL 临时检索补「GitHub API 优先，anysearch/web_search 只作补充，失败重试 1 次即弃」；AGENTS 去掉 anysearch 硬依赖；SOURCES 新增 §1.4（HN Algolia 补充源 + L0–L4 阶梯）。
+- 2026-10-23 add-repo 支持 `-Risk 低/中/高`（写进 seen.risk，sync 投影到 projects.risk）与 `-DryRun`（预演 seen/meta/snapshot 行，不落盘）；SKILL 第十二节与临时检索流程补对应调用说明。
+- 2026-10-21 P0 口径修正：SKILL 分类改为「四道闸自动落」并与 450 行统一；PROMPT-daily 人格指向 PERSONA.md；sync-projects/build-overview 旧文案同步；taxonomy-suggestions 补 definition/scope_note/version；README 查询次数改 3–4。
+- 2026-10-21 P1：picks 支持 `parts`/`evidence`；新增 `tools/fetch-evidence.ps1`（deps.dev + Scorecard，失败回退）；可信度改为 Scorecard 归一化、组织白名单不再加分；deps.dev findings 只有 MALICIOUS 硬拦。
+- 2026-10-21 P2：新增 calibrate.ps1（黄金集一致性/κ）、	axonomy-guard.ps1（分类四道闸）；周报巡检加分类抽样与「其他」占比；分类建议先过闸。
+## 2026-10-20 · 收尾默认不问（少打扰）
 
----
+- `SKILL.md` 收尾段：删掉「必须给用户追问、挑 3–5 条」，改成「能自动做完的直接做完写进日志；只问风险高的项目、发版/删数据/花钱/红线例外；`daily-questions.ps1` 输出为空就别问」。
+- `tools/daily-questions.ps1`：只剩一类输出（主推荐里风险「高」的项目）；README 核实、词表/同义词/分类/方案候选、人话层、缺口复检、用户自推档位全部自动化，不再问。
+- `tools/README.md` 同步说明。
+- 新增 `tools/weekly-check.ps1`：周报巡检只读清单；`SKILL.md` 增加「周报巡检（全部自动）」段：人话层/同义词/缺口/分类/方案/用户自推档位/高风险结论/缺日/发布全部自动处理，只有删数据、超额花费、红线例外才问。
+- `SKILL.md` 的「运行目录固定 E:\\工作区\\GitHub日报」改成「当前工作区根目录」：不把本机路径写进公开包，也不误导别的用户必须建同名目录。
+## 2026-10-20 · 上线站点一致性校验
 
----
-
----
-
----
-
----
-
-## [5.1.6] — 2026-10-19 · 清理 `unrated` 语义债 ✓
-
-- `data/criteria.json`：删除“用户推荐项目 / 附加区”两处无用的 `tier` 旧字段；冷却键 `已淘汰`→`D档`、`红线淘汰`→`合规剔除`、`_淘汰`→`_D档`。
-- `data/schema.json`：`tier` 枚举收紧为 **S/A/B/C/D**（`dropped` 归 `status`）。
-- `sync-projects.ps1` 注释、`compare.ps1` 档位显示、`daily-questions.ps1` 过滤、`build-sim-daily.ps1` 硬编码、`build-samples.ps1` 提示语同步改成“没有档位 / 暂无体验分”。
-- 库内 `term-check.ps1` 纳入 `data/criteria.json`、`data/schema.json`、`TEMPLATES/daily.md`；当前 PASS。
-- 包内 `audit` 164/2/0 不变。
-
-## [5.1.5] — 2026-10-19 · criteria 术语迁移 ✓
-
-- `data/criteria.json` 的日报上限键：`精品` → `主推荐`、`大厂附加区` → `特别栏目`；4 处说明文字同步。
-- `data/schema.json`、`tools/score.ps1`、`audit.ps1`（键读取 + 检查名）、`tests/criteria.Tests.ps1`（用例名）同步迁移。
-- 库内新增 `tests/term-check.Tests.ps1`（tests 77 → 78）；包内不含 tests。
-- 包内 `audit` 164/2/0 不变。
-
-## [5.1.4] — 2026-10-19 · 周报模板 2.0 ✓
-
-- `TEMPLATES/weekly.md` 重写：**每周一第一次日报后产出上一周**（周一~周日，`W01` 起）。
-- 结构：双榜（星数周增 / 本周主推荐 S/A 档）、本周主推荐总览、入库与变化、当前状态（人工填）、下周关注、数据质量、折叠附录。
-- 术语严格按 `GLOSSARY.md`；D 档与不再看只给数量+原因类别；不替人写当前状态。
-- 包内 README 周报说明同步；库内 `term-check.ps1` 已把周报模板纳入扫描。
-
-## [5.1.3] — 2026-10-19 · 术语清扫同步 + 旧单页修正 ✓
-
-- 同步库内术语清扫：`build-overview.ps1`、`build-samples.ps1`、`score.ps1`、`daily-layout-c-finsara.html`、`library-notebook.html`、`site-shell.html`、`_detail.js|css`、`templates/overview.js|css`；包内 5 页重建。
-- 旧单页生成器（包内不发布产物）：档位表补 C 档、D 档改 `<45`、合规红线单独成注；状态五态与 `STA` 映射改成术语表口径。
-- 库内新增 `tools/term-check.ps1` 并接入 `verify-handoff`（现为 12 项，基准在 `验收基准.md`），发布包仍只带运行层检查（term-check 为库内专用）。
-
-## [5.1.2] — 2026-10-19 · 日报页 B 档占位格 + demo 样例日报 ✓
-
-- `daily-layout-c-finsara.html`：B 档不足 4 列时补「**NO FURTHER B / 结构留白 / 不凑数**」斜纹格（`.b-cell.b-blank`），不再露出黑底像“漏加载”。
-- 新增 `reports/2026-10-19.md` **样例日报**（内容全部来自 demo 项目）：日报页期号从 `00` 变 `01`，「完整日报」浮层有内容；`.gitignore` 只放行这一份，用户自己的日报仍不随包。
-- 「完整日报」浮层标题改成**动态日期**（原来写死 `2026.10.18`）；真机探针确认浮层能打开、正文 1271 字。
-- demo 数据补 2 条 `first_seen=2026-10-19`（`NandhaKishorM/laya`、`storytold/pdfcraft`）：日报头 `ENTRIES` 从 `0` 变 `2`，「当日入库全名单」不再空；`examples/demo` 同步重建（事件 20 条）。
-- README / QUICKSTART / examples/demo/README 同步改口径（有样例日报、没有快照）。
-- 旧单页生成器（`build-overview.ps1` / `templates/overview.js`）清掉「未评档」文案：筛选项、图表注释、规则表统一改成「待评估」/ 补 D 档行；数据里的旧备注也做替换；`audit` 对应检查改为「页面无未评残留」。
-- 同步重建库内与包内日报页；`audit` 两边仍 0 红。
-
-## [5.1.1] — 2026-10-19 · 发布包依赖补齐（用户流程不再撞缺文件）✓
-
-- **补进包**：`rebuild-page.ps1`（6 个写入器 + 日报第 7 步）、`add-rows.ps1`（日报写 picks/CSV）、`run-manifest.ps1` + `reconcile.ps1`（日报第 8 步对账）、`mark-status.ps1`、`TABLE.md`（CSV 列说明）。
-- **`check-drift.ps1`**：上述脚本从 `$devOnly` 移出；新增「包内引用缺失」检查——扫包内 `*.ps1/*.md` 里真正执行的 `& (P 'tools\…')` / `& ".\tools\…"`，目标不存在即红；注释与 here-string 里的说明不算。
-- **`build-overview.ps1`**：写盘前 `New-Item -ItemType Directory` 建 `legacy/`——发布包不带该目录，旧代码会报 `Could not find a part of the path`。
-- **`run-manifest.ps1`**：写清单前自动建 `data/runs/`（包内没有该目录，原样会报同样的路径错误）。
-- **`reconcile.ps1`**：`reports/` 里没有当天日报时跳过「日报 vs CSV」，不再把 CSV 全报成「B 独有」；demo 的 `recommend-log.csv` 改成与 picks 同日（2026-10-19）的 5 条 S/A，首次装包跑对账即 0 问题。
-- **移除 `check-page` 引用**：`SKILL.md` 三处改成 `audit.ps1` 第 22 节 / `validate-lib`；`add-intro`、`add-plan` 的 `-Sync` 分支改为提示（兼容参数保留）；`make-demo` 的示例命令改成 `validate-lib.ps1`。
-
-## [5.1.0] — 2026-10-19 · 发布包同步：站点版 + demo 重建 ✓
-
-- **发布形态**：D1=A，只发新站点 —— 根 `index.html`（外壳 + `<base href="data/site/">`）+ `data/site/` 5 页；旧单页 `legacy/overview-v5.html` 不再随包，`overview.html` 保留为同一入口的别名。
-- **脚本同步**：`build-overview` / `check-page` / `sync-projects` / `auto-tag` / `add-repo` / `add-intro` / `workspace` / `check-config` / `add-plan` / `make-demo`，新增 `tools/templates/overview.css|js`、`build-samples.ps1`、`score.ps1`、`validate-lib.ps1` 与站点模板 6 件。
-- **demo 重建**：15 条项目 / 5 条主推荐 / 9 条 picks / 5 行 `recommend-log.csv` / 15 行 `seen.jsonl` / 1 份 `meta`；`make-demo` 改为「个人字段置空（note / user_notes）而不是删字段」，保证投影层字段齐全。
-- **audit 166 项**：第 22 节 18 条页面检查从旧单页改指站点（入口 / 4 路由 / 日报 01–05 / 全库搜索分类 / 计划页 / BUILD-STAMP / 首页条数 / 图表 aria / 未评档与收藏残留）；`build-samples` 统一注入 `BUILD-STAMP`，首页图表补 `role="img"` + `aria-label` + `chart-note`。
-- **文档与素材**：README / QUICKSTART 改为站点口径；3 张截图重拍为 `docs/screenshots/1-home.jpg`、`2-daily.jpg`、`3-plans.jpg`；新增 `THIRD-PARTY.md`（字体 OFL + NASA 公有领域图）。
-- **已知差异**：包内 `audit.ps1` 是「站点版」（第 22 节与库内单页版不同）。
+- `audit.ps1` 新增第 25 节：`data/site/weekly-*.generated.html` 至少一份存在且被生产首页引用；`daily-2026-10-19.generated.html`、`blank-issue.html`、`kiosk-return.js` 必须存在。
+- 这条检查 fail-closed：缺任意文件或首页未引用，直接 FAIL；不再依赖 `publish-archive` 的发布日志。
+- `TOTAL_CHECKS` 166 → 167；README / CHANGELOG 项数同步。
 
 ## [4.10.46] — 2026-10-19 · P1 收尾：唯一写入器 + 快照 round ✓
 

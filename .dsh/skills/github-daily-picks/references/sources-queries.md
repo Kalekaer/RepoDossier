@@ -6,7 +6,7 @@
 
 ## 1. 请求写法
 
-- 通道：`web_fetch`（宿主网络）。**不要**用本机 PowerShell / curl 直连，实测 SSL 不通（见 `config.json` 的 `forbid_local_direct_connect`）。
+- 日报统一通道：`tools/collect-daily.ps1`，在宿主授权后使用 curl 串行队列，按实际计划和响应推进分页/分区；其他研究可使用原生 HTTP 工具。
 - 一次一个 URL，**串行执行**，不要并发轰炸（search 额度只有 10/分钟）。
 - 有 `GITHUB_TOKEN` 时附加请求头 `Authorization: Bearer <token>`（**不要把 token 写进任何落盘文件或输出**）；没有就匿名跑。
 - 取回后立刻用 `tools/fetch-daily.ps1 -Import <Q编号> -File <文件>` 登记到 `data/raw/<date>/r<N>/`。
@@ -15,14 +15,23 @@
 
 | 编号 | 取数 | URL 模板 |
 |---|---|---|
-| Q1 | 20 | `https://api.github.com/search/repositories?q=created:%3E{D7}+stars:%3E150&sort=stars&order=desc&per_page=20` |
-| Q2 | 15 | `https://api.github.com/search/repositories?q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=15` |
-| Q2b | 15 | `https://api.github.com/search/repositories?q=stars:200..800+pushed:%3E{D7}&sort=stars&order=desc&per_page=15` |
-| Q2c | 15 | `https://api.github.com/search/repositories?q=stars:200..800+pushed:%3E{D7}&sort=updated&order=desc&per_page=15` |
-| Q3 | 10 | `https://api.github.com/search/repositories?q=topic:{TODAY_TOPIC}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=10` |
-| Q3s | 10 | `https://api.github.com/search/repositories?q=topic:{TODAY_TOPIC}+stars:200..800+pushed:%3E{D14}&sort=stars&order=desc&per_page=10` |
-| Q3b | 10 | `https://api.github.com/search/repositories?q=topic:cli+created:%3E{D30}+stars:%3E300&sort=stars&order=desc&per_page=10` |
-| Q3c | 10 | `https://api.github.com/search/repositories?q=topic:{TODAY_TOPIC2}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=10` |
+| Q1 | 100 | `https://api.github.com/search/repositories?q=created:%3E{D7}+stars:%3E150&sort=stars&order=desc&per_page=100` |
+| Q1b | 100 | `https://api.github.com/search/repositories?q=created:{D30}..{D8}+stars:100..499+pushed:%3E{D30}+fork:false+archived:false&sort=stars&order=desc&per_page=100` |
+| Q2p1 | 100 | `https://api.github.com/search/repositories?q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=100&page=1` |
+| Q2p2 | 100 | `https://api.github.com/search/repositories?q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=100&page=2` |
+| Q2p3 | 100 | `https://api.github.com/search/repositories?q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=100&page=3` |
+| Q2b | 100 | `https://api.github.com/search/repositories?q=stars:200..800+pushed:%3E{D30}+fork:false+archived:false&sort=stars&order=desc&per_page=100` |
+| Q2c | 100 | `https://api.github.com/search/repositories?q=stars:200..800+pushed:%3E{D30}+fork:false+archived:false&sort=updated&order=desc&per_page=100` |
+| Q3 | 100 | `https://api.github.com/search/repositories?q=topic:{TODAY_TOPIC}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=100` |
+| Q3s | 100 | `https://api.github.com/search/repositories?q=topic:{TODAY_TOPIC}+stars:200..800+pushed:%3E{D14}&sort=stars&order=desc&per_page=100` |
+| Q3b | 100 | `https://api.github.com/search/repositories?q=topic:cli+created:%3E{D30}+stars:%3E300&sort=stars&order=desc&per_page=100` |
+| Q3c | 100 | `https://api.github.com/search/repositories?q=topic:{TODAY_TOPIC2}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=100` |
+| Q7a | 100 | `https://api.github.com/search/repositories?q=dsh+in:name,description+stars:%3E800+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` |
+| Q7b | 100 | `https://api.github.com/search/repositories?q=dsh+in:name,description+stars:500..800+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` |
+| Q7c | 100 | `https://api.github.com/search/repositories?q=dsh+in:name,description+stars:200..499+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` |
+| Q8 | 100 | `https://api.github.com/search/repositories?q=topic:{TODAY_TOPIC}+stars:%3E300+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` |
+| Q9 | 100 | `https://api.github.com/search/repositories?q=stars:%3E800+created:<{D30}+pushed:%3E{D180}+fork:false+archived:false&sort=stars&order=desc&per_page=100` |
+| Q10 | 100 | `https://api.github.com/search/repositories?q=stars:20..199+created:%3E{D30}+pushed:%3E{D30}+fork:false+archived:false&sort=updated&order=desc&per_page=100` |
 
 ## 3. 可直接复制的完整示例
 
@@ -45,7 +54,7 @@ https://api.github.com/search/repositories?q=topic:llm+created:%3E2026-09-11+sta
 | 周三 | `self-hosted` | Q3b、Q2d |
 | 周四 | `windows` + `developer-tools` | Q3c |
 | 周五 | `automation` | — |
-| 周六 | `developer-tools` | Q3b |
+| 周六 | `developer-tools` | Q3b、Q8 |
 | 周日 | `llm` | — |
 
 ## 5. 返回体字段速查
@@ -59,7 +68,7 @@ Search 返回的 `items[]` 里已可直接取用：`full_name`、`html_url`、`d
 | 响应 | 含义 | 动作 |
 |---|---|---|
 | `200` + `items: []` | 本次检索无结果 | 记录并继续；不要放宽条件重试 |
-| `403` + `API rate limit exceeded` | 额度用尽 | **不重试**，记录到运行日志，用已有数据继续；若一条都没拿到，按「全部数据源失败」处理 |
+| `403` + `API rate limit exceeded` | 额度用尽 | **不重试，先暂停**；只由队列按响应头冷却后有限续采；缺必跑响应时不发布完整日报 |
 | `422` | 检索式不合法 | 记录检索式原文，跳过该条，不要猜原因重写 |
 | 超时 / fetch failed | 网络或宿主限制 | **最多重试 1 次**，仍失败则记录并跳过 |
 | `total_count` 骤降 | 可能被限流降级或检索式写错 | 在运行日志的「异常」里写明 |
@@ -78,7 +87,7 @@ Search 返回的 `items[]` 里已可直接取用：`full_name`、`html_url`、`d
 ## 8. 合规与账号安全（红线，不要越）
 
 - **唯一禁止的写入类动作**：star / fork / watch / follow / 提交 / 评论。GitHub 可接受使用政策第 4 条把「automated starring or following」明确列为 **rank abuse（刷榜）**，属于平台明示可处罚行为。本流程只做 `GET`，**永不发起任何写操作**。
-- **API 调用是合规的**：官方明确「scraping 不包含通过我们的 API 收集信息」，本流程走 `api.github.com` 而非抓 HTML；每天 5–7 次调用远低于限额，不构成 excessive bandwidth。
+- **请求预算**：本流程只走公开 API；每轮最多 40 次实际请求（含失败/重试），另有逐查询预算和响应头冷却。预算采样必须保留未完成分区，不宣称全集覆盖。
 - **不要抓 HTML 页面**（`github.com/trending` 等）：那才算 scraping，且实测超时，已排除。
 - **合规红线仓库不作为日报内容**：为盗版 / 破解 / 外挂 / 恶意软件类项目导流，会让日报本身变成传播渠道。这类只写**不带链接**的中性剔除备注。
 - **只取公开信息**：不读私有仓库、不联系人、不发邮件；台账只存公开仓库名与星数，不含个人信息。

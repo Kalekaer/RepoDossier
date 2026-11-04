@@ -1,8 +1,14 @@
 # 数据源与检索式
 
-请求**优先走 DSH 的 `web_fetch`**（宿主网络，实测可达 `api.github.com`）。本机代理（`http://127.0.0.1:2080`）本身可用：**`curl.exe` 与 Python `urllib` 走代理可达**（2026-10-23 实测 HTTPS 200 / search remaining=10），但两者在普通沙箱里会被拒绝执行，需宿主终端或申请权限；**PowerShell 的 `Invoke-RestMethod/-WebRequest`（.NET/schannel）HTTPS 实测不通**，不要用它抓 GitHub。**批量/额度**场景才用本机脚本，token 可选（`DSH_GITHUB_TOKEN`）。
+请求**按宿主能力选择通道**：DSH 优先 `web_fetch`；Codex 优先原生网页/HTTP 工具，没有时使用 `gh api` 或经授权的 `curl.exe`。本机代理（`http://127.0.0.1:2080`）可用：**`curl.exe` 与 Python `urllib` 走代理可达**（2026-10-23 实测 HTTPS 200 / search remaining=10），但普通沙箱会被拒绝，需宿主终端或申请网络权限。**PowerShell 的 `Invoke-RestMethod/-WebRequest`（.NET/schannel）当前实测不通**，不应作为默认 GitHub 通道。**批量/额度**场景才用本机脚本，token 可选（`GITHUB_TOKEN`；旧的 `DSH_GITHUB_TOKEN` 仍兼容）。
 
 ## 1. 主源：GitHub Search API
+
+2026-10-29：统一采集器在本轮预算内推进分页与分区。Q2b/c 活跃窗口扩大到 30 天，
+固定查询参数保留最多 7 天；先按星数、必要时再按创建时间拆分，广度优先减少单区占用。
+Q1b 改为每日；Q9 补无 topic 限制的成熟存量；Q10 补 20–199★ 新项目。
+逐查询预算见下表，单轮含重试最多 40 次；未完成范围写入 search-progress 文件。
+这是预算采样，固定查询参数也不是 GitHub 的冻结快照；不能保证零漏检。
 
 基址：`https://api.github.com/search/repositories`
 
@@ -11,18 +17,27 @@
 <!-- QGEN:START -->
 | 编号 | 用途 | 检索式（URL 编码后） | 取数 |
 |---|---|---|---|
-| Q1 | 新星爆发（近 7 天新建） | `q=created:%3E{D7}+stars:%3E150&sort=stars&order=desc&per_page=20` | 20 |
-| Q2 | 近 30 天新星（过滤玩具） | `q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=15` | 15 |
-| Q2b | 中间星段（200–800★，顶部） | `q=stars:200..800+pushed:%3E{D7}&sort=stars&order=desc&per_page=15` | 15 |
-| Q2c | 中间星段（200–800★，按活跃度） | `q=stars:200..800+pushed:%3E{D7}&sort=updated&order=desc&per_page=15` | 15 |
+| Q1 | 新星爆发（近 7 天新建） | `q=created:%3E{D7}+stars:%3E150&sort=stars&order=desc&per_page=100` | 100/响应；预算 3 请求 |
+| Q1b | 低星新项目（8–30 天，100–499★） | `q=created:{D30}..{D8}+stars:100..499+pushed:%3E{D30}+fork:false+archived:false&sort=stars&order=desc&per_page=100` | 100/响应；预算 2 请求 |
+| Q2p1 | 近 30 天新星（800+，第 1 页） | `q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=100&page=1` | 100 |
+| Q2p2 | 近 30 天新星（800+，第 2 页） | `q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=100&page=2` | 100 |
+| Q2p3 | 近 30 天新星（800+，第 3 页） | `q=created:%3E{D30}+stars:%3E800&sort=stars&order=desc&per_page=100&page=3` | 100/响应；预算 5 请求 |
+| Q2b | 中间星段（200–800★，星数自适应分层） | `q=stars:200..800+pushed:%3E{D30}+fork:false+archived:false&sort=stars&order=desc&per_page=100` | 100/响应；预算 6 请求 |
+| Q2c | 中间星段（200–800★，活跃自适应分层） | `q=stars:200..800+pushed:%3E{D30}+fork:false+archived:false&sort=updated&order=desc&per_page=100` | 100/响应；预算 6 请求 |
 | Q2d | 实验槽（星速探针） | 见 §1.3（每周三 1 次） | 15 探针 / 出 ≤5 名 |
-| Q3 | 方向定向（按星期轮换） | `q=topic:{TODAY_TOPIC}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=10` | 10 |
-| Q3s | 星段兜底 | `q=topic:{TODAY_TOPIC}+stars:200..800+pushed:%3E{D14}&sort=stars&order=desc&per_page=10` | 10 |
-| Q3b | 实用小工具（cli） | `q=topic:cli+created:%3E{D30}+stars:%3E300&sort=stars&order=desc&per_page=10` | 10 |
-| Q3c | 第二方向（developer-tools） | `q=topic:{TODAY_TOPIC2}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=10` | 10 |
+| Q3 | 方向定向（按星期轮换） | `q=topic:{TODAY_TOPIC}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=100` | 100/响应；预算 2 请求 |
+| Q3s | 星段兜底 | `q=topic:{TODAY_TOPIC}+stars:200..800+pushed:%3E{D14}&sort=stars&order=desc&per_page=100` | 100/响应；预算 2 请求 |
+| Q3b | 实用小工具（cli） | `q=topic:cli+created:%3E{D30}+stars:%3E300&sort=stars&order=desc&per_page=100` | 100/响应；预算 2 请求 |
+| Q3c | 第二方向（developer-tools） | `q=topic:{TODAY_TOPIC2}+created:%3E{D30}+stars:%3E200&sort=stars&order=desc&per_page=100` | 100/响应；预算 2 请求 |
 | Q4 | 老朋友续热（逐仓库复检） | 逐个 `GET /repos/{OWNER}/{REPO}`，每次最多 5 个 | ≤5 |
 | Q5 | 读 README（S 档核实） | 逐个 `GET /repos/{OWNER}/{REPO}/readme`，每次最多 5 个 | ≤5 |
+| Q7a | DSH 生态存量补扫（>800★） | `q=dsh+in:name,description+stars:%3E800+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` | 100 |
+| Q7b | DSH 生态存量补扫（500–800★） | `q=dsh+in:name,description+stars:500..800+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` | 100 |
+| Q7c | DSH 生态存量补扫（200–499★） | `q=dsh+in:name,description+stars:200..499+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` | 100 |
+| Q8 | 通用存量（周主题，老但热） | `q=topic:{TODAY_TOPIC}+stars:%3E300+pushed:%3E{D30}&sort=stars&order=desc&per_page=100` | 100/响应；预算 2 请求 |
 | Q6 | 备用：聚合检索 | `web_search`（非 GitHub API；失败改用 HN Algolia 等 JSON 源，仅外部讨论信号） | 8 |
+| Q9 | 成熟存量（无topic约束） | `q=stars:%3E800+created:<{D30}+pushed:%3E{D180}+fork:false+archived:false&sort=stars&order=desc&per_page=100` | 100/响应；预算 6 请求 |
+| Q10 | 低星探索（20–199星） | `q=stars:20..199+created:%3E{D30}+pushed:%3E{D30}+fork:false+archived:false&sort=updated&order=desc&per_page=100` | 100/响应；预算 3 请求 |
 <!-- QGEN:END -->
 
 实际 URL 示例（Q1，D7=2026-10-15）：
@@ -31,7 +46,9 @@
 https://api.github.com/search/repositories?q=created:%3E2026-10-15+stars:%3E150&sort=stars&order=desc&per_page=20
 ```
 
-Search 返回体里**已包含** `stargazers_count`、`forks_count`、`language`、`description`、`topics`、`created_at`、`pushed_at`、`license`，因此 Q1–Q3c 与 Q2c 不需要额外请求（Q2d 的探针要逐个 `GET /repos`，不在此列）。**Q2b 每天加跑**（补中间星段）；**Q2c 每天加跑**（同星段、按最近更新采样，补 Q2b 的「天花板偏差」）；**Q2d 每周三 1 次**（实验槽）；**Q3s 只在 Q3 拉不到新面孔时加跑** → 一天 **5–7 次**调用（周三/周四/周六可能 6–8 次）。
+Search 返回体包含仓库基本事实，但不能代替 README、发行包、供应链等质量证据。
+每日基础 10 个查询入口，加周内额外入口及条件 Q3s 最多 13 个；入口数不是请求数，
+分页、拆分、失败重试均计入单轮实际请求上限 40。Q2d/Q7 当前 disabled，不能算自动覆盖。
 
 ### 1.1 Q2b / Q3s 为什么加（2026-10-18 采纳）
 
@@ -85,20 +102,20 @@ Search 返回体里**已包含** `stargazers_count`、`forks_count`、`language`
   1. `hit.url` 等于 `https://github.com/{owner}/{repo}`（忽略大小写、末尾斜杠）
   2. `hit.title` 包含完整 `{owner}/{repo}`
 - 覆盖范围只有 Hacker News 一个社区，**不得据此说「全网都在讨论」**；未见命中只能写「HN 未见讨论」。
-- 通道：`web_fetch`，不占 GitHub 额度；失败 / 限流就放弃，标「未检索到外部讨论」。
+- 通道：宿主可用的网页/HTTP 工具，不占 GitHub 额度；失败 / 限流就放弃，标「未检索到外部讨论」。
 
 **检索能力阶梯（任何任务都按这个顺序，不绑死单一工具）**
 
 | 层 | 通道 | 用途 |
 |---|---|---|
-| L0 | `web_fetch` + GitHub API | 日报全部检索、仓库事实、发现 |
+| L0 | 宿主 HTTP 工具 + GitHub API | 日报全部检索、仓库事实、发现 |
 | L1 | anysearch（**可选**，会话里有才用） | 通用网页检索 / 素材 |
-| L2 | `web_search` | 通用检索备用；失败重试 1 次即弃 |
-| L3 | `web_fetch` + 已知 JSON API（HN Algolia / npm / PyPI / deps.dev） | 讨论信号 / 包事实 |
+| L2 | 宿主 web search | 通用检索备用；失败重试 1 次即弃 |
+| L3 | 宿主 HTTP 工具 + 已知 JSON API（HN Algolia / npm / PyPI / deps.dev） | 讨论信号 / 包事实 |
 | L4 | 都没有 | 明说检索了什么、为什么没有；标「未验证」，不编造 |
 
 - 单任务总调用 ≤2 次（含核实）；换通道算一次。
-- `web_fetch` 整体不可用 = 当天不出日报，只写运行日志——这不是「降级」。
+- 所有可用 HTTP 通道整体不可用 = 当天不出日报，只写运行日志——这不是「降级」。
 
 ## 2. Q3 方向按星期轮换（已确认的口味）
 
@@ -128,7 +145,7 @@ Search 返回体里**已包含** `stargazers_count`、`forks_count`、`language`
 |---|---|---|
 | core | 60 / 小时 | 5000 / 小时 |
 | search | 10 / 分钟 | 30 / 分钟 |
-| 本方案日耗 | 约 5–7 次（周三 7–8） | — |
+| 本方案预算 | 每轮实际请求 ≤40，含失败与重试 | 逐查询另有预算；不绕过限流 |
 
 - **一次跑完，不轮询**。失败就记录并跳过，不重试超过 1 次。
 - 记录每次运行的实际调用次数到 `data/runs/`，便于发现额度异常。
@@ -137,7 +154,7 @@ Search 返回体里**已包含** `stargazers_count`、`forks_count`、`language`
 
 | 源 | 原因 |
 |---|---|
-| `github.com/trending` HTML | `web_fetch` 30s 超时，不稳定 |
+| `github.com/trending` HTML | HTML 抓取易超时，不稳定 |
 | `api.ossinsight.io/v1/trends/*` | 官方标注 star 事件数据自 2026-03-01 起不可用，返回空结果 |
 | GitHub GraphQL | 匿名不允许（limit 0） |
 | 各类第三方 trending 镜像站 | 数据滞后一天以上，无法验证口径 |

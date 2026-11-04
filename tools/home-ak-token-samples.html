@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>主页示例 A/B · ak-ui token 落地</title>
+<style>
+/* ============================================================================
+   设计来源（**不是我自己定的**）：
+   · 颜色/切角/动效 token ← YunYouJun/ak-ui（明日方舟风格设计系统的开源实现）
+     src/scss/_tokens.scss + _variables.scss，值逐条照抄
+   · 结构 ← 用户提供的《明日方舟》主界面截图 + 《女神异闻录5》属性菜单截图
+   · 数据 ← 本库真实统计（229 项目 / 39 推荐 / 11 方案 / 410 事件 / 83 冷门 / 8 官方）
+   ============================================================================ */
+:root{
+  /* 画布与面板（ak-ui 原值） */
+  --canvas:#111315; --panel:rgba(253,253,251,.9); --panel-muted:rgba(235,236,235,.9);
+  --raised:rgba(66,66,66,.92); --inverse:#17191b;
+  --text:#f8f8f5; --text-2:rgba(248,248,245,.68); --text-inv:#1b1d1f;
+  /* 信号色（ak-ui 原值） */
+  --info:#4aabea; --action:#f1c644; --accent:#f6540e; --danger:#e33b3b; --success:#46c47c; --low:#9c9c9c;
+  --cyan-plate:rgba(5,167,220,.9);           /* 方舟那块蓝板 */
+  --yellow:#ffd802; --blue:#22bbff;
+  /* 切角与线（ak-ui 原值） */
+  --cut-sm:.375rem; --cut-md:.75rem; --cut-lg:1.5rem; --hair:1px; --strong:4px;
+  /* 动效（ak-ui 原值） */
+  --fast:120ms; --base:200ms; --slow:420ms;
+  --ease:cubic-bezier(.2,0,0,1); --ease-emph:cubic-bezier(.2,.8,.2,1);
+  /* 字体（ak-ui 原值：Noto Sans SC / Noto Serif SC） */
+  --sans:"Noto Sans SC",Roboto,Arial,system-ui,"Microsoft YaHei UI",sans-serif;
+  --serif:"Noto Serif SC",serif;
+  --mono:SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#08090a;color:var(--text);font:15px/1.5 var(--sans)}
+.cap{display:flex;align-items:baseline;gap:12px;padding:16px 24px 8px;font:11px/1 var(--mono);letter-spacing:.16em;color:#5b625f}
+.cap b{color:var(--yellow);letter-spacing:.08em;font-size:12px}
+
+/* 通用：切角工具（ak-ui 的 cut 概念：左上/右下各切一刀） */
+.cut{clip-path:polygon(var(--cut-md) 0,100% 0,100% calc(100% - var(--cut-md)),calc(100% - var(--cut-md)) 100%,0 100%,0 var(--cut-md))}
+.cut-sm{clip-path:polygon(var(--cut-sm) 0,100% 0,100% calc(100% - var(--cut-sm)),calc(100% - var(--cut-sm)) 100%,0 100%,0 var(--cut-sm))}
+.label{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}   /* --ak-type-wide */
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+
+/* ================= 示例 A · 明日方舟 / 终末地 ================= */
+.a{position:relative;height:760px;margin:6px 20px 30px;overflow:hidden;background:var(--canvas);
+  /* 修订1（按像素统计）：参考图左侧是明亮实拍，没有照片就必须用**中调结构面**顶上，
+     否则整屏 62% 近黑 = "黑底上贴白纸"，不是方舟。 */
+  background-image:
+    radial-gradient(ellipse 900px 440px at 72% 12%,rgba(96,150,185,.55),transparent 66%),
+    radial-gradient(ellipse 760px 460px at 12% 88%,rgba(158,116,70,.42),transparent 68%),
+    linear-gradient(180deg,#323d43 0%,#2b363b 32%,#222a2e 62%,#161c1f 100%)}
+.a .struct{position:absolute;inset:0;opacity:.8;
+  background-image:linear-gradient(90deg,rgba(255,255,255,.10) 1px,transparent 1px),
+                   linear-gradient(0deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:180px 100%,100% 120px}
+.a .band{position:absolute;left:0;right:0;height:22px;background:rgba(66,66,66,.55);border-top:1px solid rgba(255,255,255,.14)}
+.a .band.b1{top:78px}.a .band.b2{bottom:96px}
+.a .haz{position:absolute;left:0;bottom:0;width:260px;height:46px;opacity:.35;
+  background:repeating-linear-gradient(135deg,#1b1b17 0 12px,#2e2a12 12px 24px)}
+.a .vig{position:absolute;inset:0;background:radial-gradient(ellipse at 55% 42%,transparent 46%,rgba(0,0,0,.38))}
+
+/* 顶部图标行（方舟左上角） */
+.a .tools{position:absolute;left:24px;top:18px;display:flex;gap:14px;z-index:8}
+.a .tools i{width:38px;height:38px;border:var(--hair) solid rgba(248,248,245,.35);position:relative;display:block}
+.a .tools i::before{content:"";position:absolute;inset:9px;border:2px solid var(--text);border-radius:50%}
+.a .tools i.m::before{border-radius:0;border-width:2px 2px 0 0;transform:rotate(45deg)}
+.a .tools i.w::before{border-radius:0;border:0;background:var(--text);height:12px;width:3px;left:16px;top:7px}
+.a .tools i.w::after{content:"";position:absolute;left:16px;top:23px;width:3px;height:3px;background:var(--text)}
+/* 资源条（方舟右上角） */
+.a .res{position:absolute;right:24px;top:14px;display:flex;gap:24px;z-index:8;align-items:center}
+.a .res div{display:flex;align-items:center;gap:7px;font:700 21px/1 var(--mono);font-variant-numeric:tabular-nums;
+  text-shadow:0 2px 6px #000}
+.a .res i{width:12px;height:12px;transform:rotate(45deg);display:block}
+.a .res .c1{background:var(--info);box-shadow:0 0 10px rgba(74,171,234,.75)}
+.a .res .c2{background:var(--danger);box-shadow:0 0 10px rgba(227,59,59,.7)}
+.a .res .c3{background:var(--action);box-shadow:0 0 10px rgba(241,198,68,.7)}
+.a .res .lbl{font:600 10px/1 var(--mono);color:var(--text-2);letter-spacing:.12em}
+/* 左侧圆形徽章（用真实比例 39/229 = 17%） */
+.a .badge{position:absolute;left:30px;bottom:120px;width:146px;height:146px;z-index:8;
+  filter:drop-shadow(0 0 18px rgba(255,216,2,.35))}   /* 修订：黄色身份色必须"看得见" */
+.a .badge .ring{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(var(--yellow) 0 17%,rgba(255,255,255,.14) 17% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 58%,#000 59%);mask:radial-gradient(circle,transparent 58%,#000 59%)}
+.a .badge .in{position:absolute;inset:9px;border-radius:50%;background:rgba(23,25,27,.86);
+  border:var(--hair) solid rgba(255,255,255,.18);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.a .badge .in b{font:800 42px/1 var(--mono)}
+.a .badge .in span{font:600 9px/1 var(--mono);letter-spacing:.2em;color:var(--text-2);margin-top:3px}
+.a .who{position:absolute;left:30px;bottom:100px;z-index:8}
+.a .who b{display:block;font:700 13px/1.3 var(--mono);letter-spacing:.06em}
+.a .who span{font:10px/1.4 var(--mono);color:var(--text-2)}
+
+/* 右侧白色大板网格 */
+.a .plates{position:absolute;right:24px;top:64px;width:838px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;z-index:10}
+.a .p{position:relative;background:var(--panel);color:var(--text-inv);padding:15px 17px;
+  box-shadow:0 .4rem 2rem rgba(0,0,0,.32);transition:transform var(--fast) var(--ease),background var(--fast) var(--ease)}
+.a .p:hover{transform:translateY(-2px);background:#fff}
+.a .p .t{font-weight:900;font-size:34px;line-height:1.08;letter-spacing:-.04em}
+.a .p .sub{font:11px/1.45 var(--mono);letter-spacing:.06em;color:#4d5350;margin-top:5px}
+.a .p .chip{display:inline-block;background:var(--inverse);color:var(--text);font:600 10px/1 var(--mono);
+  letter-spacing:.1em;padding:5px 8px;margin-top:8px}
+.a .p.combat{grid-column:1/7;display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;padding:16px 20px}
+.a .p.combat .big{font:900 58px/1 var(--mono);letter-spacing:-.04em}
+.a .p.combat .big em{font:600 12px/1 var(--mono);font-style:normal;letter-spacing:.1em;color:#4d5350;margin-left:8px}
+.a .p.combat h2{margin:0;font-size:46px;font-weight:900;line-height:1.02;letter-spacing:-.04em}
+.a .p.combat .desc{font:12px/1.5 var(--mono);color:#4d5350;max-width:230px}
+.a .p.combat::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--accent)} /* --ak-line-strong + accent */
+.a .p.c2{grid-column:1/4}.a .p.c3{grid-column:4/7}
+/* 蓝色功能组（terminal-cyan 原值） */
+.a .p.blue{background:var(--cyan-plate);color:#fff}
+.a .p.blue .sub{color:rgba(255,255,255,.84)}
+.a .p.blue.outline{background:rgba(5,167,220,.14);color:#d9f2ff;border:var(--hair) solid rgba(5,167,220,.6)}
+.a .p.c4{grid-column:1/4}.a .p.c5{grid-column:4/7}
+/* 底部更暗的一行 */
+.a .p.dim{background:var(--panel-muted);opacity:.92}
+.a .p.dim .t{font-size:21px}
+.a .p.c6{grid-column:1/3}.a .p.c7{grid-column:3/5}.a .p.c8{grid-column:5/7;background:rgba(253,253,251,.34);color:#dfe4e1}
+/* 新闻条 */
+.a .news{position:absolute;left:24px;bottom:24px;display:flex;align-items:stretch;z-index:11;
+  background:rgba(23,25,27,.94);border:var(--hair) solid rgba(255,255,255,.2);max-width:600px}
+.a .news .tag{background:var(--danger);color:#fff;font:700 10px/1 var(--mono);letter-spacing:.14em;
+  padding:11px 10px;display:flex;align-items:center}
+.a .news .tx{padding:9px 12px;font:11px/1.5 var(--mono);color:var(--text-2)}
+.a .news .tx b{color:#fff;font-size:13px}
+
+/* ================= 示例 B · 女神异闻录 ================= */
+.b{position:relative;height:760px;margin:0 20px 30px;overflow:hidden;
+  /* 修订2（按像素统计）：Persona 5 是**明亮青蓝场**，不是暗夜蓝。蓝占比 4.4% → 目标 15%+ */
+  background:linear-gradient(118deg,#0d4b67 0%,#1a86ad 32%,#31b3d6 58%,#12536f 100%)}
+/* 左侧巨型黑白形（Persona 的漫画特写位；不伪造人物 ⇒ 几何剪影） */
+.b .shape{position:absolute;left:-5%;top:-8%;width:56%;height:118%;background:#f8f8f5;
+  clip-path:polygon(0 0,70% 0,56% 24%,76% 44%,50% 60%,68% 100%,0 100%)}
+.b .shape2{position:absolute;left:7%;top:8%;width:32%;height:66%;background:#08090a;
+  clip-path:polygon(0 0,56% 10%,40% 36%,64% 54%,28% 72%,0 100%)}
+.b .jag{position:absolute;left:0;bottom:0;width:62%;height:34%;background:#08090a;
+  clip-path:polygon(0 26%,11% 10%,25% 32%,37% 6%,51% 28%,63% 2%,73% 100%,0 100%)}
+.b .half{position:absolute;inset:0;opacity:.15;mix-blend-mode:screen;
+  background-image:radial-gradient(#eaf6ff 1px,transparent 1px);background-size:9px 9px}
+.b .slab{position:absolute;left:31%;top:0;width:24%;height:100%;background:rgba(248,248,245,.06);transform:skewX(-10deg)}
+/* 左上白卡（Persona 的钱包位） */
+.b .wallet{position:absolute;left:24px;top:22px;background:var(--panel);color:var(--text-inv);
+  padding:6px 10px;transform:skewX(-10deg);z-index:9;box-shadow:0 .4rem 1.4rem rgba(0,0,0,.3)}
+.b .wallet b{font:800 16px/1 var(--mono);font-variant-numeric:tabular-nums}
+.b .wallet span{display:block;font:600 9px/1.5 var(--mono);letter-spacing:.12em;color:#4d5350;transform:skewX(10deg)}
+/* 斜切菜单栈（选中项红牌） */
+.b .menu{position:absolute;right:8%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-end;z-index:10}
+.b .mi{display:flex;align-items:baseline;gap:12px;text-decoration:none;color:var(--text);
+  transform:skewX(-10deg);padding:2px 12px;transition:transform var(--fast) var(--ease),color var(--fast) var(--ease);
+  /* 亮蓝底上的白字必须加暗描边/投影，否则对比度不足（参考图里也有暗色块压住菜单区） */
+  text-shadow:0 2px 12px rgba(2,10,16,.6),0 0 2px rgba(2,10,16,.5)}
+.b .mi .en{font:900 30px/1 var(--mono);letter-spacing:-.03em;text-transform:uppercase}
+.b .mi .cn{font:600 12px/1 var(--sans);letter-spacing:.1em;color:rgba(248,248,245,.66)}
+.b .mi:nth-child(1) .en{font-size:21px;opacity:.62}
+.b .mi:nth-child(2) .en{font-size:25px;opacity:.8}
+.b .mi:nth-child(3) .en{font-size:40px}
+.b .mi:nth-child(4) .en{font-size:28px;opacity:.86}
+.b .mi:nth-child(5) .en{font-size:22px;opacity:.7}
+.b .mi:nth-child(6) .en{font-size:19px;opacity:.55}
+.b .mi:hover{transform:skewX(-10deg) translateX(-8px);color:#fff}
+.b .mi.sel{background:var(--danger);color:#fff;padding:4px 16px 6px 18px;
+  transform:skewX(-10deg) translateX(-4px);box-shadow:0 1rem 2rem rgba(0,0,0,.36);position:relative}
+.b .mi.sel .en{font-size:46px;font-style:italic;letter-spacing:-.04em}
+.b .mi.sel .cn{color:rgba(255,255,255,.86)}
+.b .mi.sel::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;background:#f8f8f5;transform:skewX(10deg)}
+/* 右缘三个斜切小框 */
+.b .party{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:9}
+.b .pc{width:84px;height:42px;background:rgba(5,167,220,.32);border:var(--hair) solid rgba(217,242,255,.55);
+  transform:skewX(-10deg);display:flex;flex-direction:column;justify-content:center;padding:0 8px}
+.b .pc b{font:800 15px/1 var(--mono);font-variant-numeric:tabular-nums;color:#eaf6ff}
+.b .pc small{font:600 9px/1.4 var(--mono);color:rgba(217,242,255,.75);letter-spacing:.1em}
+/* 右下按键提示 */
+.b .keys{position:absolute;right:22px;bottom:20px;text-align:right;font:11px/1.7 var(--mono);color:rgba(248,248,245,.78);z-index:9}
+.b .keys b{color:#fff}
+.b .keys kbd{display:inline-block;border:var(--hair) solid rgba(248,248,245,.6);padding:1px 6px;margin-left:6px;
+  font:600 10px/1.3 var(--mono)}
+/* 左下标题块（黄斜切，Persona 的冲击位） */
+.b .title{position:absolute;left:24px;bottom:26px;z-index:11}
+.b .title .box{background:var(--yellow);color:var(--text-inv);padding:6px 12px;display:inline-block;transform:skewX(-10deg)}
+.b .title .box b{font:900 20px/1 var(--mono);letter-spacing:-.03em}
+.b .title small{display:block;margin-top:8px;font:600 10px/1.5 var(--mono);color:rgba(248,248,245,.8);letter-spacing:.12em}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:1180px){
+  .a,.b{height:auto;padding:18px 16px 90px}
+  .a .tools,.a .res,.a .badge,.a .who{position:static;margin:0 0 14px}
+  .a .plates{position:static;width:auto;grid-template-columns:1fr}
+  .a .p{grid-column:auto!important}
+  .a .news,.b .menu,.b .party,.b .keys,.b .wallet,.b .title{position:static;margin:14px 0}
+  .b .menu{align-items:flex-start}.b .mi.sel .en{font-size:34px}
+  .b .shape,.b .shape2,.b .jag,.b .slab{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cap"><b>示例 A</b><span>明日方舟 / 终末地 · 面板 rgba(253,253,251,.9) · 蓝板 rgba(5,167,220,.9) · 切角 .75rem · 标题 900/-.04em · 动效 120/200/420ms</span></div>
+<section class="a">
+  <div class="struct"></div><div class="band b1"></div><div class="band b2"></div><div class="haz"></div><div class="vig"></div>
+
+  <div class="tools"><i></i><i class="w"></i><i class="m"></i><i></i></div>
+  <div class="res">
+    <div><i class="c1"></i><span>/*__TOTAL__*/0</span><span class="lbl">ITEMS</span></div>
+    <div><i class="c2"></i><span>/*__REC__*/0</span><span class="lbl">REC</span></div>
+    <div><i class="c3"></i><span>/*__PLANS__*/0</span><span class="lbl">PLANS</span></div>
+  </div>
+
+  <div class="badge"><div class="ring"></div><div class="in"><b>39</b><span>RECOMMENDED</span></div></div>
+  <div class="who"><b>ARCHIVE / INDEX</b><span>本地只读 · 2026-10-16</span></div>
+
+  <div class="plates">
+    <a class="p combat cut" href="#/picks">
+      <div class="big">/*__REC__*/0<em>/ 条已推荐</em></div>
+      <div><h2>每日精选</h2><div class="sub">日报与精选同一件事 · 按天看新增 / 按档位看精品</div></div>
+      <div class="desc"><span class="chip">LATEST /*__LATEST__*/</span></div>
+    </a>
+    <a class="p c2 cut" href="#/all"><div class="t">完整项目库</div><div class="sub">分类 / 标签 / 徽章 / 风险 / 成长记录</div><div class="chip">/*__TOTAL__*/0 ITEMS</div></a>
+    <a class="p c3 cut" href="#/plans"><div class="t">计划与工作区</div><div class="sub">按需求配好的工具组合</div><div class="chip">/*__PLANS__*/0 PLANS</div></a>
+    <a class="p blue c4 cut" href="#/legend"><div class="t" style="font-size:24px">图例与标准</div><div class="sub">小窗打开 · 不占独立页面</div></a>
+    <a class="p blue outline c5 cut" href="#/all"><div class="t" style="font-size:24px">搜索</div><div class="sub">按 / 聚焦 · 说人话</div></a>
+    <a class="p dim c6 cut-sm" href="#/all?badge=gem"><div class="t">🧊 冷门优质</div><div class="sub">/*__GEM__*/0 条</div></a>
+    <a class="p dim c7 cut-sm" href="#/all?badge=org"><div class="t">🏢 官方出品</div><div class="sub">/*__ORG__*/0 条</div></a>
+    <div class="p dim c8 cut-sm"><div class="t">近 7 天事件</div><div class="sub">/*__EVENTS__*/0 条</div></div>
+  </div>
+
+  <div class="news"><span class="tag">LATEST</span><span class="tx"><b>/*__LATEST__*/</b> 精选已入库 · 共 /*__REC__*/0 条推荐</span></div>
+</section>
+
+<div class="cap"><b>示例 B</b><span>女神异闻录 5 · 斜切 -10deg（ak-ui 原值）· 选中红牌 #e33b3b · 半调点 · 白卡与按键提示</span></div>
+<section class="b">
+  <div class="shape"></div><div class="shape2"></div><div class="jag"></div><div class="slab"></div><div class="half"></div>
+
+  <div class="wallet"><b>/*__TOTAL__*/0</b><span>ARCHIVE ITEMS</span></div>
+
+  <div class="menu">
+    <a class="mi" href="#/plans"><span class="en">PLANS</span><span class="cn">计划与工作区</span></a>
+    <a class="mi" href="#/all"><span class="en">LIBRARY</span><span class="cn">完整项目库</span></a>
+    <a class="mi sel" href="#/picks"><span class="en">DAILY</span><span class="cn">每日精选</span></a>
+    <a class="mi" href="#/all?badge=gem"><span class="en">GEMS</span><span class="cn">冷门优质</span></a>
+    <a class="mi" href="#/legend"><span class="en">SPEC</span><span class="cn">图例与标准</span></a>
+    <a class="mi" href="#/all"><span class="en">SEARCH</span><span class="cn">搜索</span></a>
+  </div>
+
+  <div class="party">
+    <div class="pc"><b>/*__TOTAL__*/0</b><small>ITEMS</small></div>
+    <div class="pc"><b>/*__REC__*/0</b><small>REC</small></div>
+    <div class="pc"><b>/*__PLANS__*/0</b><small>PLANS</small></div>
+  </div>
+
+  <div class="keys"><b>进入 / 查看</b><kbd>ENTER</kbd><br><b>关闭小窗</b><kbd>ESC</kbd></div>
+  <div class="title"><span class="box"><b>ARCHIVE 档案</b></span><small>LOCAL · OFFLINE · /*__LATEST__*/</small></div>
+</section>
+
+</body>
+</html>

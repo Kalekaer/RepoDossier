@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>标签图鉴 · 样片（全库视觉候选）</title>
+<style>
+:root{
+  --bg:#0b0b0b;--surface:#111;--surface-2:#161616;--surface-3:#1c1c1c;--border:#2a2a28;--border-strong:#3d3d3a;
+  --text:#f4f2ec;--dim:#9a9a94;--faint:#6b6b66;--accent:#e8ff2a;
+  --tx-grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M24 0H0V24' fill='none' stroke='%23242422'/%3E%3C/svg%3E");
+  --tx-ruler:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12'%3E%3Cpath d='M0 11h40M0 11V7M10 11V9M20 11V5M30 11V9' stroke='%233d3d3a'/%3E%3C/svg%3E");
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;
+     background-image:var(--tx-grid);background-attachment:fixed}
+.wrap{max-width:1240px;margin:0 auto;padding:44px 26px 80px}
+h1{font-size:40px;line-height:1;letter-spacing:-.02em;margin:0 0 6px}
+h1 small{display:block;font:400 12px/1.5 var(--mono);color:var(--dim);letter-spacing:.08em;margin-top:10px;text-transform:uppercase}
+.sec{display:grid;grid-template-columns:84px 1fr auto;gap:14px;align-items:baseline;border-top:1px solid var(--border-strong);
+     padding-top:12px;margin:52px 0 16px}
+.sec .no{font:600 17px/1 var(--mono);color:var(--accent)}
+.sec h2{margin:0;font-size:22px}
+.sec .side{font:400 12px/1 var(--mono);color:var(--faint)}
+.note{color:var(--dim);font-size:13px;margin:6px 0 14px}
+.spec{border:1px solid var(--border);background:var(--surface);padding:18px}
+.tick{height:12px;background-image:var(--tx-ruler);background-repeat:repeat-x;opacity:.6;margin:34px 0}
+/* ---------- 01 环形导航 ---------- */
+.ring{position:relative;width:520px;height:520px;margin:26px auto}
+.ring .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:190px;height:190px;border-radius:50%;
+  border:1px solid var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:radial-gradient(circle at 50% 40%,#1a1a18,#0d0d0c)}
+.ring .core b{font:600 30px/1 var(--mono)}
+.ring .core span{font-size:12px;color:var(--dim)}
+.ring .orbit{position:absolute;inset:0;border:1px dashed #2f2f2c;border-radius:50%}
+.ring .outer{position:absolute;inset:70px;border:1px dashed #262624;border-radius:50%}
+.rnode{position:absolute;width:168px;padding:14px 16px;border:1px solid var(--border-strong);background:var(--surface-2);
+  text-decoration:none;color:var(--text);transform:translate(-50%,-50%);transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.rnode b{display:block;font:600 11px/1 var(--mono);color:var(--accent);letter-spacing:.1em}
+.rnode .t{display:block;font-size:17px;font-weight:700;margin:6px 0 4px}
+.rnode .d{display:block;font-size:12px;color:var(--dim)}
+.rnode .n{display:block;font:400 11px/1 var(--mono);color:var(--faint);margin-top:8px}
+.rnode:hover,.rnode.hot{transform:translate(-50%,-50%) scale(1.06);border-color:var(--accent);background:var(--surface-3)}
+.spoke{position:absolute;left:50%;top:50%;height:1px;background:linear-gradient(90deg,#3a3a36,transparent);transform-origin:0 0}
+/* ---------- 02 标签球 ---------- */
+.sphere-wrap{position:relative;height:520px;border:1px solid var(--border);background:radial-gradient(circle at 50% 50%,#141412,#0b0b0a 70%);overflow:hidden}
+#sphere{position:absolute;inset:0}
+#sphere span{position:absolute;font:600 13px/1 var(--mono);white-space:nowrap;transform-origin:50% 50%;
+  padding:2px 4px;cursor:default;transition:color .15s ease}
+#tip{position:absolute;pointer-events:none;background:#000;border:1px solid var(--accent);color:var(--text);
+  font:12px/1.4 var(--mono);padding:6px 9px;display:none;z-index:9;white-space:nowrap}
+/* ---------- 03 真边子图 ---------- */
+.graphwrap{position:relative;height:420px;border:1px solid var(--border);background:var(--surface)}
+#graph{position:absolute;inset:0}
+#graph .edge{stroke:#3a3a36;stroke-width:1}
+#graph .en{fill:var(--dim);font:11px/1 var(--mono)}
+#graph circle{cursor:default}
+#graph .node.dim{opacity:.25}
+/* ---------- 04 分类 + 滚动标签条 + 搜索 ---------- */
+.tools{display:grid;grid-template-columns:1fr 240px;gap:16px}
+.catbtns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.catbtn{border:1px solid var(--border-strong);background:var(--surface-2);padding:7px 12px;font:13px/1 inherit;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:8px}
+.catbtn i{width:10px;height:10px;display:inline-block}
+.catbtn:hover{border-color:var(--accent)}
+.catbtn .n{font:11px/1 var(--mono);color:var(--faint)}
+.searchbox{display:flex;align-items:center;gap:8px;border:1px solid var(--border-strong);background:var(--surface-2);padding:9px 12px}
+.searchbox svg{flex:0 0 16px;opacity:.7}
+.searchbox input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font:14px/1 inherit}
+.tagstrip{height:330px;overflow-y:auto;border:1px solid var(--border);background:var(--surface);padding:10px}
+.tagstrip div{display:flex;justify-content:space-between;gap:8px;padding:5px 6px;border-bottom:1px solid #1e1e1c;font-size:13px}
+.tagstrip div:hover{background:#191917}
+.tagstrip .c{font:11px/1 var(--mono);color:var(--faint)}
+/* ---------- 05 项目两种形态 ---------- */
+.idx{border-top:1px solid var(--border)}
+.idxrow{display:grid;grid-template-columns:52px 1fr 150px 96px;gap:14px;align-items:baseline;padding:13px 4px;border-bottom:1px solid #202020}
+.idxrow:hover{background:#131311}
+.idxrow .no{font:11px/1 var(--mono);color:var(--faint)}
+.idxrow .id{font:600 14px/1.4 var(--mono)}
+.idxrow .one{color:var(--dim);font-size:13px}
+.idxrow .meta{font:11px/1.4 var(--mono);color:var(--faint);text-align:right}
+.edit{display:grid;grid-template-columns:1.5fr .9fr;gap:0;border:1px solid var(--border-strong)}
+.edit .lead{padding:26px;background:var(--surface-2);position:relative;overflow:hidden}
+.edit .lead::after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;background:var(--accent);opacity:.07;transform:rotate(30deg)}
+.edit .lead h3{margin:0 0 8px;font-size:30px;line-height:1.05;letter-spacing:-.02em}
+.edit .lead p{margin:0;color:var(--dim);font-size:14px}
+.edit .aside{padding:26px;border-left:4px solid var(--accent);background:var(--surface)}
+.edit .aside dt{font:11px/1.6 var(--mono);color:var(--faint)}
+.edit .aside dd{margin:0 0 12px;font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>标签图鉴 · 样片<small>全库视觉候选 · 数据全部真实（229 项目 / 517 标签 / 真实共现）· 独立文件不进发布页面</small></h1>
+  <p class="note">这一页把你不确定的几种效果都做出来给你挑：① 环形导航 ② 3D 标签球 ③ 真实关联子图 ④ 分类按钮+滚动标签条+搜索 ⑤ 项目浏览两种形态。</p>
+
+  <div class="sec"><span class="no">§ 01</span><h2>环形 / 多边形导航（首页中央那种）</h2><span class="side">术语：radial menu · pie menu · orbit nav</span></div>
+  <p class="note">一个块 = 一个页面，围着中心转；鼠标移上去放大 + 黄边；真实联通线（spoke）从中心引出。下面是 4 个入口的样式（真实数字）。</p>
+  <div class="ring">
+    <div class="orbit"></div><div class="outer"></div>
+    <div class="core"><b id="ringTotal">—</b><span>条项目在库</span></div>
+    <div id="ringNodes"></div>
+  </div>
+
+  <div class="tick"></div>
+  <div class="sec"><span class="no">§ 02</span><h2>3D 标签球（你说的"星球"）</h2><span class="side">术语：tag sphere / 3D tag cloud</span></div>
+  <p class="note">一个小点/短词就是一个标签，按出现次数给字号；<b>颜色 = 所属一级分类</b>（与分类按钮、项目标签同一套色）；鼠标移上去显示「标签 + 多少项目在用」。球会慢慢自转，系统开了"减少动态效果"就停转。</p>
+  <div class="sphere-wrap"><div id="sphere"></div><div id="tip"></div></div>
+
+  <div class="tick"></div>
+  <div class="sec"><span class="no">§ 03</span><h2>真实关联子图（只画真有的边）</h2><span class="side">术语：force-directed graph（力导向图）</span></div>
+  <p class="note">你想要的"不同颜色的神经 = 不同分类"需要**标签之间真的同时出现**才有边。实测：517 个标签里只有 <b id="edgeCount">—</b> 对共现 ≥2 次，且最强的一团全在 DSH 生态。所以这里画的**每一条线都是真的**，没有编造的关系。</p>
+  <div class="graphwrap"><svg id="graph"></svg></div>
+
+  <div class="tick"></div>
+  <div class="sec"><span class="no">§ 04</span><h2>分类按钮 + 单列滚动标签条 + 放大镜搜索</h2><span class="side">全库的"控制台"</span></div>
+  <p class="note">分类按钮点一下就能筛（每块带真实条数）；右边是**单列滚动**的标签条（可滚、悬停高亮）；搜索框带放大镜图标，输入即筛。</p>
+  <div class="tools">
+    <div class="spec">
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#f4f2ec" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+        <input placeholder="想干什么？例如：画图 / 本地跑 AI / 找文件（按 / 聚焦）">
+      </div>
+      <div style="height:14px"></div>
+      <div class="catbtns" id="catBtns"></div>
+      <p class="note" id="filterState">当前条件：无 ｜ 命中 — 条 <span style="color:var(--accent)">（这里演示"条件 + 结果数 + 重置"三件套）</span></p>
+    </div>
+    <div class="tagstrip" id="tagStrip"></div>
+  </div>
+
+  <div class="tick"></div>
+  <div class="sec"><span class="no">§ 05</span><h2>项目浏览：两种候选（你说没灵感的那块）</h2><span class="side">左：索引式密集列表 ｜ 右：编辑式主视觉</span></div>
+  <p class="note">A 案「索引式」：像档案目录，编号 + 等宽元数据 + 一句人话，**不用卡片边框**，信息密度高，适合 229 条这种量。B 案「编辑式」：一条做主视觉（大标题 + 斜切色块 + 侧注），其余做索引 —— 适合"每天头条"那种场景。</p>
+  <div class="idx" id="idxList"></div>
+  <div style="height:20px"></div>
+  <div class="edit" id="editLead"></div>
+
+  <div class="tick"></div>
+  <p class="note">样片结束 · 所有数字与标签都来自 <b>data/projects.jsonl</b> 实测，没有任何编造内容。</p>
+</div>
+<script>
+const TAGS = /*__TAGS__*/[];
+const EDGES = /*__EDGES__*/[];
+const PROJ = /*__PROJ__*/[];
+const CATS = /*__CATS__*/[];
+const EDGE_TOTAL = /*__EDGETOTAL__*/0;
+const TOTAL = /*__TOTAL__*/0;
+const COLOR = ['#e8ff2a','#2f7bff','#19e0c4','#ff7a1a','#a06bff','#ff2d20','#ffd166','#ff4d6d','#4dd0e1','#9ccc65','#6b6b66'];
+
+/* § 01 环形导航 */
+document.getElementById('ringTotal').textContent = TOTAL;
+const ringData = [
+  { no:'01', t:'每日精选', d:'日报与精选是同一件事', n:(PROJ.filter(p=>p.rec).length)+' 条已推荐', x:'50%', y:'6%' },
+  { no:'02', t:'完整项目库', d:'分类 / 标签 / 徽章 / 风险', n:TOTAL+' 条', x:'94%', y:'50%' },
+  { no:'03', t:'计划与工作区', d:'按需求配好的方案', n:'4 个方案', x:'50%', y:'94%' },
+  { no:'04', t:'图例与标准', d:'小窗打开即可，不占页面', n:'弹窗', x:'6%', y:'50%' }
+];
+const ringHost = document.getElementById('ringNodes');
+ringData.forEach(function(x){
+  const a = document.createElement('a'); a.className='rnode'; a.href='#';
+  a.style.left=x.x; a.style.top=x.y;
+  a.innerHTML = '<b>'+x.no+'</b><span class="t">'+x.t+'</span><span class="d">'+x.d+'</span><span class="n">'+x.n+'</span>';
+  ringHost.appendChild(a);
+});
+
+/* § 02 标签球 */
+(function(){
+  const host = document.getElementById('sphere'), tip = document.getElementById('tip');
+  const W = host.clientWidth || 1180, H = 520, R = 205;
+  const max = Math.max.apply(null, TAGS.map(t=>t.n));
+  const items = TAGS.slice(0, 190).map(function(t, i){
+    const phi = Math.acos(-1 + (2*i)/190), theta = Math.sqrt(190*Math.PI)*phi;
+    const el = document.createElement('span');
+    const s = 11 + 9*(t.n/max);
+    el.textContent = t.t; el.style.fontSize = s.toFixed(1)+'px'; el.style.color = t.c;
+    el.style.opacity = t.n > 3 ? 1 : .62;
+    host.appendChild(el);
+    return { el:el, x:Math.cos(theta)*Math.sin(phi), y:Math.sin(theta)*Math.sin(phi), z:Math.cos(phi), n:t.n, t:t.t };
+  });
+  let ax = 0.0016, ay = 0.0026;
+  function frame(){
+    const cosX=Math.cos(ax), sinX=Math.sin(ax), cosY=Math.cos(ay), sinY=Math.sin(ay);
+    items.forEach(function(o){
+      const y1 = o.y*cosX - o.z*sinX, z1 = o.y*sinX + o.z*cosX;
+      const x1 = o.x*cosY - z1*sinY, z2 = o.x*sinY + z1*cosY;
+      o.x=x1; o.y=y1; o.z=z2;
+      const sc = 320/(320 + o.z*R);
+      o.el.style.transform = 'translate(' + (W/2 + o.x*R*sc - 24) + 'px,' + (H/2 + o.y*R*sc - 9) + 'px) scale(' + sc.toFixed(2) + ')';
+      o.el.style.zIndex = (1000 - Math.round(o.z*500));
+      o.el.style.filter = 'blur(' + Math.max(0, (o.z*1.1)).toFixed(1) + 'px)';
+    });
+    raf = requestAnimationFrame(frame);
+  }
+  let raf = 0;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce) { raf = requestAnimationFrame(frame); } else { frame(); cancelAnimationFrame(raf); }
+  host.addEventListener('mousemove', function(e){
+    const el = e.target.closest('span');
+    if (!el) { tip.style.display='none'; return; }
+    const found = items.find(function(o){ return o.el === el; });
+    tip.textContent = (found? found.t : el.textContent) + ' · ' + (found? found.n : '?') + ' 个项目在用';
+    tip.style.display='block'; tip.style.left=(e.offsetX+14)+'px'; tip.style.top=(e.offsetY+10)+'px';
+  });
+  host.addEventListener('mouseleave', function(){ tip.style.display='none'; });
+})();
+
+/* § 03 真边子图（极简力导向） */
+(function(){
+  const svg = document.getElementById('graph');
+  document.getElementById('edgeCount').textContent = EDGE_TOTAL;
+  const W=1180, H=420;
+  const nodes = {}, list = [];
+  EDGES.slice(0, 46).forEach(function(e){
+    [e[0], e[1]].forEach(function(n){
+      if (!nodes[n]) { const t = TAGS.find(function(x){ return x.t===n; }); nodes[n] = { id:n, x:W/2+(Math.random()-.5)*W*.55, y:H/2+(Math.random()-.5)*H*.6, vx:0, vy:0, n:(t?t.n:1), c:(t?t.c:'#6b6b66') }; list.push(nodes[n]); }
+    });
+  });
+  const links = EDGES.slice(0, 46);
+  for (let it=0; it<260; it++){
+    links.forEach(function(l){
+      const a=nodes[l[0]], b=nodes[l[1]]; if(!a||!b) return;
+      let dx=b.x-a.x, dy=b.y-a.y, d=Math.sqrt(dx*dx+dy*dy)||1, f=(d-140)/d*0.02;
+      a.x+=dx*f; a.y+=dy*f; b.x-=dx*f; b.y-=dy*f;
+    });
+    for (let i=0;i<list.length;i++) for (let j=i+1;j<list.length;j++){
+      let dx=list[j].x-list[i].x, dy=list[j].y-list[i].y, d2=dx*dx+dy*dy||1;
+      if (d2 < 9000){ const f=9000/d2*0.6; list[i].x-=dx*f*0.01; list[i].y-=dy*f*0.01; list[j].x+=dx*f*0.01; list[j].y+=dy*f*0.01; }
+    }
+    list.forEach(function(n){ n.x=Math.max(40,Math.min(W-40,n.x)); n.y=Math.max(30,Math.min(H-24,n.y)); });
+  }
+  const NS='http://www.w3.org/2000/svg';
+  links.forEach(function(l){
+    const a=nodes[l[0]], b=nodes[l[1]]; if(!a||!b) return;
+    const ln=document.createElementNS(NS,'line'); ln.setAttribute('class','edge');
+    ln.setAttribute('x1',a.x); ln.setAttribute('y1',a.y); ln.setAttribute('x2',b.x); ln.setAttribute('y2',b.y);
+    ln.setAttribute('stroke-width', Math.min(4, 0.6+l[2]*0.22)); svg.appendChild(ln);
+  });
+  list.forEach(function(n){
+    const c=document.createElementNS(NS,'circle'); c.setAttribute('cx',n.x); c.setAttribute('cy',n.y);
+    c.setAttribute('r', 5+Math.min(11, n.n*0.55)); c.setAttribute('fill', n.c); c.setAttribute('opacity','.9');
+    c.dataset.id=n.id; svg.appendChild(c);
+    const t=document.createElementNS(NS,'text'); t.setAttribute('class','en'); t.setAttribute('x',n.x+9); t.setAttribute('y',n.y+4);
+    t.textContent=n.id; svg.appendChild(t);
+  });
+})();
+
+/* § 04 分类按钮 + 标签条 + 搜索 */
+(function(){
+  const btns=document.getElementById('catBtns'), strip=document.getElementById('tagStrip'), state=document.getElementById('filterState');
+  CATS.forEach(function(c){
+    const b=document.createElement('button'); b.className='catbtn';
+    b.innerHTML='<i style="background:'+c.c+'"></i>'+c.l1+'<span class="n">'+c.n+'</span>';
+    b.onclick=function(){
+      document.querySelectorAll('.catbtn').forEach(function(x){ x.style.borderColor=''; });
+      b.style.borderColor=c.c;
+      state.textContent='当前条件：'+c.l1+' ｜ 命中 '+c.n+' 条 ｜ 点这里重置 ⟲';
+    };
+    btns.appendChild(b);
+  });
+  TAGS.slice(0,120).forEach(function(t){
+    const d=document.createElement('div');
+    d.innerHTML='<span style="color:'+t.c+'">'+t.t+'</span><span class="c">'+t.n+'</span>';
+    strip.appendChild(d);
+  });
+})();
+
+/* § 05 项目两种形态 */
+(function(){
+  const idx=document.getElementById('idxList');
+  PROJ.forEach(function(p,i){
+    const r=document.createElement('div'); r.className='idxrow';
+    r.innerHTML='<span class="no">'+String(i+1).padStart(3,'0')+'</span><span><span class="id">'+p.id+'</span>'
+      +'<div class="one">'+p.one+'</div></span><span class="meta">'+p.cat+'</span><span class="meta">★ '+p.stars+'</span>';
+    idx.appendChild(r);
+  });
+  if (PROJ[0]) {
+    const p=PROJ[0];
+    document.getElementById('editLead').innerHTML =
+      '<div class="lead"><h3>'+p.id+'</h3><p>'+p.one+'</p></div>'
+      +'<dl class="aside"><dt>分类</dt><dd>'+p.cat+'</dd><dt>星数</dt><dd>★ '+p.stars+'</dd>'
+      +'<dt>为什么值一提</dt><dd>见人话层：一句话理解 / 它解决什么问题 / 举个例子</dd></dl>';
+  }
+})();
+</script>
+</body>
+</html>

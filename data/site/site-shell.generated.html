@@ -2,13 +2,14 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>本地开源项目 · 档案站</title>
 <style>
 @font-face{font-family:"Big";src:url("../../assets/anton-latin.woff2") format("woff2");font-display:swap}
-:root{--ink:#0a0a0a;--paper:#f4f1e4;--fluoro:#e9ff2e;--magenta:#ff1f6b;--mono:SFMono-Regular,Consolas,monospace}
+:root{--ink:#0a0a0a;--paper:#f4f1e4;--fluoro:#e9ff2e;--magenta:#ff1f6b;--mono:SFMono-Regular,Consolas,monospace;--shell-bottom:86px}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#080807;color:var(--paper);font:14px/1.5 "Noto Sans SC","Microsoft YaHei UI",system-ui,sans-serif;overflow:hidden}
-#view{position:fixed;inset:0;width:100%;height:100%;border:0;background:#080807}
+#view{position:fixed;top:0;left:0;width:100%;height:calc(100% - var(--shell-bottom));border:0;background:#080807}
 
 /* 底部游戏式导航坞 */
 .dock{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:50;display:flex;align-items:stretch;gap:2px;
@@ -137,14 +138,23 @@ html,body{margin:0;height:100%;background:#080807;color:var(--paper);font:14px/1
 .skel a:hover{border-color:var(--paper)}
 .skel a.on{background:var(--fluoro);color:#0a0a0a;border-color:var(--fluoro)}
 
-@media (max-width:720px){
-  .dock a{padding:9px 10px;font-size:9px}
-  .dock a .n{font-size:15px}
+@media (max-width:1000px){
+  :root{--shell-bottom:80px}
+  body.daily-active{--shell-bottom:124px}
+  .dock{left:8px;right:64px;bottom:8px;transform:none;box-shadow:4px 4px 0 rgba(233,255,46,.28)}
+  .dock a{flex:1 1 0;min-width:0;min-height:48px;justify-content:center;align-items:center;flex-direction:column;gap:2px;padding:4px 2px;text-align:center;font-size:10px;line-height:1.1;letter-spacing:0}
+  .dock a .n{font-size:15px;line-height:1}
+  .dock a .label{white-space:normal}
   .dock .k{display:none}
+  .lbtn{right:8px;bottom:12px;width:44px;height:44px}
+  .skel{left:8px;bottom:76px}
+}
+@media (max-width:360px){
+  .dock a{font-size:9px}
 }
 </style>
   <link rel="stylesheet" href="../../assets/ui/motion.css">
-<!-- BUILD-STAMP: build 2026-10-24 16:43 ｜ 数据指纹 C2BDD6A3E5BD ｜ 15 条 -->
+<!-- BUILD-STAMP: build 2026-11-04 22:30 ｜ 数据指纹 A35D01FD9E41 ｜ 15 条 -->
 </head>
 <body data-motion-page="shell">
 <div class="load" id="load">ARCHIVE<span style="color:var(--magenta)">//</span>LOADING</div>
@@ -157,10 +167,10 @@ html,body{margin:0;height:100%;background:#080807;color:var(--paper);font:14px/1
 <iframe id="view" title="页面"></iframe>
 
 <nav class="dock" id="dock" aria-label="主菜单">
-  <a data-r="home"><span class="n">01</span>首页</a>
-  <a data-r="daily"><span class="n">02</span>每日精选</a>
-  <a data-r="library"><span class="n">03</span>全库</a>
-  <a data-r="plans"><span class="n">04</span>计划与工作区</a>
+  <a data-r="home" href="#/home"><span class="n">01</span><span class="label">首页</span></a>
+  <a data-r="daily" href="#/daily"><span class="n">02</span><span class="label">每日精选</span></a>
+  <a data-r="library" href="#/library"><span class="n">03</span><span class="label">全库</span></a>
+  <a data-r="plans" href="#/plans"><span class="n">04</span><span class="label">计划与工作区</span></a>
   <span class="k"><b>1</b><b>2</b><b>3</b><b>4</b> 切换</span>
 </nav>
 <button class="lbtn" id="lbtn" title="图例（G）" aria-label="打开图例">?</button>
@@ -283,13 +293,17 @@ html,body{margin:0;height:100%;background:#080807;color:var(--paper);font:14px/1
   }
   function render() {
     var p = parse();
+    document.body.classList.toggle('daily-active', p.route === 'daily');
     var src = urlFor(p.route, p.sub);
     if (view.getAttribute('data-src') !== src) {
       view.setAttribute('data-src', src);
       view.src = src;
     }
     [].forEach.call(dock.querySelectorAll('a'), function (a) {
+      a.href = location.href.split('#')[0] + '#/' + a.getAttribute('data-r');
       a.classList.toggle('on', a.getAttribute('data-r') === p.route);
+      if (a.getAttribute('data-r') === p.route) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
     });
     var skel = document.getElementById('skel');
     if (skel) {
@@ -303,7 +317,9 @@ html,body{margin:0;height:100%;background:#080807;color:var(--paper);font:14px/1
   }
   window.addEventListener('hashchange', render);
   [].forEach.call(dock.querySelectorAll('a'), function (a) {
-    a.addEventListener('click', function () {
+    a.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
       location.hash = '#/' + a.getAttribute('data-r');
       render();
     });

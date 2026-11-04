@@ -28,7 +28,7 @@ function P($r) { Join-Path $root $r }
 if (-not $Date) { $Date = (Get-Date).ToString('yyyy-MM-dd') }
 if ($Date -notmatch '^\d{4}-\d{2}-\d{2}$') { Write-Host "✗ 日期格式应为 YYYY-MM-DD：$Date" -ForegroundColor Red; exit 1 }
 
-$steps = @('backup', 'queries', 'report', 'snapshot', 'seen', 'index', 'csv', 'picks', 'univer', 'build')
+$steps = @('backup', 'queries', 'report', 'snapshot', 'seen', 'index', 'csv', 'picks', 'univer', 'build', 'discovery', 'candidates', 'validation', 'verification')
 $mp = P "data\runs\$Date.manifest.json"
 $m = $null
 if (Test-Path $mp) { try { $m = Get-Content $mp -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $m = $null } }
@@ -67,22 +67,60 @@ if ($Sync) {
   $build = $picks -and ((Get-Item (P 'data\site\daily-layout-c-finsara.generated.html') -ErrorAction SilentlyContinue).LastWriteTime -gt (Get-Item (P "data\picks\$Date.jsonl")).LastWriteTime)
   $covPath = P "data\raw\$Date\coverage.json"
   $covStatus = ''
-  if (Test-Path $covPath) { try { $covStatus = [string](Get-Content $covPath -Raw -Encoding UTF8 | ConvertFrom-Json).status } catch { $covStatus = '' } }
-  $map = [ordered]@{ backup = $backup; report = $report; snapshot = $snap; seen = $seen; index = $index; csv = $csv; picks = $picks; build = $build; queries = ($covStatus -eq 'pass' -or $covStatus -eq 'warn') }
+  $global:LASTEXITCODE = 0
+  $coverageOutput = @(& (P 'tools\check-queries.ps1') -Date $Date *>&1)
+  $coverageCode = $global:LASTEXITCODE
+  $coverageOutput | Out-Host
+  if ($coverageCode -eq 0) { $covStatus = 'pass' }
+  elseif ($coverageCode -eq 2 -and $report -and ([IO.File]::ReadAllText((P "reports\$Date.md")) -match '不完整')) { $covStatus = 'warn' }
+  else { $covStatus = 'fail' }
+  # A 层：收工时刷新候选池 + 渠道贡献；只写 data/audit，失败不阻塞收工
+  $poolPath = P "data\audit\pool\$Date-all.jsonl"
+  $channelPath = P "data\audit\channel-report-$Date.md"
+  $disc = (Test-Path $poolPath) -and (Test-Path $channelPath)
+  if (Test-Path (P "data\raw\$Date")) {
+    try {
+      $global:LASTEXITCODE = 0
+      & (P 'tools\discovery-refresh.ps1') -Date $Date *> $null
+      $disc = $global:LASTEXITCODE -eq 0 -and (Test-Path $poolPath) -and (Test-Path $channelPath)
+    } catch { $disc = $false }
+  }
+  $map = [ordered]@{ backup = $backup; report = $report; snapshot = $snap; seen = $seen; index = $index; csv = $csv; picks = $picks; build = $build; queries = ($covStatus -eq 'pass' -or $covStatus -eq 'warn'); discovery = $disc }
   foreach ($k in $map.Keys) {
     if ($steps -notcontains $k) { continue }
-    if ($m.steps[$k].status -eq 'fail') { continue }   # 人工标 fail 不覆盖
+    if ($k -eq 'report' -and -not $report -and $m.steps[$k].status -eq 'skipped') { continue }
+    if ($m.steps[$k].status -eq 'fail' -and $m.steps[$k].note -ne 'Report missing; backfill or explicitly record a skipped day.') { continue }   # 人工标 fail 不覆盖
     $m.steps[$k] = [ordered]@{ status = $(if ($map[$k]) { 'ok' } else { 'pending' }); at = (Get-Date).ToString('o'); note = 'sync' }
   }
   if ($covStatus) { $m.steps['queries'] = [ordered]@{ status = $(if ($covStatus -eq 'fail') { 'fail' } else { 'ok' }); at = (Get-Date).ToString('o'); note = "coverage: $covStatus" } }
+  $m.steps['discovery'] = [ordered]@{ status = $(if ($disc) { 'ok' } else { 'fail' }); at = (Get-Date).ToString('o'); note = 'discovery-refresh.ps1' }
+  $candidateCode=0
+  $hasEditorialScope = Test-Path (P "data\audit\editorial\$Date.json")
+  if($disc -and $hasEditorialScope){
+    $candidateArgs=@{Action='check';Date=$Date;Root=$root}
+    $policyPath=P 'data/search-policy.json'
+    if($report -and (Test-Path $policyPath)){$policy=Get-Content $policyPath -Raw|ConvertFrom-Json;if($Date -ge $policy.disposition_enforce_from){$candidateArgs.Publish=$true}}
+    if($candidateArgs.Publish -and $policy.publication_mode -eq 'declared-editorial-batch'){
+      & (P 'tools/editorial-batch.ps1') check -Date $Date -Root $root | Out-Host
+    }else{& (P 'tools/candidate-ledger.ps1') @candidateArgs | Out-Host}
+    $candidateCode=$LASTEXITCODE
+  }
+  $m.steps['candidates']=[ordered]@{status=$(if($candidateCode -eq 0){'ok'}else{'fail'});at=[datetimeoffset]::UtcNow.ToString('o');note=$(if($hasEditorialScope){'candidate-ledger accounting/publication check'}else{'skipped: editorial scope not initialized (legacy DSH mode)'})}
+  if (-not $report -and $m.steps['report'].status -ne 'skipped') { $m.steps['report'] = [ordered]@{ status = 'fail'; at = (Get-Date).ToString('o'); note = 'Report missing; backfill or explicitly record a skipped day.' } }
   $m.updated_at = (Get-Date).ToString('o')
   [IO.File]::WriteAllText($mp, ($m | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding($false)))
   # 2026-10-24：硬门禁——收工前跑数据契约校验；重复键 / 日期格式 / 枚举越界都别带着走
-  $vOut = & (P 'tools\validate-lib.ps1') *>&1
-  $vOut | Out-Host
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host '✗ 数据契约校验未通过（validate-lib），先修再收工' -ForegroundColor Red
-    exit 1
+  foreach ($gate in @(@{step='validation';file='validate-lib.ps1'}, @{step='verification';file='verify-handoff.ps1'})) {
+    $gateCode = 1
+    try {
+      $global:LASTEXITCODE = 0
+      $gateOutput = @(& (P ('tools\' + $gate.file)) *>&1)
+      $gateCode = $global:LASTEXITCODE
+      $gateOutput | Out-Host
+    } catch { Write-Host $_.Exception.Message -ForegroundColor Red }
+    $m.steps[$gate.step] = [ordered]@{ status = $(if ($gateCode -eq 0) { 'ok' } else { 'fail' }); at = (Get-Date).ToString('o'); note = $gate.file }
+    [IO.File]::WriteAllText($mp, ($m | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding($false)))
+    if ($gateCode -ne 0) { Write-Host '✗ 收工门禁未通过；失败已记入清单' -ForegroundColor Red; exit 1 }
   }
 }
 if (-not $Init -and -not $Sync -and -not $Mark -or $Show) {
@@ -95,3 +133,4 @@ if (-not $Init -and -not $Sync -and -not $Mark -or $Show) {
 }
 $bad = @($steps | Where-Object { $m.steps[$_].status -eq 'fail' })
 if ($bad.Count) { exit 1 }
+exit 0

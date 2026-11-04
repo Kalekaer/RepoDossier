@@ -18,7 +18,7 @@ $dread = Join-Path $root 'data\README.md'
 $script:pass = 0; $script:fail = 0; $script:skip = 0
 # 本脚本的检查项总数。**新增/删除 Chk 时必须同步改这里**，并同步 CHANGELOG.md 与 README.md 里的「N 项」，
 # 否则第 17 节会报 FAIL —— 这是故意设计的，防止校验项被悄悄删掉而无人察觉。
-$script:TOTAL_CHECKS = 167
+$script:TOTAL_CHECKS = 168
 function Chk([string]$name, [bool]$ok, [string]$detail = '') {
   if ($ok) { $script:pass++; Write-Host ("  [PASS] {0}" -f $name) -ForegroundColor Green }
   else     { $script:fail++; Write-Host ("  [FAIL] {0} {1}" -f $name, $detail) -ForegroundColor Red }
@@ -48,8 +48,8 @@ Chk "SKILL 声明 12 项" ($S -match '收集齐全的 12 项')
 Chk "TEMPLATE 有 1-12 且无 13" (($T -match '(?m)^12\. \*\*总结') -and -not ($T -match '(?m)^13\. \*\*'))
 Chk "SKILL 明确『代价/坑』归属第 7 项" ($S -match '不是第 13 项')
 
-Write-Host "`n=== 3. 限流/重试口径一致（403 不重试）==="
-Chk "SKILL: 403 不重试" ($S -match '403` 限流 / `422` 参数错误 \| \*\*不重试\*\*')
+Write-Host "`n=== 3. 限流/重试口径一致（限流冷却、权限错误不重试）==="
+Chk "SKILL: 限流暂停并有限续采，权限错误不重试" (($S -match '403` / `429` 限流 \| \*\*暂停队列\*\*') -and ($S -match '权限 `403` / `401` / `422` 参数错误 \| \*\*不重试\*\*') -and (Test-Path (Join-Path $root 'tools/collect-daily.ps1')))
 Chk "SOURCES-Q: 403 不重试" ((Get-Content (Join-Path $base 'references\sources-queries.md') -Raw) -match 'rate limit exceeded.*不重试')
 
 Write-Host "`n=== 4. 风险等级为单值枚举 ==="
@@ -237,7 +237,7 @@ if (Test-Path $chg) {
   Chk "CHANGELOG 记录的 SHA256 与当前 SKILL.md 一致" ($C -match $realHash) "当前=$realHash"
   Chk "CHANGELOG 记录的行数一致" ($C -match "\b$realLines 行\b") "当前=$realLines 行"
   Chk "CHANGELOG 记录的字节数一致" ($C -match "\b$realBytes B\b") "当前=$realBytes B"
-  Chk "CHANGELOG 声明校验项数 = $($script:TOTAL_CHECKS) 项" ($C -match "\b$($script:TOTAL_CHECKS) 项") "CHANGELOG 未声明 $($script:TOTAL_CHECKS) 项"  # 2026-10-23：表结构检查——原来只比值，表格被插坏也能过
+  Chk "CHANGELOG 声明校验项数 = $($script:TOTAL_CHECKS) 项" ($C -match "\b$($script:TOTAL_CHECKS) 项") "CHANGELOG 未声明 $($script:TOTAL_CHECKS) 项"  # 2026-10-23：表结构检查——第 17 节原来只比值，表格被插坏也能过（当天真实发生过一次）
   $cl = $C -split "`r?`n"
   $hi = [array]::IndexOf($cl, '| 项 | 值 |')
   $tblOk = $false
@@ -345,7 +345,7 @@ Chk "projects.jsonl 无重复 id（同一仓库唯一身份）" (($ids | Sort-Ob
   }
   Chk "CSV 兜底不与 picks 记录重复注入" ($violCsv.Count -eq 0) (($violCsv | Select-Object -First 3) -join ', ')
 
-Chk "站点页面已由 projects.jsonl 生成（index.html + data/site）" ((Test-Path (Join-Path $root 'index.html')) -and (Test-Path (Join-Path $root 'data\site')))
+  Chk "overview.html 由 projects.jsonl 生成且存在" (Test-Path (Join-Path $root 'legacy\overview-v5.html'))
   Write-Host ("        主档案 $($projRows.Count) 条 ｜ 事件 $($evRows.Count) 条 ｜ 已推荐 $($recIds.Count) 条") -ForegroundColor DarkGray
 } else {
   Chk "知识库层已生成（projects.jsonl / events.jsonl）" $false "未找到，需先跑 tools\sync-projects.ps1"
@@ -422,105 +422,102 @@ if (Test-Path $humanDir2) {
   }
 }
 
-Write-Host "`n=== 22. 站点页面与两级分类（v4 · 2026-10-19 站点版）==="
-# 2026-10-19 D1=A：发布包只发新站点（index.html + data/site 5 页）。
-# 旧版这一节读 legacy\overview-v5.html；单页不发之后，页面检查全部改指站点页，
-# 并把工具/数据层检查从 if(Test-Path $ovPath) 里挪出来，避免「文件不在就整段跳过」。
-$siteDir = Join-Path $root 'data\site'
-$sitePages = @('daily-layout-c-finsara.generated.html', 'library-notebook.generated.html', 'home-brutal-token.generated.html', 'plans-shelf.generated.html', 'site-shell.generated.html')
-$siteOk = (Test-Path (Join-Path $root 'index.html')) -and (@($sitePages | Where-Object { Test-Path (Join-Path $siteDir $_) }).Count -eq 5)
-Chk "站点入口 index.html 存在且 data/site 五页齐全" $siteOk
-
-$readRaw = { param($p) if (Test-Path $p) { Get-Content $p -Raw -Encoding UTF8 } else { '' } }
-$idxHtml   = & $readRaw (Join-Path $root 'index.html')
-$dailyHtml = & $readRaw (Join-Path $siteDir 'daily-layout-c-finsara.generated.html')
-$libHtml   = & $readRaw (Join-Path $siteDir 'library-notebook.generated.html')
-$homeHtml  = & $readRaw (Join-Path $siteDir 'home-brutal-token.generated.html')
-$plansHtml = & $readRaw (Join-Path $siteDir 'plans-shelf.generated.html')
-$ov = $idxHtml + "`n" + $dailyHtml + "`n" + $libHtml + "`n" + $homeHtml + "`n" + $plansHtml
-
-Chk "站点无外部 fetch（双击即可用）" (-not ($ov -match 'fetch\('))
-Chk "站点无外部资源引用" (-not ($ov -match 'src="https?://|@import'))
-Chk "四个入口齐全（每日精选 / 全库 / 计划与工作区 / 图例）" (($idxHtml -match '#/daily') -and ($idxHtml -match '#/all') -and ($idxHtml -match '#/plans') -and ($idxHtml -match '图例'))
-Chk "日报页 01–06 内容块齐全" (($dailyHtml -match '今日头条') -and ($dailyHtml -match '重点报道') -and ($dailyHtml -match '观察面') -and ($dailyHtml -match '边栏观察') -and ($dailyHtml -match '特别栏目') -and ($dailyHtml -match '旧闻新报'))
-Chk "日报页有 S/A 档位标记" (($dailyHtml -match '"tier":"S"') -or ($dailyHtml -match '"tier":"A"'))
-Chk "全库页有搜索输入" (($libHtml -match '<input') -and ($libHtml -match '搜索'))
-Chk "全库页有分类筛选" ($libHtml -match '分类')
-Chk "全库页有人话层「一句话」" ($libHtml -match '一句话')
-Chk "全库页有徽章与统计" (($libHtml -match '徽章') -and ($libHtml -match '统计'))
-Chk "全库页有项目对比入口" ($libHtml -match '对比')
-Chk "全库页有成长记录" ($libHtml -match '成长记录')
-Chk "全库页有翻页控件（pageslider）" ($libHtml -match 'pageslider')
-Chk "日报页含当日入库全名单" ($dailyHtml -match '全名单')
-Chk "计划页有场景与工作区" (($plansHtml -match '场景') -and ($plansHtml -match '工作区'))
-Chk "站点有 hash 路由骨架（#/daily #/all #/plans + hashchange）" (($idxHtml -match 'hashchange') -and ($idxHtml -match '#/daily'))
-Chk "站点每页有 BUILD-STAMP 且格式完整" (([regex]::Matches($ov, '<!-- BUILD-STAMP: build \d{4}-\d{2}-\d{2} \d{2}:\d{2} ｜ 数据指纹 [0-9A-Fa-f]{12} ｜ \d+ 条 -->')).Count -ge 5)
-$pageTimes = @($sitePages | ForEach-Object { Join-Path $siteDir $_ } | Where-Object { Test-Path $_ } | ForEach-Object { (Get-Item $_).LastWriteTimeUtc })
-$dataTimes = @('data\projects.jsonl', 'data\events.jsonl', 'data\recommend-log.csv') | ForEach-Object { $dp = Join-Path $root $_; if (Test-Path $dp) { (Get-Item $dp).LastWriteTimeUtc } }
-$p17ok = ($siteOk -and $pageTimes.Count -gt 0 -and $dataTimes.Count -gt 0 -and ($pageTimes | Measure-Object -Minimum).Minimum -ge ($dataTimes | Measure-Object -Maximum).Maximum)
-Chk "P1-17 页面比所有数据新（改了数据不重建 → 必须变红）" $p17ok
-$chartTagsS = [regex]::Matches($homeHtml, '<[^>]*role="img"[^>]*>')
-$chartBadS = @($chartTagsS | Where-Object { $_.Value -notmatch 'aria-label="[^"]{8,}"' }).Count
-$chartNotesS = ([regex]::Matches($homeHtml, 'class="chart-note"')).Count
-Chk "图表都有 aria-label 与文字摘要（$($chartTagsS.Count) 个图 / $chartNotesS 条摘要）" ($chartTagsS.Count -gt 0 -and $chartBadS -eq 0 -and $chartNotesS -ge $chartTagsS.Count) "缺 aria 的图 $chartBadS 个"
-$heroN = $null; if ($homeHtml -match '(\d+)\s*ITEMS') { $heroN = [int]$Matches[1] }
-$projNS = @(Get-Content (Join-Path $root 'data\projects.jsonl') -Encoding UTF8 | Where-Object { $_.Trim() }).Count
-Chk "首页自述条数 = 主档案条数（$projNS）" ($heroN -eq $projNS) "首页写的是 $heroN"
-Chk "页面无「未评档」残留（术语表已废）" ($ov -notmatch '未评档')
-Chk "页面无收藏残留（功能已撤销）" (($ov -notmatch 'favRow') -and ($ov -notmatch 'favCmd') -and ($ov -notmatch 'user-library'))
-
-# ---- 工具 / 数据层（与页面无关，必须始终执行）----
-Chk "SKILL 含「临时检索」流程" (($S -match '临时检索') -and ($S -match 'add-repo\.ps1'))
-Chk "工具组合推荐可用（compose.ps1 + SKILL 流程）" ((Test-Path (Join-Path $root 'tools\compose.ps1')) -and ($S -match '工具组合'))
-Chk "自动补标签工具存在（auto-tag.ps1）" (Test-Path (Join-Path $root 'tools\auto-tag.ps1'))
-Chk "同义词候选工具存在（suggest-terms.ps1）" (Test-Path (Join-Path $root 'tools\suggest-terms.ps1'))
-Chk "搜索缺口闭环存在（gaps.ps1 + SKILL 说明）" ((Test-Path (Join-Path $root 'tools\gaps.ps1')) -and ($S -match '搜索缺口'))
-$plansPath2 = Join-Path $root 'data\plans.json'
-$plOk2 = Test-Path $plansPath2
-$pl2 = $null
-if ($plOk2) { try { $pl2 = Get-Content $plansPath2 -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $null = $_ } }
-Chk "方案模板存在且含角色与「为什么需要」" ($plOk2 -and $pl2 -and @($pl2.plans).Count -ge 5 -and @($pl2.plans[0].roles).Count -ge 2 -and $pl2.plans[0].roles[0].why)
-$stackSkill = Join-Path $root '.dsh\skills\tool-stack\SKILL.md'
-Chk "tool-stack 技能存在（/tool-stack）" ((Test-Path $stackSkill) -and ((Get-Content $stackSkill -Raw -Encoding UTF8) -match 'name:\s*tool-stack'))
-Chk "方案固化工具存在（add-plan.ps1）" (Test-Path (Join-Path $root 'tools\add-plan.ps1'))
-Chk "日报后追问工具存在（daily-questions.ps1）" ((Test-Path (Join-Path $root 'tools\daily-questions.ps1')) -and ($S -match 'daily-questions'))
-Chk "方案候选工具存在（suggest-plans.ps1）" ((Test-Path (Join-Path $root 'tools\suggest-plans.ps1')) -and ($S -match 'suggest-plans'))
-Chk "人话层待补清单工具存在（humanize-next.ps1）" ((Test-Path (Join-Path $root 'tools\humanize-next.ps1')) -and ($S -match 'humanize-next'))
-Chk "人话层批量写入工具存在（add-intro.ps1）" (Test-Path (Join-Path $root 'tools\add-intro.ps1'))
-$projPath3 = Join-Path $root 'data\projects.jsonl'
-if (Test-Path $projPath3) {
-  $pr3 = @()
-  foreach ($l3 in (Get-Content $projPath3 -Encoding UTF8)) { if ($l3.Trim()) { try { $pr3 += ($l3 | ConvertFrom-Json) } catch { $null = $_ } } }
-  $anchors = [ordered]@{ 'ARahim3/DigUp' = '效率/文件管理'; 'zyddnys/manga-image-translator' = '设计/图片处理'; 'storytold/deckcraft' = '办公/演示文稿'; 'enricoros/big-AGI' = 'AI/AI聊天'; 'amontlabs/lcu' = '开发/编程助手'; 'iamlukethedev/Herald-OS' = 'AI/AI Agent' }
-  $badAnchor = @()
-  foreach ($k3 in $anchors.Keys) {
-    $row3 = @($pr3 | Where-Object { $_.id -eq $k3 })[0]
-    if (-not $row3) { continue }
-    if ("$($row3.category.l1)/$($row3.category.l2)" -ne $anchors[$k3]) { $badAnchor += "$k3=$($row3.category.l1)/$($row3.category.l2)" }
+Write-Host "`n=== 22. 单文件页面与两级分类（v4）==="
+$ovPath = Join-Path $root 'legacy\overview-v5.html'
+if (Test-Path $ovPath) {
+  $ov = Get-Content $ovPath -Raw -Encoding UTF8
+  # 双击可用：**不允许再出现外部 fetch**（file:// 下会被浏览器拦，用户明确要求双击即用）
+  Chk "overview.html 无外部 fetch（双击即可用）" (-not ($ov -match 'fetch\('))
+  Chk "overview.html 无外部资源引用" (-not ($ov -match 'src="https?://|@import'))
+  Chk "三个入口齐全（今日新增 / 分类浏览 / 搜索）" (($ov -match '今日新增') -and ($ov -match '分类浏览') -and ($ov -match 'id="q"'))
+  Chk "含人话层展示区（一句话理解 / 功能说明）" (($ov -match '一句话理解') -and ($ov -match '功能说明'))
+  Chk "含功能备注多维评分（上手/文档/活跃/推荐等）" (($ov -match '功能备注') -and ($ov -match '上手难度') -and ($ov -match '文档质量') -and ($ov -match '活跃程度') -and ($ov -match '推荐程度') -and ($ov -match 'function stars5'))
+  Chk "含「它解决什么问题」与「举个例子」展示" (($ov -match '它解决什么问题') -and ($ov -match '举个例子'))
+  Chk "搜索按匹配优先级排序（名称 > 简称 > 标签 > 描述）" ($ov -match 'function matchScore')
+  Chk "含按用途分组（工具组合的页内形态）" ($ov -match 'function toggleGroup')
+  Chk "含两级分类筛选" (($ov -match 'function setL2') -and ($ov -match 'function setL1'))
+  Chk "含成长记录区" ($ov -match '成长记录')
+  Chk "页面无「未评档 / 未评」残留（术语表已废）" ($ov -notmatch '未评')
+  $ovMatch = [regex]::Match($ov, '(?s)const P = (\[.*?\]);')
+  if ($ovMatch.Success) {
+    Chk "页面数据未内嵌 url（按 id 拼回，省体积）" (-not ($ovMatch.Groups[1].Value -match '"url"'))
+    # 回归（2026-10-13「卡片点不了」事故）：内嵌数据里**不允许数组含 null 元素**。
+    # 成因：PowerShell 的 `$x = if (...) { @() }` 会把空数组塌成 $null，@($null) 又变成 [null]，
+    # 前端 .map(x=>x.date) 抛 TypeError，**页面照常渲染但点击无反应**——语法与字段检查都发现不了。
+    $nullElems = ([regex]::Matches($ovMatch.Groups[1].Value, '\[null[,]|\[null\]')).Count
+    Chk "页面内嵌数据无数组 null 元素（防「点了没反应」）" ($nullElems -eq 0) "出现 $nullElems 处"
   }
-  Chk "分类锚点稳定（6 条：强信号 / topics / 人话层 / 防AI污染 / 开发桶 / 形态词规则）" ($badAnchor.Count -eq 0) ($badAnchor -join '; ')
-}
-$wsP = Join-Path $root 'data\workspaces.jsonl'
-$wsOk2 = Test-Path $wsP
-if ($wsOk2) { foreach ($l in (Get-Content $wsP -Encoding UTF8)) { if ($l.Trim()) { try { $null = ($l | ConvertFrom-Json) } catch { $wsOk2 = $false } } } }
-Chk "工作区层存在且每行可解析（workspaces.jsonl）" $wsOk2
-Chk "工作区工具存在（workspace.ps1）" (Test-Path (Join-Path $root 'tools\workspace.ps1'))
-$qs = Join-Path $root 'QUICKSTART.md'
-Chk "5 分钟说明书存在（QUICKSTART.md）" ((Test-Path $qs) -and ((Get-Content $qs -Raw -Encoding UTF8) -match '第 1 步'))
-$ss = Join-Path $root 'docs\screenshots\README.md'
-Chk "截图说明存在且 README 引用三张图" ((Test-Path $ss) -and ((Get-Content (Join-Path $root 'README.md') -Raw -Encoding UTF8) -match 'docs/screenshots/3-plans'))
-$dm = Join-Path $root 'examples\demo\projects.jsonl'
-$dmOk = Test-Path $dm
-if ($dmOk) {
-  foreach ($l in (Get-Content $dm -Encoding UTF8)) {
-    if (-not $l.Trim()) { continue }
-    try { $d = $l | ConvertFrom-Json } catch { $dmOk = $false; break }
-    if ($d.PSObject.Properties['library']) { $dmOk = $false }
+  # 页内对比功能（用户自己勾两个就能比，不需要命令行/对话）
+  Chk "页面含页内项目对比（勾选两个即可对比）" (($ov -match 'function showCompare') -and ($ov -match 'function toggleCmp') -and ($ov -match 'id="cmpBar"'))
+  # 临时检索流程（按需求找工具 → 核实 → 入库）必须写在 SKILL 里，否则只存在于对话中、不可复现
+  Chk "SKILL 含「临时检索」流程" (($S -match '临时检索') -and ($S -match 'add-repo\.ps1'))
+  # 工具组合推荐（v3.1 第八节）：脚本 + 流程文档都要有
+  Chk "工具组合推荐可用（compose.ps1 + SKILL 流程）" ((Test-Path (Join-Path $root 'tools\compose.ps1')) -and ($S -match '工具组合'))
+  # 搜索词表自适应（词表必须随库增长）
+  Chk "自动补标签工具存在（auto-tag.ps1）" (Test-Path (Join-Path $root 'tools\auto-tag.ps1'))
+  Chk "同义词候选工具存在（suggest-terms.ps1）" (Test-Path (Join-Path $root 'tools\suggest-terms.ps1'))
+  Chk "搜索缺口闭环存在（gaps.ps1 + SKILL 说明）" ((Test-Path (Join-Path $root 'tools\gaps.ps1')) -and ($S -match '搜索缺口'))
+  Chk "页面含分词/容错/缺口记录" (($ov -match 'function parseQuery') -and ($ov -match 'function fuzzyFix') -and ($ov -match 'function addGap') -and ($ov -match 'id="gapChip"'))
+  # 方案（v3.1 第八节完整体验）：模板数据 + 页面视图 + 流程文档
+  $plansPath2 = Join-Path $root 'data\plans.json'
+  Chk "方案模板存在且可解析（data/plans.json）" (Test-Path $plansPath2)
+  if (Test-Path $plansPath2) {
+    $pl = $null
+    try { $pl = Get-Content $plansPath2 -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $null = $_ }
+    Chk "方案模板含角色与「为什么需要」" ($pl -and @($pl.plans).Count -ge 5 -and @($pl.plans[0].roles).Count -ge 2 -and $pl.plans[0].roles[0].why)
+  }
+  Chk "页面含方案视图（showPlan + 场景按钮区）" (($ov -match 'function showPlan') -and ($ov -match 'function planRoleTools') -and ($ov -match 'id="planGrid"'))
+  # 对话侧能力（skill + 三个工具）：需求配方案 / 固化方案 / 日报后追问 / 方案候选
+  $stackSkill = Join-Path $root '.dsh\skills\tool-stack\SKILL.md'
+  Chk "tool-stack 技能存在（/tool-stack）" ((Test-Path $stackSkill) -and ((Get-Content $stackSkill -Raw -Encoding UTF8) -match 'name:\s*tool-stack'))
+  Chk "方案固化工具存在（add-plan.ps1）" (Test-Path (Join-Path $root 'tools\add-plan.ps1'))
+  Chk "日报后追问工具存在（daily-questions.ps1）" ((Test-Path (Join-Path $root 'tools\daily-questions.ps1')) -and ($S -match 'daily-questions'))
+  Chk "方案候选工具存在（suggest-plans.ps1）" ((Test-Path (Join-Path $root 'tools\suggest-plans.ps1')) -and ($S -match 'suggest-plans'))
+  # 人话层补全流水线（GPT 评审第 1 优先：普通用户看不懂 owner/repo）
+  Chk "人话层待补清单工具存在（humanize-next.ps1）" ((Test-Path (Join-Path $root 'tools\humanize-next.ps1')) -and ($S -match 'humanize-next'))
+  Chk "人话层批量写入工具存在（add-intro.ps1）" (Test-Path (Join-Path $root 'tools\add-intro.ps1'))
+  # 分类锚点（防止分类器被改坏）：三条分别覆盖「人话层强信号 / topics 弱信号 / 人话层标签」三条路径
+  # 起因：2026-10-13 发现 sync 里 $topicText/$noteText 从未定义，topics 实际没参与分类 —— 这类静默失效
+  # 只有锚点能感知。改分类算法后若锚点变了，先确认是有意为之。
+  $projPath3 = Join-Path $root 'data\projects.jsonl'
+  if (Test-Path $projPath3) {
+    $pr3 = @()
+    foreach ($l3 in (Get-Content $projPath3 -Encoding UTF8)) { if ($l3.Trim()) { try { $pr3 += ($l3 | ConvertFrom-Json) } catch { $null = $_ } } }
+    $anchors = [ordered]@{ 'ARahim3/DigUp' = '效率/文件管理'; 'zyddnys/manga-image-translator' = '设计/图片处理'; 'storytold/deckcraft' = '办公/演示文稿'; 'enricoros/big-AGI' = 'AI/AI聊天'; 'amontlabs/lcu' = '开发/编程助手'; 'iamlukethedev/Herald-OS' = 'AI/AI Agent' }
+    $badAnchor = @()
+    foreach ($k3 in $anchors.Keys) {
+      $row3 = @($pr3 | Where-Object { $_.id -eq $k3 })[0]
+      if (-not $row3) { continue }   # demo 数据里没有这个项目 → 跳过，不算错
+      if ("$($row3.category.l1)/$($row3.category.l2)" -ne $anchors[$k3]) { $badAnchor += "$k3=$($row3.category.l1)/$($row3.category.l2)" }
+    }
+    Chk "分类锚点稳定（6 条：强信号 / topics / 人话层 / 防AI污染 / 开发桶 / 形态词规则）" ($badAnchor.Count -eq 0) ($badAnchor -join '; ')
+  $wsP  = Join-Path $root 'data\workspaces.jsonl'
+  $wsOk2 = Test-Path $wsP
+  if ($wsOk2) { foreach ($l in (Get-Content $wsP -Encoding UTF8)) { if ($l.Trim()) { try { $null = ($l | ConvertFrom-Json) } catch { $wsOk2 = $false } } } }
+  Chk "工作区层存在且每行可解析（workspaces.jsonl）" $wsOk2
+  Chk "工作区工具存在（workspace.ps1）" (Test-Path (Join-Path $root 'tools\workspace.ps1'))
+  Chk "页面含冷启动引导与工作区入口（hero / wsSection / showWorkspace）" (($ov -match 'id="hero"') -and ($ov -match 'id="wsSection"') -and ($ov -match 'function showWorkspace'))
+  # 收藏功能已整体撤销（用户 2026-10-13 决定）：页面里不得再出现收藏元素，防止有人"顺手加回来"
+  Chk "页面无收藏残留（功能已撤销）" (($ov -notmatch 'favRow') -and ($ov -notmatch 'favCmd') -and ($ov -notmatch 'user-library'))
+  # 发布物（v5.0 包装）：说明书 / 截图说明 / demo 数据包
+  $qs = Join-Path $root 'QUICKSTART.md'
+  Chk "5 分钟说明书存在（QUICKSTART.md）" ((Test-Path $qs) -and ((Get-Content $qs -Raw -Encoding UTF8) -match '第 1 步'))
+  $ss = Join-Path $root 'docs\screenshots\README.md'
+  Chk "截图说明存在且 README 引用三张图" ((Test-Path $ss) -and ((Get-Content (Join-Path $root 'README.md') -Raw -Encoding UTF8) -match 'docs/screenshots/3-workspace'))
+  $dm = Join-Path $root 'examples\demo\projects.jsonl'
+  $dmOk = Test-Path $dm
+  if ($dmOk) {
+    foreach ($l in (Get-Content $dm -Encoding UTF8)) {
+      if (-not $l.Trim()) { continue }
+      try { $d = $l | ConvertFrom-Json } catch { $dmOk = $false; break }
+      if ($d.PSObject.Properties['library']) { $dmOk = $false }
     if ($d.PSObject.Properties['user_notes'] -and $d.user_notes) { $dmOk = $false }
     if ($d.PSObject.Properties['note'] -and $d.note) { $dmOk = $false }
+    }
   }
-}
-Chk "demo 数据包存在且已剥个人数据（examples/demo）" $dmOk
+  Chk "demo 数据包存在且已剥个人数据（examples/demo）" $dmOk
+  }
+} else { Chk "overview.html 存在" $false }
 
 # 两级分类规则库
 $taxPath = Join-Path $root 'data\taxonomy.json'
@@ -607,14 +604,14 @@ if (Test-Path $deliverDir) {
   Skip "投递脚本含 git add + commit（否则新增文件推不上去）" "没有 发布测试\ 目录"
 }
 
+$ovPath = Join-Path $root 'legacy\overview-v5.html'
 $heroN = $null
-$homePath = Join-Path $root 'data\site\home-brutal-token.generated.html'
-if (Test-Path $homePath) {
-  $homeOv = Get-Content $homePath -Raw -Encoding UTF8
-  if ($homeOv -match '(\d+)\s*ITEMS') { $heroN = [int]$Matches[1] }
+if (Test-Path $ovPath) {
+  $ov = Get-Content $ovPath -Raw -Encoding UTF8
+  if ($ov -match '<em>(\d+)\s*个项目') { $heroN = [int]$Matches[1] }
 }
 $projN = @(Get-Content (Join-Path $root 'data\projects.jsonl') -Encoding UTF8 | Where-Object { $_.Trim() }).Count
-Chk "首页自述项目数 = 主档案条数（$projN）" ($heroN -eq $projN) "首页写的是 $heroN"
+Chk "页面 hero 自述项目数 = 主档案条数（$projN）" ($heroN -eq $projN) "hero 写的是 $heroN"
 
 $shotDir = Join-Path $root '发布测试\_shots'
 if (Test-Path $shotDir) {
@@ -735,9 +732,13 @@ $badOwner = @($projAll | Where-Object { $_.owner_class -and (@('official','commu
 Chk "owner_class 取值合法（P1-2）" ($badOwner.Count -eq 0) ("非法: " + $badOwner.Count + " 条")
 $officialNoLabel = @($projAll | Where-Object { $_.owner_class -eq 'official' -and -not $_.owner_label })
 Chk "official 必须带 owner_label（P1-2）" ($officialNoLabel.Count -eq 0) ("缺 label: " + $officialNoLabel.Count + " 条")
-# ---------- 2026-10-17 新增：路由骨架与 build stamp（P2-9 / P1-14） ----------
-# 2026-10-19 D1=A：路由骨架检查已并入第 22 节站点版（#/daily #/all #/plans + hashchange），
-# 这里只保留 build stamp（站点页统一注入，见 build-samples.ps1）。
+# ---------- 2026-10-17 新增：hash 路由骨架与 build stamp（P2-9 / P1-14） ----------
+# 为什么这两条要进 audit：路由骨架和图例抽屉是**页面信息架构**，被删掉时页面照样能打开
+# （只是又变回一坨长滚动），没有任何测试会红 —— 属于"静默退化"，必须由页面级检查兜住。
+$navOk = ($ov -match 'id="nav"') -and ($ov -match 'function route\(') -and ($ov -match 'hashchange') `
+  -and ($ov -match 'id="view-home"') -and ($ov -match 'id="view-picks"') -and ($ov -match 'id="view-all"') -and ($ov -match 'id="view-plans"') `
+  -and ($ov -match 'id="legend"') -and ($ov -match 'function openLegend') -and ($ov -match 'function closeLegend')
+Chk "P2-9 页面有 hash 路由骨架（4 个区 + 图例抽屉）" $navOk "缺 nav / view-* / legend / route()"
 $stampOk = ($ov -match '<!-- BUILD-STAMP: build \d{4}-\d{2}-\d{2} \d{2}:\d{2} ｜ 数据指纹 [0-9A-Fa-f]{12} ｜ \d+ 条 -->')
 Chk "P1-14 页面 build stamp 存在且格式完整（时间/指纹/条数）" $stampOk "缺 BUILD-STAMP 或格式不全（换数据重建后必须变新）"
 # ---------- 2026-10-16 新增：内嵌字体的合规配对（P2-12） ----------
@@ -756,11 +757,39 @@ if ($embedsFont) {
   Chk "P2-12 内嵌字体必须有 THIRD-PARTY.md（含 OFL 全文 + 版权行）" $true "页面当前未内嵌字体 → 不要求（有内嵌时此条会变红来提醒）✓"
 }
 # ---------- 2026-10-16 新增：新鲜度不变量（P1-17） ----------
-# 2026-10-19 D1=A：站点版的「页面比数据新」已并入第 22 节（比较 data/site 5 页与数据文件），
-# 这里不再重复旧单页的检查，避免同一件事查两遍、且旧单页不存在时永远红。
-# 图表可访问性（P1-14 之后）：每个 role="img" 必须有非空 aria-label，且图表块要有文字摘要
-# 2026-10-19：站点版已在第 22 节检查首页图表（$homeHtml），这里保留全局兜底（$ov）。
-# 图表可访问性已在第 22 节按首页检查（$chartTagsS / $chartNotesS），这里不再重复。
+# 页面必须比**参与生成它的数据**新，否则就是"改了数据没重建"——用户最怕的静默陈旧。
+# ⚠️ 判据用**白名单**，不是"data\ 下所有文件"：一开始我写的是全目录扫描，结果 data\series\
+#    （fetch-series 的采集产物）与 data\enrich\（ecosyste.ms 富化）**都不参与页面生成**，
+#    采一次就误报"页面陈旧" ✗ —— 假警报会训练人忽略变红，比不查更糟。
+#    白名单 = 下表（就是 sync-projects.ps1 实际读的那些）；sync 若新增输入，这里要同步加 ✓
+$freshInputs = @()
+$inputFiles = @('data\seen.jsonl', 'data\recommend-log.csv', 'data\status-log.jsonl', 'data\taxonomy.json',
+  'data\user-notes.jsonl', 'data\wide-terms.json', 'data\owner-whitelist.json', 'data\plans.json',
+  'data\workspaces.jsonl', 'config.json', 'assets\anton-latin.woff2')   # 字体也是页面输入（P2-12）✓
+$inputDirs = @('data\meta', 'data\human', 'data\snapshots', 'data\picks')
+foreach ($rel in $inputFiles) {
+  $fp = Join-Path $root $rel
+  if (Test-Path $fp) { $freshInputs += (Get-Item $fp) }
+}
+foreach ($rel in $inputDirs) {
+  $dp = Join-Path $root $rel
+  if (Test-Path $dp) { $freshInputs += @(Get-ChildItem $dp -Recurse -File -ErrorAction SilentlyContinue) }
+}
+$ovItem = if (Test-Path $ovPath) { Get-Item $ovPath } else { $null }
+if ($ovItem -and $freshInputs.Count) {
+  $newestIn = $freshInputs | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  $freshOk = ($ovItem.LastWriteTime -ge $newestIn.LastWriteTime)
+  Chk "P1-17 页面比所有数据新（改了数据不重建 → 必须变红）" $freshOk `
+    ("页面 $($ovItem.LastWriteTime.ToString('MM-dd HH:mm:ss')) 早于最新输入 $($newestIn.LastWriteTime.ToString('MM-dd HH:mm:ss'))（$($newestIn.Name)）→ 跑 tools\rebuild-page.ps1（或双击 刷新页面.cmd）")
+} else {
+  Chk "P1-17 页面比所有数据新（改了数据不重建 → 必须变红）" $false "缺少 overview.html 或找不到数据输入"
+}
+# 图表可访问性（设计 §7「新增断言⑤」）：每个 role="img" 必须有非空 aria-label，且图表块要有文字摘要
+# 为什么静态查：`#/home` 的图表是**构建期写死**在 HTML 里的（不是运行时生成），所以能直接查产物 ✓
+$chartTags = [regex]::Matches($ov,'<[^>]*role="img"[^>]*>')
+$chartBad  = @($chartTags | Where-Object { $_.Value -notmatch 'aria-label="[^"]{8,}"' }).Count
+$chartNotes= ([regex]::Matches($ov,'class="chart-note"')).Count
+Chk "图表都有 aria-label 与文字摘要（$($chartTags.Count) 个图 / $chartNotes 条摘要）" ($chartTags.Count -gt 0 -and $chartBad -eq 0 -and $chartNotes -ge $chartTags.Count) "缺 aria 的图 $chartBad 个"
 # P1-13：**推荐过的条目必须有「适合谁」（audience）** —— 页面在 #/picks 头条与详情里显示它 ✓
 $recIds2 = @($projRows2 | Where-Object { $_.recommended -eq $true } | ForEach-Object { $_.id })   # 投影里的键是 id（不是 full_name）✗ 2026-10-17 写错过一次
 $audMiss = @()
@@ -786,6 +815,44 @@ if ((Test-Path $vocabP2) -and (Test-Path $projP2)) {
   }
   Chk "function_tags_l1 与词表 parent 一致（P1-6，全量 $((Get-Content $projP2 | Where-Object { $_.Trim() }).Count) 条）" ($badL1.Count -eq 0) (($badL1 | Select-Object -First 3) -join '; ')
 } else { Chk "function_tags_l1 与词表 parent 一致（P1-6）" $false '缺少 tags-vocabulary.json 或 projects.jsonl' }
+
+Write-Host "`n=== 25. 上线站点一致性（2026-10-20 新增）==="
+# fail-closed：周报/周一页/空白页不是 audit 的旧单文件范围；缺文件不能靠 publish 的日志自述通过。
+$siteCheck = Join-Path $root 'data\site'
+$homeSite  = Join-Path $siteCheck 'home-brutal-token.generated.html'
+$homeText  = if (Test-Path $homeSite) { Get-Content $homeSite -Raw -Encoding UTF8 } else { '' }
+$weeklyFiles = @(Get-ChildItem -Path (Join-Path $siteCheck 'weekly-*.generated.html') -File -ErrorAction SilentlyContinue | Sort-Object Name -Descending)
+$weeklyFile  = $weeklyFiles | Select-Object -First 1
+$dailyFiles  = @(Get-ChildItem -Path (Join-Path $siteCheck 'daily-*.generated.html') -File -ErrorAction SilentlyContinue)
+$siteMissing = @()
+$requiredSite = [ordered]@{
+  '生产首页' = 'home-brutal-token.generated.html'
+  '空白页'   = 'blank-issue.html'
+  '返回脚本' = 'kiosk-return.js'
+}
+foreach ($k in $requiredSite.Keys) {
+  if (-not (Test-Path (Join-Path $siteCheck $requiredSite[$k]))) { $siteMissing += "$k（$($requiredSite[$k])）" }
+}
+if (-not $weeklyFile) { $siteMissing += '周报 weekly-*.generated.html' }
+if ($dailyFiles.Count -eq 0) { $siteMissing += '逐日归档 daily-*.generated.html' }
+if ($homeText -and $weeklyFile -and ($homeText -notmatch [regex]::Escape($weeklyFile.Name))) { $siteMissing += "首页未引用 $($weeklyFile.Name)" }
+if ($homeText) {
+  # 日期映射：首页 HISTORY 里的 date 与 path 必须对应同一日期；只查逐日归档页，空白页跳过。
+  $historyPairs = [regex]::Matches($homeText, "date: '([0-9]{4}-[0-9]{2}-[0-9]{2})'[^\r\n]*?\spath: '([^']+)'")
+  foreach ($m in $historyPairs) {
+    $hDate = $m.Groups[1].Value
+    $hPath = $m.Groups[2].Value
+    if ($hPath -notmatch '^daily-') { continue }
+    $hFile = Join-Path $siteCheck $hPath
+    if (-not (Test-Path $hFile)) { $siteMissing += "档案 $hDate → 缺 $hPath"; continue }
+    $pageText = Get-Content $hFile -Raw -Encoding UTF8
+    $hasDate = ($pageText -match [regex]::Escape('id="github-' + $hDate + '"')) -or ($pageText -match [regex]::Escape('"date":"' + $hDate + '"'))
+    if (-not $hasDate) { $siteMissing += "档案 $hDate → $hPath 不是当天页" }
+  }
+}
+if ($isDemo -or -not (Test-Path (Join-Path $root 'archive'))) { $siteMissing=@() }
+Chk "上线站点：周报/逐日归档存在且被首页引用；日期映射一致（动态扫描）" ($siteMissing.Count -eq 0) ($siteMissing -join '; ')
+
 # 总项数核对：**刻意不放进 Chk 计数器**（否则自我指涉、恒差一）
   $script:executed = $script:pass + $script:fail + $script:skip   # SKIP 也算"执行过"
 if ($isDemo) { $tailOk = $true } else { $tailOk = ($script:executed -eq $script:TOTAL_CHECKS) }   # demo 下部分检查在 if 块里被跳过，执行数天然少于常量

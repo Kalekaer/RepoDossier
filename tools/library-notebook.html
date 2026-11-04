@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>全库 · 手账本 / 线索墙</title>
 <style>
 /* ============================================================================
@@ -428,6 +429,14 @@ body{background:#0a0a0a;background-image:
 .hud-meta span{font:700 10px/1 var(--mono);letter-spacing:.14em;color:var(--bp);border:2px solid #3a3a36;padding:7px 9px;background:#121210}
 .hud-meta span b{color:var(--bf)}
 .hud-meta span.y{background:var(--bf);color:#0a0a0a;border-color:var(--bf)}
+@media (max-width:620px){
+  .hudbar{flex-wrap:wrap;align-items:flex-start;gap:12px}
+  .hudbar>div:first-child{min-width:0}
+  .hud-title .hl,.hud-title b{font-size:clamp(38px,10vw,56px)}
+  .hud-meta{width:100%}
+  .viewswitch{position:sticky;top:8px;right:auto;width:max-content;max-width:calc(100% - 40px);margin:10px 20px 0 auto}
+  .readorder{margin-top:16px}
+}
 /* 视口四角 */
 .frame i{position:fixed;width:18px;height:18px;border:3px solid var(--bf);z-index:75;pointer-events:none}
 .frame i:nth-child(1){left:8px;top:8px;border-right:0;border-bottom:0}

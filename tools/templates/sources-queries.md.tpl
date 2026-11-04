@@ -6,7 +6,7 @@
 
 ## 1. 请求写法
 
-- 通道：`web_fetch`（宿主网络）。**不要**用本机 PowerShell / curl 直连，实测 SSL 不通（见 `config.json` 的 `forbid_local_direct_connect`）。
+- 日报统一通道：`tools/collect-daily.ps1`，在宿主授权后使用 curl 串行队列，按实际计划和响应推进分页/分区；其他研究可使用原生 HTTP 工具。
 - 一次一个 URL，**串行执行**，不要并发轰炸（search 额度只有 10/分钟）。
 - 有 `GITHUB_TOKEN` 时附加请求头 `Authorization: Bearer <token>`（**不要把 token 写进任何落盘文件或输出**）；没有就匿名跑。
 - 取回后立刻用 `tools/fetch-daily.ps1 -Import <Q编号> -File <文件>` 登记到 `data/raw/<date>/r<N>/`。
@@ -46,7 +46,7 @@ Search 返回的 `items[]` 里已可直接取用：`full_name`、`html_url`、`d
 | 响应 | 含义 | 动作 |
 |---|---|---|
 | `200` + `items: []` | 本次检索无结果 | 记录并继续；不要放宽条件重试 |
-| `403` + `API rate limit exceeded` | 额度用尽 | **不重试**，记录到运行日志，用已有数据继续；若一条都没拿到，按「全部数据源失败」处理 |
+| `403` + `API rate limit exceeded` | 额度用尽 | **不重试，先暂停**；只由队列按响应头冷却后有限续采；缺必跑响应时不发布完整日报 |
 | `422` | 检索式不合法 | 记录检索式原文，跳过该条，不要猜原因重写 |
 | 超时 / fetch failed | 网络或宿主限制 | **最多重试 1 次**，仍失败则记录并跳过 |
 | `total_count` 骤降 | 可能被限流降级或检索式写错 | 在运行日志的「异常」里写明 |
@@ -65,7 +65,7 @@ Search 返回的 `items[]` 里已可直接取用：`full_name`、`html_url`、`d
 ## 8. 合规与账号安全（红线，不要越）
 
 - **唯一禁止的写入类动作**：star / fork / watch / follow / 提交 / 评论。GitHub 可接受使用政策第 4 条把「automated starring or following」明确列为 **rank abuse（刷榜）**，属于平台明示可处罚行为。本流程只做 `GET`，**永不发起任何写操作**。
-- **API 调用是合规的**：官方明确「scraping 不包含通过我们的 API 收集信息」，本流程走 `api.github.com` 而非抓 HTML；每天 5–7 次调用远低于限额，不构成 excessive bandwidth。
+- **请求预算**：本流程只走公开 API；每轮最多 40 次实际请求（含失败/重试），另有逐查询预算和响应头冷却。预算采样必须保留未完成分区，不宣称全集覆盖。
 - **不要抓 HTML 页面**（`github.com/trending` 等）：那才算 scraping，且实测超时，已排除。
 - **合规红线仓库不作为日报内容**：为盗版 / 破解 / 外挂 / 恶意软件类项目导流，会让日报本身变成传播渠道。这类只写**不带链接**的中性剔除备注。
 - **只取公开信息**：不读私有仓库、不联系人、不发邮件；台账只存公开仓库名与星数，不含个人信息。

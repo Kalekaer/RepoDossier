@@ -21,6 +21,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 function P([string]$rel) { Join-Path $root $rel }
+. (P 'tools\date-utils.ps1')
 function Fail([string]$msg) {
   if ($Json) { Write-Output (@{ ok = $false; error = $msg } | ConvertTo-Json -Compress) }
   else { Write-Host "✗ $msg" -ForegroundColor Red }
@@ -31,20 +32,8 @@ if ($Date -notmatch '^\d{4}-\d{2}-\d{2}$') { Fail "日期格式应为 YYYY-MM-DD
 if (-not (Test-Path $From)) { Fail "找不到输入文件：$From" }
 
 function To-Iso([object]$v, [string]$field, [string]$default) {
-  if ($null -eq $v -or [string]$v -eq '') { return $default }
-  if ($v -is [datetime]) {
-    switch ($v.Kind) {
-      'Utc' { return $v.ToString('yyyy-MM-ddTHH:mm:ssZ') }
-      'Local' { return $v.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }
-      default { return $v.ToString('yyyy-MM-ddTHH:mm:ssZ') }
-    }
-  }
-  $s = [string]$v
-  if ($s -match '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$') { return $s }
-  if ($s -match '^(\d{1,2})/(\d{1,2})/(\d{4}) (\d{2}):(\d{2}):(\d{2})$') {
-    return ('{0}-{1:D2}-{2:D2}T{3}:{4}:{5}Z' -f $Matches[3], $Matches[1], $Matches[2], $Matches[4], $Matches[5], $Matches[6])
-  }
-  Fail "日期格式无法识别：$field=$s（只接受 ISO 8601 或 M/d/yyyy H:mm:ss）"
+  try { ConvertTo-GitHubTimestamp -Value $v -Field $field -Default $default }
+  catch { Fail $_.Exception.Message }
 }
 
 $raw = Get-Content $From -Raw -Encoding UTF8

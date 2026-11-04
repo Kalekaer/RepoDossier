@@ -38,6 +38,8 @@ function Fail([string]$msg, $extra) {
   exit 1
 }
 
+# 周报生成与周一入口统一由 build-samples.ps1 处理。
+
 if ($env:DSH_SKIP_REBUILD -and $env:DSH_SKIP_REBUILD -ne '0') {
   Say "   ↷ 跳过自动重建（DSH_SKIP_REBUILD=1）" 'DarkGray'; exit 0
 }

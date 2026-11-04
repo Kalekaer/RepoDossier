@@ -56,6 +56,26 @@
 | 许可 | **Apache License 2.0**（全文 `assets/fonts/SpecialElite-LICENSE.txt`） |
 | 用途 | 影印草稿的打字机标注；可商用、可嵌入，保留许可与版权声明 |
 
+## 6. 2026-10-20 日报样张图版（NASA PD + Poly Haven CC0）
+
+`设计样张/样张-0*.html` 使用 6 张 NASA/NACA 自有摄影（公有领域）+ 2 张 Poly Haven 纹理（CC0 1.0）。
+
+- NASA 依据 [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)：NASA 自有素材一般不受版权保护、可商用；图中 **NASA 徽标与官方字幕已裁掉**，只做灰度 / 对比 / 半调处理。
+- Poly Haven 依据 **CC0 1.0**（<https://creativecommons.org/publicdomain/zero/1.0/>）：可商用、免署名；本项目仍登记作者与来源。
+- **未采用** `PIA19405`（Insight 降落伞测试）：署名含 Lockheed Martin，第三方权利不确定；按“可商用、零版权争议”标准剔除。
+- 页面引用**本地文件**，运行期外部请求 = 0；完整来源、尺寸、字节与 SHA256 见 `assets/bg/SOURCES.md`。
+
+| 文件 | 来源 | 作者 / 机构 | 许可 |
+|---|---|---|---|
+| `assets/bg/proof-awt-tunnel.jpg` | NASA LRC-1957-B701_P-00959 | NACA / NASA Langley | PD (NASA) |
+| `assets/bg/proof-vacuum-tunnel.jpg` | NASA GRC-1961-C-57748 | NASA Lewis | PD (NASA) |
+| `assets/bg/proof-awt-bore.jpg` | NASA GRC-2007-C-00381 | NASA GRC | PD (NASA) |
+| `assets/bg/proof-awt-chamber.jpg` | NASA GRC-2007-C-00378 | NASA GRC | PD (NASA) |
+| `assets/bg/proof-pressure-chamber.jpg` | NASA ARC-1995-AC95-0203-39 | Dominic Hart / NASA Ames | PD (NASA) |
+| `assets/bg/proof-pad-night.jpg` | NASA KSC-81PC-0136 | NASA | PD (NASA) |
+| `assets/bg/proof-concrete.jpg` | Poly Haven `concrete` | Rob Tuytel | CC0 1.0 |
+| `assets/bg/proof-concrete-worn.jpg` | Poly Haven `concrete_floor_worn_001` | Dimitrios Savva / Rico Cilliers | CC0 1.0 |
+
 ---
 
 ## SIL Open Font License 1.1（全文）
@@ -153,3 +173,57 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+## 7. 2026-10-20 周报样张图版（NASA PD + Poly Haven CC0）
+
+`设计样张/周报样张.html` 使用 3 张 NASA 自有摄影（公有领域）+ 2 张 Poly Haven 纹理（CC0 1.0）。页面只引用本地文件，运行期外部请求 = 0。
+
+- NASA 依据 [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)：NASA 自有素材一般不受版权保护、可商用；未使用第三方署名素材。
+- Poly Haven 依据 **CC0 1.0**（<https://creativecommons.org/publicdomain/zero/1.0/>）：可商用、免署名；本项目仍登记作者与来源。
+
+| 文件 | 来源 / ID | 作者 / 机构 | 许可 |
+|---|---|---|---|
+| `assets/bg/weekly-control-1.jpg` | NASA S69-59525 | NASA / JSC | PD (NASA) |
+| `assets/bg/weekly-control-2.jpg` | NASA S69-26301 | NASA / JSC | PD (NASA) |
+| `assets/bg/weekly-control-3.jpg` | NASA 6901509 | NASA / MSFC | PD (NASA) |
+| `assets/bg/weekly-plaster.jpg` | Poly Haven `grey_plaster` | Rob Tuytel | CC0 1.0 |
+| `assets/bg/weekly-plaster-worn.jpg` | Poly Haven `worn_plaster_wall` | Dimitrios Savva | CC0 1.0 |
+
+## 6. 全站动效素材（2026-10-20）
+
+| 文件 | 来源 | 许可 | 说明 |
+|---|---|---|---|
+| `assets/bg/archive-awt-00386-plate.jpg` | NASA GRC-2007-C-00386 | NASA PD | 已裁掉 NASA 徽标与字幕；无人物 |
+| `assets/bg/archive-awt-00387-plate.jpg` | NASA GRC-2007-C-00387 | NASA PD | 已裁掉 NASA 徽标与字幕；无人物 |
+| `assets/bg/archive-ribbed-concrete.jpg` | Poly Haven `ribbed_concrete_wall` | CC0 1.0 | Charlotte Baglioni |
+| `assets/bg/archive-rebar-concrete.jpg` | Poly Haven `rebar_reinforced_concrete` | CC0 1.0 | Amal Kumar |
+
+> NASA 依据 [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)；Poly Haven 依据 [CC0 1.0](https://polyhaven.com/license)。页面运行期不请求外部地址。
+
+## 2026-10-22 生成素材（日报 01 空态样张）
+
+- `assets/bg/cat-nun-01.jpg`：本机 AI 生成（智谱 glm-image，免费渠道），原创，无第三方版权；平台水印已裁除。
+- 用途：`设计样张/样张-07-头条空态-暗色.html` 的右栏胸像。**未接入生产页面。**
+- 许可：生成物无第三方版权主张；不包含任何既有作品角色、商标或真人肖像。
+
+## 2026-10-22 样张-08 主视觉（自绘 SVG，无第三方素材）
+
+`设计样张/样张-08A-信号中断.html`、`样张-08B-结构剖面.html` 的主视觉为 **本项目自绘的猫耳少女剪影**（`assets/bg/vacant-catgirl.svg`，SVG path，2026-10-22 逐版校正）。
+
+- 来源：本工作区原创绘制；不引用任何第三方图像、动漫/游戏角色、真人肖像或商标。
+- 许可：本项目原创，可商用；随项目 `LICENSE` 发布（无额外署名要求）。
+- 字体：只使用本仓库已登记的 OFL 字体（Anton、Bebas Neue）与系统字体；字体许可见本文档「字体」章节。
+- 动效/纹理：扫描线、颗粒（`feTurbulence` 的 `data:` URI）、网格、HUD 均为 CSS/SVG 代码生成，不引入外部文件。
+- **本轮未使用 AI 生成图**：`generate_image` 对智谱 `glm-image` / `cogview-3-flash` 两次尝试均 `fetch failed`（上游不可达），未产生新图；上一轮的 `cat-nun-01.jpg` 未复用。
+- 运行期外部请求 = 0。
+
+## 2026-10-24 统一皮肤素材（NASA PD + Poly Haven CC0）
+
+| 文件 | 来源 / ID | 作者 / 机构 | 许可 |
+|---|---|---|---|
+| `assets/bg/archive-steel-interior.jpg` | NASA KSC-2010-4437 | NASA/Kim Shiflett | PD (NASA) |
+| `assets/bg/archive-brushed-concrete.jpg` | Poly Haven `brushed_concrete` | Dario Barresi / Dimitrios Savva | CC0 1.0 |
+| `assets/bg/archive-pitted-concrete.jpg` | Poly Haven `anti_slip_concrete` | Charlotte Baglioni | CC0 1.0 |
+
+- 依据：[NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) / [Poly Haven License](https://polyhaven.com/license)（CC0 1.0）。
+- 用途：`设计样张/unified/` 两版统一皮肤样张的图版与纸纹；裁掉徽标/字幕、无人物，只做灰度/半调/压暗，不改原意。
+- 完整来源、尺寸、字节、SHA256 见 `assets/bg/SOURCES.md`；页面运行期外部请求 = 0。

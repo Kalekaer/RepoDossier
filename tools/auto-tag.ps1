@@ -19,6 +19,7 @@ param(
   [switch]$Apply,
   [switch]$Sync,
   [switch]$NoRebuild,
+  [switch]$ReviewAuto,
   [int]$Show = 8
 )
 $ErrorActionPreference = 'Stop'
@@ -71,8 +72,12 @@ function Split-Desc([string]$d) {
 }
 
 # 自动标签质量闸（2026-10-18）：宁缺勿造，明显是句子/长短语/宽词的一律不要
+function Test-MetaTag([string]$t) {
+  return ("$t".Trim() -match '^(?:[SABCD]\s*档|仅\s*(?:macOS|Windows|Linux|Android|iOS)|(?:低|中|高)风险|(?:待|未)验证|已安装)$')
+}
 function Test-Tag([string]$t) {
   $t = "$t".Trim()
+  if (Test-MetaTag $t) { return $false }
   if ($t.Length -lt 2 -or $t.Length -gt 8) { return $false }
   if ($t -match '[，。；、：,.;:!?！？/\\|]') { return $false }
   if ($t -match '^\d') { return $false }
@@ -82,6 +87,30 @@ function Test-Tag([string]$t) {
   return $true
 }
 
+# Review only machine-authored entries. Preserve manual/merged records byte-for-byte.
+if ($ReviewAuto -and (Test-Path $tagPath)) {
+  $reviewed = @(); $changed = 0
+  foreach ($line in Get-Content $tagPath -Encoding UTF8) {
+    if (-not $line.Trim()) { $reviewed += $line; continue }
+    $row = $line | ConvertFrom-Json
+    if ([string]$row.source -notmatch '^auto\(') { $reviewed += $line; continue }
+    $clean = @($row.function_tags | Where-Object { -not (Test-MetaTag "$_") })
+    $cleanKeywords = @($row.user_keywords | Where-Object { -not (Test-MetaTag "$_") })
+    if ($clean.Count -eq @($row.function_tags).Count -and $cleanKeywords.Count -eq @($row.user_keywords).Count) { $reviewed += $line; continue }
+    $changed++
+    if (-not $clean.Count) { $existing.Remove([string]$row.full_name); continue }
+    $row.function_tags = $clean
+    $row.user_keywords = $cleanKeywords
+    $reviewed += ($row | ConvertTo-Json -Compress -Depth 6)
+  }
+  Write-Host "自动标签复核：$changed 条需更新（人工/合并记录保留）"
+  if ($Apply -and $changed) {
+    $backup = P ('data\_backup\tag-review-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    New-Item -ItemType Directory -Path $backup -Force | Out-Null
+    Copy-Item -LiteralPath $tagPath -Destination (Join-Path $backup 'function-tags.jsonl')
+    [IO.File]::WriteAllLines($tagPath, [string[]]$reviewed, [Text.UTF8Encoding]::new($false))
+  }
+}
 $all = @()
 foreach ($l in (Get-Content $projPath -Encoding UTF8)) {
   if ([string]::IsNullOrWhiteSpace($l)) { continue }
@@ -175,7 +204,7 @@ if ($script:skipWhy.Count) {
 Write-Host ""
 Write-Host "=== 自动打标计划 ===" -ForegroundColor Cyan
 Write-Host ("  库里共 {0} 条 ｜ 已有标签 {1} 条 ｜ 本次可补 {2} 条 ｜ 素材不足跳过 {3} 条" -f `
-  $all.Count, $existing.Count, $plan.Count, ($all.Count - $existing.Count - $plan.Count))
+  $all.Count, $existing.Count, $plan.Count, $script:skipWhy.Count)
 Write-Host ""
 Write-Host "  预览（前 $Show 条）：" -ForegroundColor DarkGray
 $plan | Select-Object -First $Show | ForEach-Object {

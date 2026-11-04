@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "disposition_enforce_from": "2026-10-30",
+  "max_requests_per_invocation": 40,
+  "default_requests_per_query": 4,
+  "cohort_ttl_days": 7,
+  "coverage_claim": "budgeted sampling; a fixed query is not a frozen GitHub snapshot",
+  "quality_claim": "S/A recall requires independent quality labels and a defined sampling frame",
+  "publication_mode": "declared-editorial-batch",
+  "review_batch_size": 24
+}

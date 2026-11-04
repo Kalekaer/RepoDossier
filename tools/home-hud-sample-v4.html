@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>HUD v4 · 走廊（圆钮悬浮中央 + 卡片贴两侧墙面）</title>
+<style>
+:root{
+  --bg:#06080a;--panel:rgba(18,22,25,.9);--line:#2a3236;--line2:#3b464b;
+  --text:#eef1ea;--dim:#98a2a0;--faint:#66706b;--acc:#e8ff2a;--amber:#ffa028;--red:#ff3b2f;--blue:#3aa4ff;--teal:#22e3c6;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Cascadia Mono",monospace;
+  --scan:repeating-linear-gradient(0deg,rgba(255,255,255,.045) 0 1px,transparent 1px 3px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif}
+/* 顶部 HUD 条 */
+.hud{display:flex;align-items:center;gap:20px;padding:9px 22px;border-bottom:1px solid var(--line);
+  font:11px/1 var(--mono);letter-spacing:.16em;color:var(--dim);background:rgba(6,8,10,.94);position:relative;z-index:50}
+.hud b{color:var(--acc)}.hud .sp{flex:1}
+.hud .ic{width:20px;height:20px;border:1px solid var(--line2);position:relative;opacity:.8}
+.hud .ic::before{content:"";position:absolute;left:5px;top:9px;width:8px;height:2px;background:var(--dim)}
+.hud .ic.b::after{content:"";position:absolute;left:9px;top:5px;width:2px;height:8px;background:var(--dim)}
+
+/* ================= 走廊 ================= */
+.corridor{position:relative;height:760px;
+  perspective:900px;                 /* 走廊透视强度 */
+  perspective-origin:50% 46%;        /* 消失点在正中偏上 */
+  overflow:hidden;transform-style:preserve-3d;
+  background:radial-gradient(ellipse at 50% 46%,#0d1418 0%,#070a0c 62%,#050607 100%)}
+/* 地面 / 天花板 / 两侧墙：都放到 3D 里，才有"廊" */
+.plane{position:absolute;left:50%;top:50%;transform-style:preserve-3d;pointer-events:none}
+.floor{width:2200px;height:2200px;margin:-1100px 0 0 -1100px;top:78%;
+  transform:rotateX(90deg);
+  background-image:linear-gradient(rgba(58,164,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(58,164,255,.10) 1px,transparent 1px);
+  background-size:120px 120px;
+  -webkit-mask:radial-gradient(ellipse at 50% 0%,#000 0%,#000 26%,transparent 62%);mask:radial-gradient(ellipse at 50% 0%,#000 0%,#000 26%,transparent 62%)}
+.ceil{width:2200px;height:2200px;margin:-1100px 0 0 -1100px;top:22%;
+  transform:rotateX(90deg);
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:120px 120px;
+  -webkit-mask:radial-gradient(ellipse at 50% 100%,#000 0%,#000 22%,transparent 58%);mask:radial-gradient(ellipse at 50% 100%,#000 0%,#000 22%,transparent 58%)}
+/* 墙面：竖缝 + 踢脚线，靠透视收进去 */
+.wall{position:absolute;top:50%;width:2400px;height:760px;margin-top:-380px;
+  background-image:linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:180px 100%;opacity:.5}
+.wall.l{left:0;transform-origin:left center;transform:rotateY(38deg)}
+.wall.r{right:0;transform-origin:right center;transform:rotateY(-38deg)}
+.skirting{position:absolute;left:0;right:0;height:2px;bottom:22%;background:linear-gradient(90deg,transparent,rgba(232,255,42,.35),transparent)}
+/* 尽头光晕 */
+.endglow{position:absolute;left:50%;top:46%;width:760px;height:420px;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at 50% 50%,rgba(58,164,255,.22),rgba(58,164,255,.06) 42%,transparent 68%);filter:blur(2px)}
+
+/* ---------- 圆钮：悬浮在走廊中央 ---------- */
+.orbzone{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) translateZ(-40px);transform-style:preserve-3d;z-index:30}
+.orbwrap{position:relative;width:330px;height:330px;animation:bob 7.5s ease-in-out infinite}
+.ring{position:absolute;inset:0;border-radius:50%;border:1px dashed #2b363a}
+.ring.a{animation:spin 52s linear infinite}
+.ring.b{inset:20px;border:1px solid #223035}
+.ring.c{inset:42px;border:1px dotted #2f4046}
+.gauge{position:absolute;inset:40px;border-radius:50%;
+  background:conic-gradient(var(--acc) 0 11%,transparent 11% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%);opacity:.62}
+.orb{position:absolute;inset:66px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  text-decoration:none;color:var(--text);border:1px solid var(--line2);
+  background:linear-gradient(165deg,rgba(32,38,41,.97),rgba(8,11,12,.99));
+  box-shadow:inset 0 0 50px #000,0 0 0 8px rgba(6,8,10,.85),0 40px 90px -46px #000,0 0 60px -18px rgba(58,164,255,.35);
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.orb:hover,.orb:focus-visible{transform:scale(1.05);border-color:var(--acc);
+  box-shadow:inset 0 0 50px #000,0 0 0 8px rgba(6,8,10,.85),0 0 64px -12px rgba(232,255,42,.45)}
+.orb .k{font:9px/1 var(--mono);letter-spacing:.34em;color:var(--acc)}
+.orb .t{font-size:25px;font-weight:800;letter-spacing:-.02em}
+.orb .s{font:10px/1.45 var(--mono);color:var(--dim);text-align:center}
+.orb .n{font:700 29px/1 var(--mono);margin-top:3px}
+.orb .n em{font:400 10px/1 var(--mono);color:var(--faint);font-style:normal;margin-left:5px}
+.seg{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;gap:3px}
+.seg i{width:8px;height:3px;background:#2f3a3e}.seg i.on{background:var(--acc)}
+/* 地面投影（悬浮感的关键：没有影子就是贴纸） */
+.orbshadow{position:absolute;left:50%;top:calc(46% + 168px);width:300px;height:54px;transform:translate(-50%,0);
+  background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.85),transparent 70%);filter:blur(9px);z-index:5}
+
+/* ---------- 侧墙卡片：靠墙那条边做铰链，向廊内倾 ---------- */
+.wcard{position:absolute;top:50%;width:500px;padding:18px 20px;display:block;text-decoration:none;color:var(--text);
+  border:1px solid var(--line2);background:var(--panel);transform-style:preserve-3d;
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+  transition:transform .32s cubic-bezier(.2,.75,.2,1),border-color .32s ease,box-shadow .32s ease}
+.wcard::before{content:"";position:absolute;inset:0;background-image:var(--scan);pointer-events:none;opacity:.4}
+.wcard::after{content:"";position:absolute;top:0;bottom:0;width:3px;background:var(--h,var(--acc))}
+/* 右侧墙：铰链在左缘（靠墙那侧），向 -Y 轴内倾 */
+.wcard.rw{transform-origin:left center;transform:translateY(-50%) translateZ(var(--z)) rotateY(-56deg)}
+.wcard.rw::after{left:-3px}
+/* 左侧墙：铰链在右缘，向 +Y 轴内倾 */
+.wcard.lw{transform-origin:right center;transform:translateY(-50%) translateZ(var(--z)) rotateY(56deg)}
+.wcard.lw::after{right:-3px}
+/* 三张卡在墙上的位置：交错高度 + 不同深度 */
+.wcard.k1{--h:var(--blue); --z:-20px;  left:53%; top:24%; font-size:16px}
+.wcard.k2{--h:var(--teal); --z:-330px; right:53%; top:56%}
+.wcard.k3{--h:var(--amber);--z:-640px; left:53%; top:16%}
+.wcard .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wcard .no{font:10px/1 var(--mono);letter-spacing:.2em;color:var(--h);border:1px solid var(--line);padding:4px 7px;background:rgba(0,0,0,.45)}
+.wcard .lv{font:9px/1 var(--mono);letter-spacing:.18em;color:var(--faint)}
+.wcard h3{margin:11px 0 5px;font-size:27px;line-height:1.05;letter-spacing:-.02em}
+.wcard p{margin:0;color:var(--dim);font-size:13px}
+.wcard .foot{display:flex;gap:14px;margin-top:10px;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
+.wcard .foot b{color:var(--text)}
+.wcard .bars{display:flex;gap:3px;margin-top:11px}
+.wcard .bars i{height:3px;flex:1;background:#283134}
+.wcard .bars i.on{background:var(--h)}
+/* 远处的卡信息递减 */
+.wcard.k2 p,.wcard.k2 .bars{display:none}
+.wcard.k3{width:420px}
+.wcard.k3 p,.wcard.k3 .bars,.wcard.k3 .foot{display:none}
+.wcard.k3 h3{font-size:22px}
+/* 悬停：从墙里"抽"出来一点 */
+.wcard:hover,.wcard:focus-visible{border-color:var(--h);box-shadow:0 26px 60px -30px #000;z-index:40}
+.wcard.rw:hover{transform:translateY(-50%) translateZ(calc(var(--z) + 90px)) rotateY(-40deg)}
+.wcard.lw:hover{transform:translateY(-50%) translateZ(calc(var(--z) + 90px)) rotateY(40deg)}
+/* 底部最新一期条 */
+.news{position:absolute;left:22px;bottom:16px;display:flex;align-items:stretch;border:1px solid var(--line2);background:rgba(8,10,11,.92);z-index:30}
+.news .tag{background:var(--red);color:#fff;font:600 10px/1 var(--mono);letter-spacing:.16em;padding:9px 10px;display:flex;align-items:center}
+.news .txt{padding:8px 12px;font:11px/1.5 var(--mono);color:var(--dim)}.news .txt b{color:var(--text)}
+.hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font:10px/1 var(--mono);letter-spacing:.2em;color:var(--faint);z-index:30}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(-6px)}50%{transform:translateY(6px)}}
+
+/* ---------- 统计带（走廊之外 = 往下滚） ---------- */
+.band{position:relative;padding:34px 26px 64px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(58,164,255,.05),transparent 28%)}
+.bhead{display:flex;align-items:baseline;gap:16px;margin-bottom:18px}
+.bhead .no{font:11px/1 var(--mono);letter-spacing:.24em;color:var(--acc)}
+.bhead h2{margin:0;font-size:24px}.bhead .side{margin-left:auto;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
+.cols{display:grid;grid-template-columns:1.3fr 1fr .95fr;gap:14px}
+.box{border:1px solid var(--line);background:rgba(15,19,21,.92);padding:16px}
+.box h4{margin:0 0 12px;font:10px/1 var(--mono);letter-spacing:.22em;color:var(--dim)}
+.catrow{display:grid;grid-template-columns:90px 1fr 40px;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}
+.catrow .bar{height:7px;background:var(--c);position:relative}
+.catrow .bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(0,0,0,.55) 5px 7px)}
+.catrow .n{font:10px/1 var(--mono);color:var(--dim);text-align:right}
+.stackbar{display:flex;height:12px;border:1px solid var(--line2);margin-bottom:8px;background:#0b0f10}
+.stackbar i{height:100%}
+.lg{display:flex;flex-wrap:wrap;gap:8px;font:10px/1.6 var(--mono);color:var(--dim)}
+.lg i{width:8px;height:8px;display:inline-block;margin-right:4px}
+.spark{display:flex;align-items:flex-end;gap:7px;height:112px}
+.spark .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.spark .col i{width:100%;background:linear-gradient(180deg,var(--acc),#55600d)}
+.spark .col b{font:9px/1 var(--mono);color:var(--dim)}.spark .col span{font:8px/1 var(--mono);color:var(--faint)}
+.tagcloud{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tagcloud span{font:10px/1 var(--mono);border:1px solid var(--line);padding:4px 6px;color:var(--dim)}
+.tagcloud span.hot{color:var(--acc);border-color:#454d20}
+.note{font:10px/1.8 var(--mono);color:var(--faint);margin-top:20px;letter-spacing:.06em}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:1180px){
+  .corridor{height:auto;perspective:none;overflow:visible;padding:20px 16px 90px}
+  .plane,.wall,.endglow,.orbshadow,.hint{display:none}
+  .orbzone{position:static;transform:none;margin:0 auto 24px;width:330px}
+  .wcard{position:static;width:auto;transform:none!important;margin-bottom:12px}
+  .wcard.k2 p,.wcard.k2 .bars,.wcard.k3 p,.wcard.k3 .bars,.wcard.k3 .foot{display:block}
+  .news{position:static;margin-top:14px}
+  .cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="hud">
+  <span class="ic"></span><span class="ic b"></span>
+  <span>ARCHIVE&nbsp;CORRIDOR</span><span>SYNC <b>/*__LATEST__*/—</b></span><span>NODE <b>/*__TOTAL__*/0</b></span>
+  <span class="sp"></span><span>LEVEL-1 · 走廊视图</span>
+</div>
+
+<section class="corridor">
+  <div class="plane floor"></div>
+  <div class="plane ceil"></div>
+  <div class="wall l"></div><div class="wall r"></div>
+  <div class="endglow"></div>
+  <div class="skirting" style="top:78%"></div>
+
+  <!-- 悬浮在走廊中央的圆钮 -->
+  <div class="orbshadow"></div>
+  <div class="orbzone">
+    <div class="orbwrap">
+      <div class="ring a"></div><div class="ring b"></div><div class="ring c"></div><div class="gauge"></div>
+      <a class="orb" href="#/picks" aria-label="进入每日精选（日报）">
+        <span class="k">01 · DAILY</span>
+        <span class="t">每日精选</span>
+        <span class="s">日报 / 精选同一件事<br>按天看新增 · 按档位看精品</span>
+        <span class="n">/*__REC__*/0<em>条已推荐</em></span>
+        <span class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 贴在两侧墙面上的页面卡 -->
+  <a class="wcard rw k1" href="#/all">
+    <div class="row"><span class="no">02 / LIBRARY</span><span class="lv">LEVEL-2</span></div>
+    <h3>完整项目库</h3>
+    <p>全部档案：分类、标签、徽章、风险、成长记录。</p>
+    <div class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="foot"><span>ITEMS <b>/*__TOTAL__*/0</b></span><span>CAT 11</span></div>
+  </a>
+  <a class="wcard lw k2" href="#/plans">
+    <div class="row"><span class="no">03 / OPS</span><span class="lv">LEVEL-2</span></div>
+    <h3>计划与工作区</h3>
+    <p>按需求的工具组合与工作区。</p>
+    <div class="foot"><span>PLANS <b>/*__PLANS__*/0</b></span></div>
+  </a>
+  <a class="wcard rw k3" href="#/legend">
+    <div class="row"><span class="no">04 / SPEC</span><span class="lv">MODAL</span></div>
+    <h3>图例与标准</h3>
+    <p>档位 / 状态 / 风险 / 徽章 —— 小窗打开。</p>
+  </a>
+
+  <div class="news"><span class="tag">LATEST</span><span class="txt"><b>/*__LATEST__*/</b> 精选已入库 · 共 <b>/*__REC__*/0</b> 条推荐</span></div>
+  <div class="hint">SCROLL ↓ TELEMETRY</div>
+</section>
+
+<section class="band">
+  <div class="bhead"><span class="no">§ 01 / TELEMETRY</span><h2>库里现在长什么样</h2><span class="side">位于走廊之外</span></div>
+  <div class="cols">
+    <div class="box"><h4>DISTRIBUTION</h4><div id="catRows"></div></div>
+    <div class="box"><h4>TIER / STATUS</h4><div id="tierBar" class="stackbar"></div><div id="tierLg" class="lg"></div>
+      <div style="height:10px"></div><div id="stBar" class="stackbar"></div><div id="stLg" class="lg"></div></div>
+    <div class="box"><h4>EVENTS / 近 7 天</h4><div id="spark" class="spark"></div><div id="tagCloud" class="tagcloud"></div></div>
+  </div>
+  <p class="note">v4 · 走廊：地面/天花板用 rotateX(90°) 铺成平面、两侧墙 rotateY(±38°) 收向消失点；圆钮 translateZ(-40px) 悬浮 + 地面投影 + 7.5s 缓慢浮动；三张卡**以靠墙那条边为铰链**（transform-origin: left/right center）rotateY(∓56°) 贴墙 + translateZ 0/-330/-640 退深 ⇒ 卡片真的贴在同一面墙上 ✓ 零外部请求</p>
+</section>
+
+<script>
+const CATS = /*__CATS__*/[];
+const TIER = /*__TIER__*/[];
+const STATUS = /*__STATUS__*/[];
+const SPARK = /*__SPARK__*/[];
+const TAGS = /*__TAGS__*/[];
+const COLORS = ['#e8ff2a','#3aa4ff','#22e3c6','#ffa028','#b06bff','#ff3b2f','#ffd166','#ff4d6d','#4dd0e1','#9ccc65','#66706b'];
+(function(){
+  const max = Math.max.apply(null, CATS.map(c=>c.n));
+  document.getElementById('catRows').innerHTML = CATS.map(function(c){
+    return '<div class="catrow" style="--c:'+c.c+'"><span>'+c.l1+'</span>'
+      + '<span class="bar" style="width:'+Math.max(3,Math.round(c.n/max*100))+'%"></span>'
+      + '<span class="n">'+c.n+'</span></div>';
+  }).join('');
+  function bar(h,l,rows,pal){
+    const t = rows.reduce((s,r)=>s+r.n,0)||1;
+    document.getElementById(h).innerHTML = rows.map(function(r,i){return '<i style="width:'+(r.n/t*100)+'%;background:'+pal[i%pal.length]+'"></i>';}).join('');
+    document.getElementById(l).innerHTML = rows.map(function(r,i){return '<span><i style="background:'+pal[i%pal.length]+'"></i>'+r.k+' '+r.n+'</span>';}).join('');
+  }
+  bar('tierBar','tierLg', TIER, ['#e8ff2a','#3aa4ff','#22e3c6','#3b464b','#66706b']);
+  bar('stBar','stLg', STATUS, ['#b06bff','#22e3c6','#ffd166','#ff3b2f','#66706b']);
+  const smax = Math.max.apply(null, SPARK.map(s=>s.n))||1;
+  document.getElementById('spark').innerHTML = SPARK.map(function(s){
+    return '<div class="col"><b>'+s.n+'</b><i style="height:'+Math.max(4,Math.round(s.n/smax*100))+'%"></i><span>'+s.d+'</span></div>';
+  }).join('');
+  document.getElementById('tagCloud').innerHTML = TAGS.slice(0,12).map(function(t,i){
+    return '<span class="'+(i<4?'hot':'')+'">'+t.t+' '+t.n+'</span>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

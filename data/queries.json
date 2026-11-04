@@ -1,45 +1,132 @@
 {
-  "version": 1,
+  "version": 2,
   "enforce_from": "2026-10-24",
   "timezone": "Asia/Shanghai",
   "_说明": "检索式唯一真源。文档由 tools/gen-query-docs.ps1 生成；不要手改生成的表格。",
-  "placeholders": ["{D7}", "{D14}", "{D30}", "{TODAY_TOPIC}", "{TODAY_TOPIC2}", "{OWNER}", "{REPO}"],
+  "placeholders": [
+    "{D7}",
+    "{D8}",
+    "{D14}",
+    "{D30}",
+    "{TODAY_TOPIC}",
+    "{TODAY_TOPIC2}",
+    "{OWNER}",
+    "{REPO}",
+    "{D180}"
+  ],
   "queries": [
     {
       "id": "Q1",
       "name": "新星爆发（近 7 天新建）",
       "mode": "search",
       "q": "created:>{D7} stars:>150",
-      "sort": "stars", "order": "desc", "per_page": 20,
-      "frequency": "daily", "required": true,
-      "note": "7 天内新建、已起量的新库"
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "daily",
+      "required": true,
+      "note": "7 天内新建、已起量的新库",
+      "acquisition": {
+        "max_requests": 3,
+        "mode": "pages"
+      }
     },
     {
-      "id": "Q2",
-      "name": "近 30 天新星（过滤玩具）",
+      "id": "Q1b",
+      "name": "低星新项目（8–30 天，100–499★）",
+      "mode": "search",
+      "q": "created:{D30}..{D8} stars:100..499 pushed:>{D30} fork:false archived:false",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "daily",
+      "required": false,
+      "note": "低星新项目每日探索；保留质量标准，自动分页",
+      "acquisition": {
+        "max_requests": 2,
+        "mode": "pages"
+      }
+    },
+    {
+      "id": "Q2p1",
+      "name": "近 30 天新星（800+，第 1 页）",
       "mode": "search",
       "q": "created:>{D30} stars:>800",
-      "sort": "stars", "order": "desc", "per_page": 15,
-      "frequency": "daily", "required": true,
-      "note": "30 天内新建且 800★+"
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "page": 1,
+      "frequency": "daily",
+      "required": true,
+      "note": "30 天内 800★+；分页覆盖全部 228 条，避免只看前 15"
+    },
+    {
+      "id": "Q2p2",
+      "name": "近 30 天新星（800+，第 2 页）",
+      "mode": "search",
+      "q": "created:>{D30} stars:>800",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "page": 2,
+      "frequency": "daily",
+      "required": true,
+      "note": "同上，第 2 页"
+    },
+    {
+      "id": "Q2p3",
+      "name": "近 30 天新星（800+，第 3 页）",
+      "mode": "search",
+      "q": "created:>{D30} stars:>800",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "page": 3,
+      "frequency": "daily",
+      "required": true,
+      "note": "第3页及后续自动分页，超1000明确阻断",
+      "acquisition": {
+        "max_requests": 5,
+        "mode": "pages"
+      }
     },
     {
       "id": "Q2b",
-      "name": "中间星段（200–800★，顶部）",
+      "name": "中间星段（200–800★，星数自适应分层）",
       "mode": "search",
-      "q": "stars:200..800 pushed:>{D7}",
-      "sort": "stars", "order": "desc", "per_page": 15,
-      "frequency": "daily", "required": true,
-      "note": "取区间顶部，保留为「成熟项目」视图"
+      "q": "stars:200..800 pushed:>{D30} fork:false archived:false",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "adaptive_star_partition": true,
+      "frequency": "daily",
+      "required": true,
+      "note": "固定查询参数的预算采样；当轮继续拆星数及创建时间，不宣称全集",
+      "acquisition": {
+        "star_min": 200,
+        "mode": "bounded",
+        "max_requests": 6,
+        "star_max": 800
+      }
     },
     {
       "id": "Q2c",
-      "name": "中间星段（200–800★，按活跃度）",
+      "name": "中间星段（200–800★，活跃自适应分层）",
       "mode": "search",
-      "q": "stars:200..800 pushed:>{D7}",
-      "sort": "updated", "order": "desc", "per_page": 15,
-      "frequency": "daily", "required": true,
-      "note": "同一星段按最近更新采样，补 Q2b 的天花板偏差"
+      "q": "stars:200..800 pushed:>{D30} fork:false archived:false",
+      "sort": "updated",
+      "order": "desc",
+      "per_page": 100,
+      "adaptive_star_partition": true,
+      "frequency": "daily",
+      "required": true,
+      "note": "反向分区、广度优先推进，跨日有过期时间的预算采样",
+      "acquisition": {
+        "star_min": 200,
+        "mode": "bounded",
+        "max_requests": 6,
+        "star_max": 800
+      }
     },
     {
       "id": "Q2d",
@@ -47,7 +134,9 @@
       "mode": "probe",
       "q": "",
       "per_page": 15,
-      "frequency": "weekly:3", "required": false, "enabled": false,
+      "frequency": "weekly:3",
+      "required": false,
+      "enabled": false,
       "note": "每周三 1 次，结果只写 data/_tmp，不入库"
     },
     {
@@ -55,37 +144,70 @@
       "name": "方向定向（按星期轮换）",
       "mode": "search",
       "q": "topic:{TODAY_TOPIC} created:>{D30} stars:>200",
-      "sort": "stars", "order": "desc", "per_page": 10,
-      "frequency": "daily", "required": true,
-      "note": "方向见 weekdays"
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "daily",
+      "required": true,
+      "note": "方向见 weekdays",
+      "acquisition": {
+        "max_requests": 2,
+        "mode": "pages"
+      }
     },
     {
       "id": "Q3s",
       "name": "星段兜底",
       "mode": "search",
       "q": "topic:{TODAY_TOPIC} stars:200..800 pushed:>{D14}",
-      "sort": "stars", "order": "desc", "per_page": 10,
-      "frequency": "conditional", "required": true,
-      "when": { "field": "Q3", "newFacesLt": 3, "totalCountLt": 10, "maxPerDay": 1 },
-      "note": "Q3 新面孔 <3 或 total_count <10 时加跑"
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "conditional",
+      "required": true,
+      "when": {
+        "field": "Q3",
+        "newFacesLt": 3,
+        "totalCountLt": 10,
+        "maxPerDay": 1
+      },
+      "note": "Q3 新面孔 <3 或 total_count <10 时加跑",
+      "acquisition": {
+        "max_requests": 2,
+        "mode": "pages"
+      }
     },
     {
       "id": "Q3b",
       "name": "实用小工具（cli）",
       "mode": "search",
       "q": "topic:cli created:>{D30} stars:>300",
-      "sort": "stars", "order": "desc", "per_page": 10,
-      "frequency": "weekly:3,6", "required": true,
-      "note": "周三、周六加跑"
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "weekly:3,6",
+      "required": true,
+      "note": "周三、周六加跑",
+      "acquisition": {
+        "max_requests": 2,
+        "mode": "pages"
+      }
     },
     {
       "id": "Q3c",
       "name": "第二方向（developer-tools）",
       "mode": "search",
       "q": "topic:{TODAY_TOPIC2} created:>{D30} stars:>200",
-      "sort": "stars", "order": "desc", "per_page": 10,
-      "frequency": "weekly:4", "required": true,
-      "note": "周四加跑"
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "weekly:4",
+      "required": true,
+      "note": "周四加跑",
+      "acquisition": {
+        "max_requests": 2,
+        "mode": "pages"
+      }
     },
     {
       "id": "Q4",
@@ -93,7 +215,8 @@
       "mode": "repo",
       "q": "/repos/{OWNER}/{REPO}",
       "per_page": 5,
-      "frequency": "manual", "required": false,
+      "frequency": "manual",
+      "required": false,
       "note": "每次最多 5 个"
     },
     {
@@ -102,8 +225,64 @@
       "mode": "repo",
       "q": "/repos/{OWNER}/{REPO}/readme",
       "per_page": 5,
-      "frequency": "manual", "required": false,
+      "frequency": "manual",
+      "required": false,
       "note": "仅 S 档候选；走三级降级链"
+    },
+    {
+      "id": "Q7a",
+      "name": "DSH 生态存量补扫（>800★）",
+      "mode": "search",
+      "q": "dsh in:name,description stars:>800 pushed:>{D30}",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "weekly:3",
+      "required": true,
+      "enabled": false,
+      "note": "不带 created；周三跑；disabled：保留为回归探针"
+    },
+    {
+      "id": "Q7b",
+      "name": "DSH 生态存量补扫（500–800★）",
+      "mode": "search",
+      "q": "dsh in:name,description stars:500..800 pushed:>{D30}",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "weekly:6",
+      "required": true,
+      "enabled": false,
+      "note": "不带 created；周六跑；disabled：保留为回归探针"
+    },
+    {
+      "id": "Q7c",
+      "name": "DSH 生态存量补扫（200–499★）",
+      "mode": "search",
+      "q": "dsh in:name,description stars:200..499 pushed:>{D30}",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "weekly:7",
+      "required": true,
+      "enabled": false,
+      "note": "不带 created；周日跑；disabled：保留为回归探针"
+    },
+    {
+      "id": "Q8",
+      "name": "通用存量（周主题，老但热）",
+      "mode": "search",
+      "q": "topic:{TODAY_TOPIC} stars:>300 pushed:>{D30}",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "weekly:6",
+      "required": false,
+      "note": "不带 created；先观察，不设 required",
+      "acquisition": {
+        "max_requests": 2,
+        "mode": "pages"
+      }
     },
     {
       "id": "Q6",
@@ -111,17 +290,82 @@
       "mode": "external",
       "q": "web_search",
       "per_page": 8,
-      "frequency": "manual", "required": false,
+      "frequency": "manual",
+      "required": false,
       "note": "非 GitHub API；失败改用 HN Algolia 等 JSON 源，仅外部讨论信号"
+    },
+    {
+      "id": "Q9",
+      "name": "成熟存量（无topic约束）",
+      "mode": "search",
+      "q": "stars:>800 created:<{D30} pushed:>{D180} fork:false archived:false",
+      "sort": "stars",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "daily",
+      "required": true,
+      "acquisition": {
+        "star_min": 801,
+        "max_requests": 6,
+        "mode": "bounded",
+        "created_days_min": 31
+      },
+      "note": "创建超过30天、半年内维护；独立于主题，固定参数分区采样"
+    },
+    {
+      "id": "Q10",
+      "name": "低星探索（20–199星）",
+      "mode": "search",
+      "q": "stars:20..199 created:>{D30} pushed:>{D30} fork:false archived:false",
+      "sort": "updated",
+      "order": "desc",
+      "per_page": 100,
+      "frequency": "daily",
+      "required": true,
+      "acquisition": {
+        "star_min": 20,
+        "mode": "bounded",
+        "max_requests": 3,
+        "created_days_max": 30,
+        "star_max": 199
+      },
+      "note": "低星只是发现入口，不放宽评分和风险标准；预算采样"
     }
   ],
   "weekdays": {
-    "1": { "topic": "ai-agent" },
-    "2": { "topic": "mcp" },
-    "3": { "topic": "self-hosted", "extras": ["Q3b", "Q2d"] },
-    "4": { "topic": "windows", "topic2": "developer-tools", "extras": ["Q3c"] },
-    "5": { "topic": "automation" },
-    "6": { "topic": "developer-tools", "extras": ["Q3b"] },
-    "7": { "topic": "llm" }
+    "1": {
+      "topic": "ai-agent"
+    },
+    "2": {
+      "topic": "mcp"
+    },
+    "3": {
+      "topic": "self-hosted",
+      "extras": [
+        "Q3b",
+        "Q2d"
+      ]
+    },
+    "4": {
+      "topic": "windows",
+      "topic2": "developer-tools",
+      "extras": [
+        "Q3c"
+      ]
+    },
+    "5": {
+      "topic": "automation",
+      "extras": []
+    },
+    "6": {
+      "topic": "developer-tools",
+      "extras": [
+        "Q3b",
+        "Q8"
+      ]
+    },
+    "7": {
+      "topic": "llm"
+    }
   }
 }

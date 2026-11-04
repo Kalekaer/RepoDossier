@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>HUD v3 · 真三维透视走廊（Persona × Arknights）</title>
+<style>
+:root{
+  --bg:#07080a;--void:#0a0c0e;--panel:rgba(19,22,24,.86);--line:#2b3033;--line2:#3d4448;
+  --text:#eef1ea;--dim:#98a19c;--faint:#66706b;--acc:#e8ff2a;--amber:#ffa028;--red:#ff3b2f;--blue:#3aa4ff;--teal:#22e3c6;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Cascadia Mono",monospace;
+  --scan:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);
+  --grid:linear-gradient(rgba(120,200,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(120,200,255,.05) 1px,transparent 1px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif}
+/* ---------- 顶部图标条（Arknights 左上角那排） ---------- */
+.hud{display:flex;align-items:center;gap:22px;padding:10px 24px;border-bottom:1px solid var(--line);font:11px/1 var(--mono);letter-spacing:.16em;color:var(--dim);background:rgba(7,8,10,.92)}
+.hud .ic{width:22px;height:22px;border:1px solid var(--line2);position:relative;opacity:.85}
+.hud .ic::before,.hud .ic::after{content:"";position:absolute;background:var(--dim)}
+.hud .ic.a::before{left:5px;top:10px;width:12px;height:2px}
+.hud .ic.b::before{left:10px;top:5px;width:2px;height:12px}
+.hud .ic.c::before{left:6px;top:6px;width:10px;height:10px;border:1px solid var(--dim);background:transparent}
+.hud b{color:var(--acc)}
+.hud .sp{flex:1}
+/* ================= 3D 场景 ================= */
+.scene{position:relative;height:700px;overflow:hidden;
+  perspective:1150px;               /* 透视强度：越小越"贴脸" */
+  perspective-origin:24% 48%;       /* 消失点偏左 ⇒ 往左圆钮方向收 */
+  transform-style:preserve-3d}
+/* 地平线 + 地面网格（真正 rotateX 压到地上 ⇒ 空间感靠它） */
+.floor{position:absolute;left:-20%;right:-20%;bottom:-8%;height:70%;
+  transform:rotateX(72deg);transform-origin:50% 100%;
+  background-image:var(--grid);background-size:46px 46px;
+  -webkit-mask:linear-gradient(0deg,#000 40%,transparent 92%);mask:linear-gradient(0deg,#000 40%,transparent 92%);
+  opacity:.55}
+.horizon{position:absolute;left:0;right:0;top:46%;height:1px;background:linear-gradient(90deg,transparent,#243038 30%,#3d5a66 50%,#243038 70%,transparent)}
+.horizon::after{content:"";position:absolute;left:50%;top:-46px;width:520px;height:92px;transform:translateX(-50%);
+  background:radial-gradient(ellipse at 50% 50%,rgba(58,164,255,.22),transparent 68%)}
+/* ---------- 左：圆钮（Arknights 等级圈 + Persona 斜切标题） ---------- */
+.orbzone{position:absolute;left:26px;top:50%;transform:translateY(-50%);width:392px}
+.orbwrap{position:relative;width:352px;height:352px;margin:0 auto}
+.ring{position:absolute;inset:0;border-radius:50%;border:1px dashed #2b3336}
+.ring.a{animation:spin 48s linear infinite}
+.ring.b{inset:20px;border:1px solid #222a2d}
+.ring.c{inset:44px;border:1px dotted #2f3a3e}
+.gauge{position:absolute;inset:42px;border-radius:50%;
+  background:conic-gradient(var(--acc) 0 11%,transparent 11% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%);opacity:.6}
+.orb{position:absolute;inset:70px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  text-decoration:none;color:var(--text);border:1px solid var(--line2);
+  background:linear-gradient(165deg,rgba(30,34,36,.97),rgba(9,11,12,.99));
+  box-shadow:inset 0 0 46px #000,0 0 0 7px rgba(7,8,10,.92),0 30px 80px -40px #000;
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.orb:hover,.orb:focus-visible{transform:scale(1.045);border-color:var(--acc);box-shadow:inset 0 0 46px #000,0 0 0 7px rgba(7,8,10,.92),0 0 52px -10px rgba(232,255,42,.42)}
+.orb .k{font:9px/1 var(--mono);letter-spacing:.32em;color:var(--acc)}
+.orb .t{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.orb .s{font:10px/1.5 var(--mono);color:var(--dim);text-align:center}
+.orb .n{font:700 30px/1 var(--mono);margin-top:4px}
+.orb .n em{font:400 10px/1 var(--mono);color:var(--faint);font-style:normal;margin-left:5px}
+.seg{position:absolute;left:50%;bottom:50px;transform:translateX(-50%);display:flex;gap:3px}
+.seg i{width:9px;height:3px;background:#313a3d}
+.seg i.on{background:var(--acc)}
+.orbcap{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font:9px/1.6 var(--mono);color:var(--faint);white-space:nowrap;letter-spacing:.14em}
+/* ---------- 右：真三维走廊（尺寸由 perspective 算出来，不用 scale ✗） ---------- */
+.deck{position:absolute;right:30px;top:50%;width:640px;height:0;transform-style:preserve-3d}
+.pcard{position:absolute;right:0;width:600px;display:block;text-decoration:none;color:var(--text);
+  padding:20px 22px 18px;border:1px solid var(--line2);background:var(--panel);
+  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));
+  transform-style:preserve-3d;
+  transform:translateY(var(--y)) translateZ(var(--z)) rotateY(var(--ry));
+  transition:transform .3s cubic-bezier(.2,.75,.2,1),border-color .3s ease,opacity .3s ease;
+  will-change:transform}
+.pcard::before{content:"";position:absolute;inset:0;background-image:var(--scan);pointer-events:none;opacity:.45}
+.pcard::after{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--h,var(--acc))}
+/* 近大远小 = 纯 translateZ 的结果（perspective 自动算），外加亮度/清晰度做景深 */
+.pcard.c1{--h:var(--blue); --z:0px;    --ry:-8deg;  --y:-120%; opacity:1}
+.pcard.c2{--h:var(--teal); --z:-260px; --ry:-16deg; --y:-24%;  opacity:.93; filter:blur(.3px)}
+.pcard.c3{--h:var(--amber);--z:-520px; --ry:-24deg; --y:60%;   opacity:.84; filter:blur(.8px)}
+.pcard:hover,.pcard:focus-visible{transform:translateY(var(--y)) translateZ(calc(var(--z) + 110px)) rotateY(calc(var(--ry) + 4deg));
+  border-color:var(--h);opacity:1;filter:none;z-index:9}
+.pcard .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pcard .no{font:11px/1 var(--mono);letter-spacing:.22em;color:var(--h);border:1px solid var(--line);padding:4px 8px;background:rgba(0,0,0,.4)}
+.pcard .lv{font:9px/1 var(--mono);letter-spacing:.2em;color:var(--faint)}
+.pcard h3{margin:12px 0 6px;font-size:25px;letter-spacing:-.02em;line-height:1.06}
+.pcard p{margin:0;color:var(--dim);font-size:13px}
+.pcard .bars{display:flex;gap:3px;margin-top:12px}
+.pcard .bars i{height:3px;flex:1;background:#2a3234}
+.pcard .bars i.on{background:var(--h)}
+.pcard .foot{display:flex;gap:16px;margin-top:10px;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
+.pcard .foot b{color:var(--text)}
+/* 远处卡只留标题：信息量随距离递减（近处详、远处略） */
+.pcard.c3 p,.pcard.c3 .bars{display:none}
+/* Persona 式斜切强调条（贴在走廊尽头） */
+.slash{position:absolute;left:34%;top:50%;width:230px;height:14px;background:var(--red);
+  transform:translateZ(-40px) rotateY(-14deg) skewX(-30deg);opacity:.85}
+.slash span{position:absolute;left:10px;top:-22px;font:600 11px/1 var(--mono);letter-spacing:.2em;color:#fff;transform:skewX(30deg)}
+/* ---------- 底部新闻条（Arknights 的 BREAKING NEWS） ---------- */
+.news{position:absolute;left:26px;bottom:18px;display:flex;align-items:stretch;border:1px solid var(--line2);background:rgba(10,12,13,.9)}
+.news .tag{background:var(--red);color:#fff;font:600 10px/1 var(--mono);letter-spacing:.16em;padding:9px 10px;display:flex;align-items:center}
+.news .txt{padding:8px 12px;font:11px/1.5 var(--mono);color:var(--dim)}
+.news .txt b{color:var(--text)}
+/* ---------- 统计带 ---------- */
+.band{position:relative;padding:34px 26px 60px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(58,164,255,.05),transparent 30%)}
+.bhead{display:flex;align-items:baseline;gap:16px;margin-bottom:18px}
+.bhead .no{font:11px/1 var(--mono);letter-spacing:.24em;color:var(--acc)}
+.bhead h2{margin:0;font-size:24px}
+.bhead .side{margin-left:auto;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
+.cols{display:grid;grid-template-columns:1.3fr 1fr .95fr;gap:14px}
+.box{border:1px solid var(--line);background:rgba(16,19,20,.9);padding:16px}
+.box h4{margin:0 0 12px;font:10px/1 var(--mono);letter-spacing:.22em;color:var(--dim)}
+.catrow{display:grid;grid-template-columns:90px 1fr 40px;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}
+.catrow .bar{height:7px;background:var(--c);position:relative}
+.catrow .bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(0,0,0,.55) 5px 7px)}
+.catrow .n{font:10px/1 var(--mono);color:var(--dim);text-align:right}
+.stackbar{display:flex;height:12px;border:1px solid var(--line2);margin-bottom:8px;background:#0c0f10}
+.stackbar i{height:100%}
+.lg{display:flex;flex-wrap:wrap;gap:8px;font:10px/1.6 var(--mono);color:var(--dim)}
+.lg i{width:8px;height:8px;display:inline-block;margin-right:4px}
+.spark{display:flex;align-items:flex-end;gap:7px;height:112px}
+.spark .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.spark .col i{width:100%;background:linear-gradient(180deg,var(--acc),#55600d)}
+.spark .col b{font:9px/1 var(--mono);color:var(--dim)}
+.spark .col span{font:8px/1 var(--mono);color:var(--faint)}
+.tagcloud{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tagcloud span{font:10px/1 var(--mono);border:1px solid var(--line);padding:4px 6px;color:var(--dim)}
+.tagcloud span.hot{color:var(--acc);border-color:#454d20}
+.note{font:10px/1.8 var(--mono);color:var(--faint);margin-top:20px;letter-spacing:.06em}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:1120px){
+  .scene{height:auto;perspective:none;padding:22px 18px 30px}
+  .orbzone{position:static;transform:none;width:auto;margin-bottom:20px}
+  .deck{position:static;width:auto;height:auto}
+  .pcard{position:static;width:auto;transform:none!important;filter:none!important;opacity:1!important;margin-bottom:12px}
+  .pcard.c3 p,.pcard.c3 .bars{display:block}
+  .slash,.floor,.horizon,.news{display:none}
+  .cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="hud">
+  <span class="ic a"></span><span class="ic b"></span><span class="ic c"></span>
+  <span>ARCHIVE&nbsp;NODE</span><span>SYNC <b>/*__LATEST__*/—</b></span><span>ITEMS <b>/*__TOTAL__*/0</b></span>
+  <span class="sp"></span><span>LEVEL-1 / 一级页面</span>
+</div>
+
+<section class="scene">
+  <div class="floor"></div><div class="horizon"></div>
+  <div class="slash"><span>PRIMARY</span></div>
+
+  <div class="orbzone">
+    <div class="orbwrap">
+      <div class="ring a"></div><div class="ring b"></div><div class="ring c"></div><div class="gauge"></div>
+      <a class="orb" href="#/picks" aria-label="进入每日精选（日报）">
+        <span class="k">01 · DAILY</span>
+        <span class="t">每日精选</span>
+        <span class="s">日报 / 精选同一件事<br>按天看新增 · 按档位看精品</span>
+        <span class="n">/*__REC__*/0<em>条已推荐</em></span>
+        <span class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>
+      </a>
+      <div class="orbcap">LATEST /*__LATEST__*/ —</div>
+    </div>
+  </div>
+
+  <div class="deck">
+    <a class="pcard c1" href="#/all">
+      <div class="row"><span class="no">02 / LIBRARY</span><span class="lv">LEVEL-2</span></div>
+      <h3>完整项目库</h3>
+      <p>全部档案：分类、标签、徽章、风险、成长记录。标签球 / 分类按钮 / 单列滚动标签条 / 放大镜搜索。</p>
+      <div class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+      <div class="foot"><span>ITEMS <b>/*__TOTAL__*/0</b></span><span>CAT 11</span><span>TAGS 499</span></div>
+    </a>
+    <a class="pcard c2" href="#/plans">
+      <div class="row"><span class="no">03 / OPS</span><span class="lv">LEVEL-2</span></div>
+      <h3>计划与工作区</h3>
+      <p>按需求配好的工具组合与工作区：谁干什么、还缺什么。</p>
+      <div class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="foot"><span>PLANS <b>/*__PLANS__*/0</b></span><span>WORKSPACE 3</span></div>
+    </a>
+    <a class="pcard c3" href="#/legend">
+      <div class="row"><span class="no">04 / SPEC</span><span class="lv">MODAL</span></div>
+      <h3>图例与标准</h3>
+      <p>档位 / 状态 / 风险 / 徽章是什么意思 —— 小窗打开。</p>
+      <div class="bars"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="foot"><span>ESC 关闭</span></div>
+    </a>
+  </div>
+
+  <div class="news"><span class="tag">LATEST</span><span class="txt"><b>/*__LATEST__*/</b> 的精选已入库 · 共 <b>/*__REC__*/0</b> 条推荐 · 点左边圆钮进入</span></div>
+</section>
+
+<section class="band">
+  <div class="bhead"><span class="no">§ 01 / TELEMETRY</span><h2>库里现在长什么样</h2><span class="side">SCROLL TO READ</span></div>
+  <div class="cols">
+    <div class="box"><h4>DISTRIBUTION</h4><div id="catRows"></div></div>
+    <div class="box"><h4>TIER / STATUS</h4><div id="tierBar" class="stackbar"></div><div id="tierLg" class="lg"></div>
+      <div style="height:10px"></div><div id="stBar" class="stackbar"></div><div id="stLg" class="lg"></div></div>
+    <div class="box"><h4>EVENTS / 近 7 天</h4><div id="spark" class="spark"></div><div id="tagCloud" class="tagcloud"></div></div>
+  </div>
+  <p class="note">v3 · 真三维：perspective 1150px + translateZ 0/−260/−520 + rotateY −8/−16/−24°（尺寸由浏览器按透视算，**没有用 scale 假装**）｜ 景深：亮度 1/.93/.84 + 模糊 0/.3/.8px ｜ 远处卡只留标题（信息随距离递减）｜ 零外部请求</p>
+</section>
+
+<script>
+const CATS = /*__CATS__*/[];
+const TIER = /*__TIER__*/[];
+const STATUS = /*__STATUS__*/[];
+const SPARK = /*__SPARK__*/[];
+const TAGS = /*__TAGS__*/[];
+const COLORS = ['#e8ff2a','#3aa4ff','#22e3c6','#ffa028','#b06bff','#ff3b2f','#ffd166','#ff4d6d','#4dd0e1','#9ccc65','#66706b'];
+(function(){
+  const max = Math.max.apply(null, CATS.map(c=>c.n));
+  document.getElementById('catRows').innerHTML = CATS.map(function(c){
+    return '<div class="catrow" style="--c:'+c.c+'"><span>'+c.l1+'</span>'
+      + '<span class="bar" style="width:'+Math.max(3,Math.round(c.n/max*100))+'%"></span>'
+      + '<span class="n">'+c.n+'</span></div>';
+  }).join('');
+  function bar(h,l,rows,pal){
+    const t = rows.reduce((s,r)=>s+r.n,0)||1;
+    document.getElementById(h).innerHTML = rows.map(function(r,i){return '<i style="width:'+(r.n/t*100)+'%;background:'+pal[i%pal.length]+'"></i>';}).join('');
+    document.getElementById(l).innerHTML = rows.map(function(r,i){return '<span><i style="background:'+pal[i%pal.length]+'"></i>'+r.k+' '+r.n+'</span>';}).join('');
+  }
+  bar('tierBar','tierLg', TIER, ['#e8ff2a','#3aa4ff','#22e3c6','#3d4448','#66706b']);
+  bar('stBar','stLg', STATUS, ['#b06bff','#22e3c6','#ffd166','#ff3b2f','#66706b']);
+  const smax = Math.max.apply(null, SPARK.map(s=>s.n))||1;
+  document.getElementById('spark').innerHTML = SPARK.map(function(s){
+    return '<div class="col"><b>'+s.n+'</b><i style="height:'+Math.max(4,Math.round(s.n/smax*100))+'%"></i><span>'+s.d+'</span></div>';
+  }).join('');
+  document.getElementById('tagCloud').innerHTML = TAGS.slice(0,12).map(function(t,i){
+    return '<span class="'+(i<4?'hot':'')+'">'+t.t+' '+t.n+'</span>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

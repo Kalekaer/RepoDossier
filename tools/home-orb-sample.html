@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>一级页面样片 · 左侧圆钮 + 右侧纵深弧形卡列</title>
+<style>
+:root{
+  --bg:#0b0b0b;--surface:#111;--surface-2:#161616;--surface-3:#1c1c1c;--border:#2a2a28;--border-strong:#3d3d3a;
+  --text:#f4f2ec;--dim:#9a9a94;--faint:#6b6b66;--accent:#e8ff2a;--danger:#ff2d20;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --tx-grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M28 0H0V28' fill='none' stroke='%23202020'/%3E%3C/svg%3E");
+  --tx-ruler:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12'%3E%3Cpath d='M0 11h40M0 11V7M10 11V9M20 11V5M30 11V9' stroke='%233d3d3a'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+     font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif;
+     background-image:var(--tx-grid);background-attachment:fixed}
+.top{display:flex;justify-content:space-between;align-items:baseline;padding:18px 34px;border-bottom:1px solid var(--border)}
+.top .brand{font:600 13px/1 var(--mono);letter-spacing:.22em;color:var(--dim)}
+.top .lv{font:11px/1 var(--mono);color:var(--faint)}
+.top .lv b{color:var(--accent)}
+/* ============ 一级页面主舞台：左侧圆钮 + 右侧弧形纵深卡列 ============ */
+.stage{position:relative;min-height:660px;padding:34px 34px 10px;
+  display:grid;grid-template-columns:380px 1fr;gap:0;align-items:center}
+.stage::after{content:"";position:absolute;left:34px;right:34px;bottom:0;height:12px;
+  background-image:var(--tx-ruler);background-repeat:repeat-x;opacity:.5}
+/* ---- 左：圆钮（= 日报 / 每日精选） ---- */
+.orbwrap{position:relative;width:340px;height:340px;margin:0 auto}
+.orbring{position:absolute;inset:0;border:1px dashed #33332f;border-radius:50%}
+.orbring.r2{inset:26px;border-color:#2a2a27}
+.orbring.r3{inset:52px;border-color:#242421}
+.orb{position:absolute;inset:74px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-decoration:none;color:var(--text);border:1px solid var(--border-strong);
+  background:radial-gradient(circle at 50% 35%,#1d1d1a,#0e0e0d 72%);
+  box-shadow:0 0 0 1px #000 inset, 0 24px 60px -30px #000;
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.orb:hover,.orb:focus-visible{transform:scale(1.045);border-color:var(--accent);
+  box-shadow:0 0 0 1px #000 inset, 0 0 44px -8px rgba(232,255,42,.35)}
+.orb .no{font:600 11px/1 var(--mono);letter-spacing:.2em;color:var(--accent)}
+.orb .t{font-size:27px;font-weight:800;letter-spacing:-.01em;margin:10px 0 2px}
+.orb .sub{font:11px/1.5 var(--mono);color:var(--dim);text-align:center}
+.orb .big{font:700 34px/1 var(--mono);margin-top:12px}
+.orb .big small{font:400 11px/1 var(--mono);color:var(--faint);margin-left:6px}
+.orbdot{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;
+  background:var(--accent);animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,255,42,.5)}100%{box-shadow:0 0 0 26px rgba(232,255,42,0)}}
+.orbcap{position:absolute;left:50%;bottom:-34px;transform:translateX(-50%);
+  font:11px/1.5 var(--mono);color:var(--faint);text-align:center;white-space:nowrap}
+/* ---- 右：弧形纵深卡列（半围着左圆） ---- */
+.stack{position:relative;perspective:1500px;perspective-origin:20% 50%;min-height:520px}
+.pcard{position:absolute;left:0;top:50%;display:block;text-decoration:none;color:var(--text);
+  width:560px;padding:22px 24px;border:1px solid var(--border-strong);background:var(--surface-2);
+  transform-style:preserve-3d;transition:transform .26s cubic-bezier(.2,.7,.2,1),border-color .26s ease,background .26s ease;
+  box-shadow:0 26px 60px -40px #000}
+.pcard .row{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.pcard .no{font:600 12px/1 var(--mono);color:var(--accent);letter-spacing:.18em}
+.pcard .lvtag{font:10px/1 var(--mono);color:var(--faint);border:1px solid var(--border);padding:3px 6px}
+.pcard h3{margin:12px 0 6px;font-size:25px;letter-spacing:-.02em;line-height:1.1}
+.pcard p{margin:0;color:var(--dim);font-size:13px}
+.pcard .foot{display:flex;gap:14px;margin-top:14px;font:11px/1 var(--mono);color:var(--faint)}
+.pcard .foot b{color:var(--text);font-weight:600}
+.pcard::after{content:"";position:absolute;left:0;top:0;width:4px;height:100%;background:var(--h,var(--accent))}
+/* 三张卡：近→远，向左弧收，带 Y 轴旋转与 Z 位移 ⇒ 纵深 + 半围 */
+.pcard.c1{--h:#2f7bff;transform:translate(0,-46%) rotateY(-7deg) translateZ(0);   z-index:3}
+.pcard.c2{--h:#19e0c4;transform:translate(-54px,8%) rotateY(-11deg) translateZ(-90px) scale(.955); z-index:2;opacity:.97}
+.pcard.c3{--h:#a06bff;transform:translate(-108px,60%) rotateY(-15deg) translateZ(-180px) scale(.91); z-index:1;opacity:.92}
+.pcard:hover,.pcard:focus-visible{border-color:var(--h);background:var(--surface-3);z-index:9}
+.pcard.c1:hover{transform:translate(10px,-46%) rotateY(-3deg) translateZ(40px)}
+.pcard.c2:hover{transform:translate(-44px,8%) rotateY(-7deg) translateZ(-40px) scale(.955)}
+.pcard.c3:hover{transform:translate(-98px,60%) rotateY(-11deg) translateZ(-130px) scale(.91)}
+/* ============ 往下滚：统计区（二级信息降到这一层） ============ */
+.band{padding:46px 34px 70px;border-top:1px solid var(--border)}
+.bandhead{display:grid;grid-template-columns:100px 1fr auto;gap:16px;align-items:baseline;margin-bottom:22px}
+.bandhead .no{font:600 15px/1 var(--mono);color:var(--accent)}
+.bandhead h2{margin:0;font-size:26px}
+.bandhead .side{font:11px/1 var(--mono);color:var(--faint)}
+.cols{display:grid;grid-template-columns:1.25fr 1fr .95fr;gap:22px}
+.box{border:1px solid var(--border);background:var(--surface);padding:18px}
+.box h4{margin:0 0 14px;font:600 12px/1 var(--mono);letter-spacing:.16em;color:var(--dim)}
+.catrow{display:grid;grid-template-columns:96px 1fr 44px;gap:10px;align-items:center;margin-bottom:7px;font-size:12px}
+.catrow .bar{height:9px;background:var(--c);width:var(--w)}
+.catrow .n{font:11px/1 var(--mono);color:var(--dim);text-align:right}
+.stackbar{display:flex;height:16px;border:1px solid var(--border-strong);margin-bottom:10px}
+.stackbar i{display:block;height:100%}
+.lg{display:flex;flex-wrap:wrap;gap:10px;font:11px/1.6 var(--mono);color:var(--dim)}
+.lg i{width:9px;height:9px;display:inline-block;margin-right:5px;vertical-align:-1px}
+.spark{display:flex;align-items:flex-end;gap:9px;height:130px;padding-top:8px}
+.spark .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}
+.spark .col i{width:100%;background:linear-gradient(180deg,var(--accent),#6b7a10)}
+.spark .col b{font:10px/1 var(--mono);color:var(--dim)}
+.spark .col span{font:9px/1 var(--mono);color:var(--faint)}
+.tagcloud{display:flex;flex-wrap:wrap;gap:6px}
+.tagcloud span{font:11px/1 var(--mono);border:1px solid var(--border);padding:4px 7px;color:var(--dim)}
+.tagcloud span.hot{color:var(--text);border-color:var(--border-strong)}
+.note{font:11px/1.7 var(--mono);color:var(--faint);margin-top:26px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:1100px){.stage{grid-template-columns:1fr;min-height:auto;gap:26px}
+  .stack{min-height:620px;perspective:none}
+  .pcard{position:static;width:auto;transform:none!important;margin-bottom:14px}
+  .cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">ARCHIVE&nbsp;INDEX</span>
+  <span class="lv">当前：<b>一级页面</b>（首页）｜点卡片进入<b>二级页面</b></span>
+</div>
+
+<section class="stage">
+  <!-- 左：圆钮 = 日报 / 每日精选（01） -->
+  <div class="orbwrap">
+    <div class="orbring"></div><div class="orbring r2"></div><div class="orbring r3"></div>
+    <a class="orb" href="#/picks" aria-label="进入每日精选（日报）">
+      <span class="no">01 · 一级入口</span>
+      <span class="t">每日精选</span>
+      <span class="sub">日报与精选同一件事<br>按天看新增 · 按档位看精品</span>
+      <span class="big">/*__REC__*/0<small>条已推荐</small></span>
+    </a>
+    <span class="orbdot"></span>
+    <div class="orbcap">最新一期：/*__LATEST__*/— ｜ 点圆钮进入</div>
+  </div>
+
+  <!-- 右：弧形纵深卡列 = 其余二级页面 -->
+  <div class="stack">
+    <a class="pcard c1" href="#/all">
+      <div class="row"><span class="no">02</span><span class="lvtag">L2</span></div>
+      <h3>完整项目库</h3>
+      <p>全部档案：分类、标签、徽章、风险、成长记录。带标签球 / 分类按钮 / 单列滚动标签条 / 放大镜搜索。</p>
+      <div class="foot"><span>共 <b>/*__TOTAL__*/0</b> 条</span><span>11 个一级分类</span><span>499 个标签</span></div>
+    </a>
+    <a class="pcard c2" href="#/plans">
+      <div class="row"><span class="no">03</span><span class="lvtag">L2</span></div>
+      <h3>计划与工作区</h3>
+      <p>按需求配好的工具组合与工作区：谁干什么、还缺什么，一屏看完。</p>
+      <div class="foot"><span><b>/*__PLANS__*/0</b> 个方案</span><span>3 个工作区</span></div>
+    </a>
+    <a class="pcard c3" href="#/legend">
+      <div class="row"><span class="no">04</span><span class="lvtag">小窗</span></div>
+      <h3>图例与标准</h3>
+      <p>档位 / 状态 / 风险 / 徽章是什么意思 —— 做成**小窗**弹出，不占独立页面。</p>
+      <div class="foot"><span>点开即看</span><span>Esc 关闭</span></div>
+    </a>
+  </div>
+</section>
+
+<section class="band">
+  <div class="bandhead"><span class="no">§ 01</span><h2>库里现在长什么样</h2><span class="side">首页往下滚才看到 · 二级信息不抢主视觉</span></div>
+  <div class="cols">
+    <div class="box">
+      <h4>分类分布</h4>
+      <div id="catRows"></div>
+    </div>
+    <div class="box">
+      <h4>档位 / 状态</h4>
+      <div id="tierBar" class="stackbar"></div>
+      <div id="tierLg" class="lg"></div>
+      <div style="height:14px"></div>
+      <div id="stBar" class="stackbar"></div>
+      <div id="stLg" class="lg"></div>
+    </div>
+    <div class="box">
+      <h4>近 7 天事件</h4>
+      <div id="spark" class="spark"></div>
+      <div style="height:12px"></div>
+      <div id="tagCloud" class="tagcloud"></div>
+    </div>
+  </div>
+  <p class="note">样片 · 数据全部来自 data/projects.jsonl 与 data/events.jsonl 实测；构图 = 左侧圆钮 + 右侧弧形纵深卡列（perspective + rotateY + translateZ），纯 CSS、零外部请求。</p>
+</section>
+
+<script>
+const CATS = /*__CATS__*/[];
+const TIER = /*__TIER__*/[];
+const STATUS = /*__STATUS__*/[];
+const SPARK = /*__SPARK__*/[];
+const TAGS = /*__TAGS__*/[];
+const COLORS = ['#e8ff2a','#2f7bff','#19e0c4','#ff7a1a','#a06bff','#ff2d20','#ffd166','#ff4d6d','#4dd0e1','#9ccc65','#6b6b66'];
+(function(){
+  const max = Math.max.apply(null, CATS.map(c=>c.n));
+  document.getElementById('catRows').innerHTML = CATS.map(function(c){
+    return '<div class="catrow" style="--c:'+c.c+'"><span>'+c.l1+'</span>'
+      + '<span class="bar" style="width:'+Math.max(3,Math.round(c.n/max*100))+'%"></span>'
+      + '<span class="n">'+c.n+'</span></div>';
+  }).join('');
+  function bar(host, lg, rows, palette){
+    const total = rows.reduce((s,r)=>s+r.n,0) || 1;
+    document.getElementById(host).innerHTML = rows.map(function(r,i){
+      return '<i style="width:'+(r.n/total*100)+'%;background:'+palette[i%palette.length]+'"></i>';
+    }).join('');
+    document.getElementById(lg).innerHTML = rows.map(function(r,i){
+      return '<span><i style="background:'+palette[i%palette.length]+'"></i>'+r.k+' '+r.n+'</span>';
+    }).join('');
+  }
+  bar('tierBar','tierLg', TIER, ['#e8ff2a','#2f7bff','#19e0c4','#3d3d3a','#6b6b66']);
+  bar('stBar','stLg', STATUS, ['#a06bff','#19e0c4','#ffd166','#ff2d20','#6b6b66']);
+  const smax = Math.max.apply(null, SPARK.map(s=>s.n)) || 1;
+  document.getElementById('spark').innerHTML = SPARK.map(function(s){
+    return '<div class="col"><b>'+s.n+'</b><i style="height:'+Math.max(4,Math.round(s.n/smax*100))+'%"></i><span>'+s.d+'</span></div>';
+  }).join('');
+  document.getElementById('tagCloud').innerHTML = TAGS.slice(0,14).map(function(t,i){
+    return '<span class="'+(i<5?'hot':'')+'">'+t.t+' '+t.n+'</span>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

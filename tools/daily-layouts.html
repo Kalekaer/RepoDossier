@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>每日精选 · 换骨 A/B（数据驱动）</title>
+<style>
+/* ============================================================================
+  日报页模板池（同一份内容 × 两套骨架）
+  方向一 layout=a —— 实验性编辑排版：大小不一的图文、错位穿插、强烈节奏
+  方向二 layout=b —— 粗野主义拼贴：不规则分栏、极强黑白对比、局部荧光色
+  字体：Smiley Sans 得意黑（OFL 1.1）+ Bebas Neue（OFL）—— 商业可用、可嵌入
+  图片：assets/bg/ NASA 公有领域（署名见 SOURCES.md）
+  内容：真实（2026-10-16：24 候选 → 3 条 A 档 → 5 条退稿）
+  使用：?layout=a / ?layout=b（无参数默认 a）。生成脚本按日期选一套。
+  ============================================================================ */
+@font-face{font-family:"Smiley";src:url("../../assets/fonts/SmileySans.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Bebas";src:url("../../assets/fonts/BebasNeue-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
+:root{
+  --ink:#0a0a0a; --ink2:#151515; --paper:#f6f6f1; --paper2:#e8e8e2;
+  --fluoro:#e9ff2e; --magenta:#ff1f6b; --cyan:#2ef2d0; --grey:#8b8b85;
+  --disp:"Smiley","Noto Sans SC",sans-serif;      /* 中文压缩体巨标题 */
+  --latin:"Bebas","Arial Narrow",Impact,sans-serif;
+  --mono:SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Noto Sans SC","Microsoft YaHei UI",system-ui,sans-serif;
+  --serif:"Noto Serif SC",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#070707;color:var(--paper);font:15px/1.5 var(--sans)}
+.paper{margin:10px auto 34px;max-width:1460px;border:8px solid var(--ink);background:var(--paper);color:var(--ink);position:relative;overflow:hidden}
+.half{position:relative}
+.half::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.3;mix-blend-mode:multiply;
+  background-image:radial-gradient(#000 .6px,transparent .7px);background-size:3px 3px}
+.cap{max-width:1460px;margin:0 auto;padding:12px 22px 4px;font:11px/1 var(--mono);letter-spacing:.18em;color:#5f5f5a;display:none}
+.cap b{color:var(--fluoro);letter-spacing:.06em;font-size:12px}
+.lab{font:700 10px/1.4 var(--mono);letter-spacing:.2em;text-transform:uppercase}
+
+/* ---------------- 共用：报头 ---------------- */
+.mast{position:relative;border-bottom:8px solid var(--paper);padding:12px 16px 10px}
+.mast .trule{position:absolute;left:0;right:0;top:0;height:8px;background:var(--fluoro)}
+.mast .name{font-family:var(--disp);font-size:96px;line-height:.86;margin:0;letter-spacing:-.02em}
+.mast .name em{font-style:normal;color:var(--magenta)}
+.mast .bar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:6px;
+  font:600 10px/1.6 var(--mono);letter-spacing:.14em;color:#55554f;text-transform:uppercase}
+.mast .bar b{color:var(--ink)}
+.mast .issue{background:var(--magenta);color:#fff;padding:3px 8px;font:700 10px/1.4 var(--mono);letter-spacing:.12em}
+
+/* ---------------- 共用：内容块 ---------------- */
+.leadimg{background:url("../../assets/bg/nasa-vab-highbay.jpg") center/cover;position:relative;
+  filter:grayscale(1) contrast(1.5) brightness(.55)}
+/* 荧光染：像参考图那种"专色叠印"（在 filter 之后叠加，才不会被灰度吃掉） */
+.leadimg::after{content:"";position:absolute;inset:0;background:var(--fluoro);opacity:.16;mix-blend-mode:multiply}
+.credit{position:absolute;right:5px;bottom:5px;font:600 8px/1 var(--mono);letter-spacing:.08em;
+  color:#e6e6df;background:rgba(8,8,8,.72);padding:3px 5px}
+.kick{display:inline-block;background:var(--fluoro);color:var(--ink);font:700 10px/1 var(--mono);
+  letter-spacing:.2em;padding:5px 8px;text-transform:uppercase}
+h1.big{margin:8px 0 6px;font-family:var(--disp);font-weight:400;line-height:.88;letter-spacing:-.02em}
+h1.big em{font-style:normal;color:var(--fluoro)}
+.dek{font:12.5px/1.65 var(--mono);color:#3a3a34;border-left:3px solid var(--magenta);padding-left:9px}
+.txt p{margin:0 0 9px;font:13.5px/1.72 var(--sans);color:#1b1b18}
+.txt p:first-of-type::first-letter{float:left;font-family:var(--disp);font-size:58px;line-height:.8;padding:3px 8px 0 0;color:var(--magenta)}
+.txt b{background:var(--ink);color:var(--paper);padding:0 3px}
+.txt .m{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:#4d4d47}
+/* 反白块：报纸里唯一的"黑块"，用来切节奏 */
+.stats{background:var(--ink);color:var(--paper);padding:12px}
+.stats .h{font:700 9.5px/1 var(--mono);letter-spacing:.2em;background:var(--paper);color:var(--ink);padding:4px 6px;display:inline-block}
+.stats .n{font-family:var(--latin);font-size:76px;line-height:.8;margin:8px 0 0;color:var(--fluoro)}
+.stats dl{margin:8px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:6px 8px}
+.stats dt{font:600 9px/1.3 var(--mono);letter-spacing:.12em;color:#b9b9b2;text-transform:uppercase}
+.stats dd{margin:0;font-family:var(--latin);font-size:26px;line-height:1}
+.brief{display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:start}
+.brief .th{height:84px;background-size:cover;background-position:center;filter:grayscale(1) contrast(1.45) brightness(.6);border:3px solid var(--ink)}
+.brief .no{font-family:var(--latin);font-size:30px;line-height:.8;color:var(--magenta)}
+.brief h3{margin:3px 0 3px;font-family:var(--disp);font-weight:400;font-size:25px;line-height:1.02}
+.brief p{margin:0;font:11.5px/1.6 var(--sans);color:#2a2a26}
+.brief .tag{display:inline-block;margin-top:6px;border:2px solid var(--ink);color:var(--ink);
+  font:700 9px/1 var(--mono);letter-spacing:.14em;padding:3px 5px;text-transform:uppercase}
+.pull{background:var(--fluoro);color:var(--ink);padding:12px 14px}
+.pull q{display:block;font:italic 900 30px/1.1 var(--serif)}
+.pull cite{display:block;margin-top:6px;font:700 9.5px/1 var(--mono);letter-spacing:.16em;font-style:normal;text-transform:uppercase}
+.reject{background:var(--ink2);padding:12px 14px 14px}
+.reject .hd{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+.reject .hd b{font-family:var(--latin);font-size:26px;line-height:1;color:var(--magenta)}
+.reject .hd span{font:700 9.5px/1 var(--mono);letter-spacing:.16em;color:var(--grey);text-transform:uppercase}
+.reject .it{padding:6px 0;border-top:1px solid #232321}
+.reject .it .nm{font:700 10px/1.3 var(--mono);color:#e6e6df;word-break:break-all}
+.reject .it .rs{font:600 9.5px/1.4 var(--mono);color:#9a9a94}
+.reject .it .why{font:600 9px/1.4 var(--mono);color:var(--grey)}
+.pol{border:5px solid var(--ink);background:var(--paper);color:var(--ink);transform:rotate(-5deg);box-shadow:6px 6px 0 var(--ink)}
+.pol .ph{height:110px;background:url("../../assets/bg/nasa-mobile-launcher.jpg") center/cover;
+  filter:grayscale(1) contrast(1.45) brightness(.66)}
+.pol .tx{padding:4px 5px;font:700 8.5px/1.4 var(--mono);letter-spacing:.08em}
+.foot{padding:9px 14px;display:flex;gap:14px;flex-wrap:wrap;font:600 8.5px/1.6 var(--mono);letter-spacing:.1em;color:#55554f;text-transform:uppercase}
+.foot b{color:var(--ink)}
+.vert{writing-mode:vertical-rl;font:800 10px/1 var(--mono);letter-spacing:.3em;color:var(--magenta);text-transform:uppercase}
+
+/* ============================================================
+   骨架 A —— 实验性编辑排版：12 栏网格、大小不一的图、错位穿插
+   ============================================================ */
+body.mode-a .stage{display:grid;grid-template-columns:repeat(12,1fr);gap:0;grid-auto-flow:dense}
+body.mode-a .mast{grid-column:1/-1}
+body.mode-a .leadimg{grid-column:1/8;height:400px;border-right:8px solid var(--paper);border-bottom:0}
+body.mode-a .headline{grid-column:6/13;align-self:end;background:var(--ink);padding:0 14px 12px;margin-top:-150px;z-index:4;color:var(--paper)}
+body.mode-a .headline .dek{color:#d8d8cf;border-left-color:var(--fluoro)}
+body.mode-a h1.big{font-size:46px}
+body.mode-a .stats{grid-column:8/13;margin-top:-6px;z-index:5;border-bottom:8px solid var(--paper);align-self:start}
+body.mode-a .txt1{grid-column:1/6;padding:16px 14px;border-right:2px solid #262624}
+body.mode-a .txt2{grid-column:6/10;padding:16px 14px}
+body.mode-a .sidecol{grid-column:10/13;padding:12px 10px;border-left:8px solid var(--paper);display:flex;gap:10px;align-items:flex-start}
+body.mode-a .pull{grid-column:1/-1;border-top:8px solid var(--paper);border-bottom:8px solid var(--paper)}
+body.mode-a .pull q{font-size:38px}
+body.mode-a .briefs{grid-column:1/-1;display:grid;grid-template-columns:1.2fr 1fr 1fr;border-bottom:8px solid var(--paper)}
+body.mode-a .briefs>*{padding:14px;border-right:8px solid var(--paper)}
+body.mode-a .briefs>*:last-child{border-right:0}
+body.mode-a .widefig{grid-column:1/5;height:190px;background:url("../../assets/bg/nasa-pad39b-steel.jpg") center/cover;
+  filter:grayscale(1) contrast(1.55) brightness(.5);border-right:8px solid var(--paper)}
+body.mode-a .reject{grid-column:1/-1}
+body.mode-a .reject .items{display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+body.mode-a .reject .it{padding:6px 8px 6px 0;border-right:1px solid #222220}
+body.mode-a .reject .it:last-child{border-right:0}
+body.mode-a .foot{grid-column:1/-1}
+body.mode-a .giant-no{grid-column:10/13;font-family:var(--latin);font-size:150px;line-height:.7;color:var(--magenta);
+  padding:10px 8px 0;opacity:.9}
+
+/* ============================================================
+   骨架 B —— 粗野主义拼贴：不规则三栏（2fr 1fr .8fr）、荧光块、贴纸
+   ============================================================ */
+body.mode-b .stage{display:grid;grid-template-columns:2fr 1fr .85fr;gap:0;grid-auto-flow:dense}
+body.mode-b .mast{grid-column:1/-1;border-bottom:0}
+body.mode-b .mast .name{font-size:150px;letter-spacing:-.03em}
+body.mode-b .hero{grid-column:1/-1;position:relative;height:330px;border-top:8px solid var(--paper);border-bottom:8px solid var(--paper)}
+body.mode-b .hero .leadimg{position:absolute;inset:0;filter:grayscale(1) contrast(1.7) brightness(.42)}
+body.mode-b .hero .headline{position:absolute;left:0;right:0;bottom:0;padding:10px 14px 12px;z-index:3;color:var(--paper);
+  background:linear-gradient(0deg,rgba(8,8,8,.95),rgba(8,8,8,.6) 60%,transparent)}
+body.mode-b .hero .headline .dek{color:#d8d8cf;border-left-color:var(--fluoro)}
+body.mode-b .hero h1.big{font-size:52px;line-height:.9}
+body.mode-b .hero .kick{position:absolute;left:14px;top:14px;background:var(--magenta);color:#fff}
+body.mode-b .fl {grid-column:2/4;background:var(--fluoro);color:var(--ink);padding:12px 14px;border-bottom:8px solid var(--paper)}
+body.mode-b .fl q{display:block;font:italic 900 32px/1.05 var(--serif);color:var(--ink)}
+body.mode-b .fl cite{display:block;margin-top:6px;font:700 9.5px/1 var(--mono);letter-spacing:.16em;font-style:normal;text-transform:uppercase}
+body.mode-b .txt1{grid-column:1/2;padding:14px;border-right:2px solid #262624}
+body.mode-b .stats{grid-column:3/4;border-bottom:8px solid var(--paper);border-left:8px solid var(--paper);align-self:start}
+body.mode-b .txt2{grid-column:1/3;padding:14px;border-top:8px solid var(--paper);border-right:8px solid var(--paper)}
+body.mode-b .sidecol{grid-column:3/4;padding:12px 10px;display:flex;flex-direction:column;gap:10px}
+body.mode-b .briefs{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;border-top:8px solid var(--paper);border-bottom:8px solid var(--paper)}
+body.mode-b .briefs>*{padding:14px;border-right:8px solid var(--paper)}
+body.mode-b .briefs>*:last-child{border-right:0}
+body.mode-b .widefig{background:url("../../assets/bg/nasa-pad39b-steel.jpg") center/cover;
+  filter:grayscale(1) contrast(1.55) brightness(.5);min-height:150px}
+body.mode-b .reject{grid-column:1/3}
+body.mode-b .reject .items{display:block}
+body.mode-b .foot{grid-column:1/-1;border-top:8px solid var(--paper)}
+body.mode-b .giant-no{grid-column:1/3;font-family:var(--latin);font-size:120px;line-height:.72;color:var(--magenta);padding:8px 12px 0}
+body.mode-b .sticker{display:inline-block;background:var(--cyan);color:var(--ink);font:800 11px/1 var(--mono);
+  letter-spacing:.12em;padding:6px 9px;transform:rotate(-4deg);box-shadow:4px 4px 0 var(--magenta)}
+
+@media (max-width:1180px){
+  body.mode-a .stage,body.mode-b .stage{grid-template-columns:1fr}
+  body.mode-a .stage>*{grid-column:1/-1!important}
+  body.mode-b .stage>*{grid-column:1/-1!important}
+  body.mode-a .headline{margin-top:-60px}
+  body.mode-a h1.big,body.mode-b .hero h1.big{font-size:44px}
+  body.mode-b .mast .name{font-size:60px}
+  body.mode-a .leadimg,body.mode-b .hero{height:220px}
+  body.mode-b .hero .leadimg{position:relative;inset:auto}
+  body.mode-a .briefs,body.mode-b .briefs{grid-template-columns:1fr}
+  body.mode-a .reject .items{grid-template-columns:1fr 1fr}
+  .vert{writing-mode:horizontal-tb}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body class="mode-a">
+<div class="cap"><b>每日精选 · 换骨</b> <span id="modeLabel">layout=a · 实验性编辑排版</span> ｜ 换骨：?layout=a / b ｜ 数据每天由 build-samples 注入 ｜ 字体 Smiley Sans + Bebas（OFL）｜ 图为 NASA 公有领域</div>
+
+<article class="paper">
+  <div class="stage">
+    <!-- 报头（两套骨架共用） -->
+    <header class="mast">
+      <div class="trule"></div>
+      <h1 class="name">每日<em>／</em>精选</h1>
+      <div class="bar" id="bar"></div>
+    </header>
+
+    <!-- 头条（A 用 8 栏出血图 + 压字；B 用整幅 hero） -->
+    <div class="hero" style="display:contents">
+      <div class="leadimg half"><span class="credit" id="credit">NASA · 公有领域 · 示意插图</span></div>
+      <div class="headline">
+        <span class="kick">头条 / LEAD</span>
+        <h1 class="big" id="leadTitle"></h1>
+        <p class="dek" id="leadDek"></p>
+      </div>
+    </div>
+
+    <aside class="stats" id="stats"></aside>
+
+    <div class="txt txt1" id="txt1"></div>
+
+    <div class="txt txt2" id="txt2"></div>
+
+    <div class="pull" id="pull"></div>
+
+    <div class="fl" id="fl" style="display:none"></div>
+
+    <aside class="sidecol">
+      <div class="vert" id="vert"></div>
+      <figure class="pol"><div class="ph"></div><div class="tx">移动发射塔 / NASA · 公有领域</div></figure>
+    </aside>
+
+    <div class="giant-no" id="giantNo">00</div>
+
+    <div class="briefs" id="briefs"></div>
+
+    <section class="reject" id="reject"></section>
+
+    <footer class="foot" id="foot"></footer>
+  </div>
+</article>
+
+<script>
+var D = /*__DAILY__*/null;
+(function () {
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]})}
+  function txt(s){return esc(s).replace(/\n/g,'<br>')}
+  function head(s){s=String(s||'');var i=Math.max(s.indexOf('。'),s.indexOf('｜'),s.indexOf('；'));return i>10?s.slice(0,i):s}
+  /* 巨标题只放一句短的：在标点处截断，最长 18 字（a/b 的 74–88px 放不下整段 one_liner） */
+  function shortTitle(s){
+    s=String(s||'');var i=s.search(/[，。；：|｜]/);
+    var cut=i>6?s.slice(0,i):s;
+    if(cut.length>26) cut=cut.slice(0,26)+'…';
+    return cut;
+  }
+
+  var P=(D&&D.picks)||[], R=(D&&D.rejects)||[], S=(D&&D.stats)||{}, I=(D&&D.imgs)||[];
+  var L=P[0]||null;
+  function ph(i){return I[i%Math.max(1,I.length)]||'../../assets/bg/nasa-vab-highbay.jpg'}
+
+  /* 报头 */
+  document.getElementById('bar').innerHTML =
+    '<span>ISSUE <span class="issue">'+esc(D.issue||'—')+'</span></span>'
+    +'<span>'+esc(D.iso||'')+' · '+esc(D.week||'')+'</span>'
+    +'<span>候选 <b>'+S.cand+'</b> → 推荐 <b>'+S.rec+'</b>（S'+S.s+'/A'+S.a+'）· 退稿 <b>'+S.rej+'</b>'+(S.un>0?' · 未评 <b>'+S.un+'</b>':'')+'</span>'
+    +'<span>库内 <b>'+S.total+'</b> · 分类 <b>'+S.cats+'</b></span>'
+    +'<span id="modeTag">LAYOUT A</span>';
+
+  if(!L){
+    document.getElementById('leadTitle').textContent='今日无达标项目';
+    document.getElementById('leadDek').textContent='宁缺毋滥：今天没有项目过推荐线。';
+  } else {
+    document.getElementById('leadTitle').innerHTML=esc(shortTitle(L.one));
+    document.getElementById('leadDek').innerHTML='<b>'+esc(L.id)+'</b> —— '+txt(L.example||L.one||'');
+    document.getElementById('credit').textContent='NASA · 公有领域 · 示意插图（非项目截图）';
+  }
+
+  /* 数字 */
+  document.getElementById('stats').innerHTML =
+    '<span class="h">今日数字</span><div class="n">'+(S.cand||0)+'</div><dl>'
+    +'<div><dt>推荐</dt><dd>'+S.rec+'</dd></div><div><dt>S/A</dt><dd>'+S.s+'/'+S.a+'</dd></div>'
+    +'<div><dt>未评</dt><dd>'+(S.un||0)+'</dd></div><div><dt>退稿</dt><dd>'+S.rej+'</dd></div>'
+    +'<div><dt>库内</dt><dd>'+S.total+'</dd></div><div><dt>分类</dt><dd>'+S.cats+'</dd></div>'
+    +'</dl>';
+
+  /* 正文：头条 + 同期 */
+  if(L){
+    document.getElementById('txt1').innerHTML =
+      (L.problem?'<p>'+txt(L.problem)+'</p>':'')
+      +(L.what?'<p>'+txt(L.what)+'</p>':'')
+      +(L.uses&&L.uses.length?'<p class="m">常见用途：'+txt(L.uses.join('；'))+'</p>':'')
+      +(L.unfit&&L.unfit.length?'<p class="m">⚠ 不适合：'+txt(L.unfit.join('；'))+'</p>':'');
+  }
+  var P2=P[1]||null;
+  document.getElementById('txt2').innerHTML = P2
+    ? '<p><b>'+esc(P2.id)+'</b></p>'+(P2.problem?'<p>'+txt(P2.problem)+'</p>':'')+(P2.what?'<p>'+txt(P2.what)+'</p>':'')
+      +(P2.aud?'<p class="m">适合：'+txt(P2.aud)+'</p>':'')
+    : '<p>本期只有 1 条过线。宁缺毋滥，不凑数。</p>';
+
+  /* 引言（A 用 pull，B 用 fl） */
+  var Q=P2||L;
+  if(Q){
+    var qh='<q>'+txt(head(Q.one||''))+'</q><cite>'+esc(Q.id)+' · '+esc(Q.tier||'—')+' 档'+(Q.score?' · '+Q.score+' 分':'')+'</cite>';
+    document.getElementById('pull').innerHTML=qh;
+    document.getElementById('fl').innerHTML=qh;
+  }
+
+  /* 简报条：第 3 条起 */
+  var rest=P.slice(2,4);
+  document.getElementById('briefs').innerHTML = rest.map(function(p,i){
+    return '<div class="brief"><div class="th" style="background-image:url(\''+ph(i+2)+'\')"></div>'
+      +'<div><span class="no">0'+(i+3)+'</span><h3>'+esc((p.id||'').split('/')[1]||p.id)+'</h3><p>'+txt(p.one||'')+'</p>'
+      +'<span class="tag">'+esc(p.tier||'—')+' 档'+(p.action?' · '+esc(p.action):'')+'</span></div></div>';
+  }).join('')+'<div class="widefig half"></div>';
+
+  /* 退稿 */
+  document.getElementById('reject').innerHTML =
+    '<div class="hd"><b>REJECTED</b><span>'+R.length+' 条 · 每条都有明确原因</span></div><div class="items">'
+    +(R.length?R.map(function(r){return '<div class="it"><div class="nm">'+esc(r.id)+'</div><div class="rs">'+esc(r.reason||'未写原因')+'</div></div>'}).join('')
+      :'<div class="it"><div class="nm">（本期没有退稿）</div></div>')+'</div>';
+
+  document.getElementById('vert').textContent='INSIDE · '+P.length+' STORIES + '+R.length+' REJECTIONS';
+  document.getElementById('giantNo').textContent=esc(D.issue||'—');
+  document.getElementById('foot').innerHTML =
+    '<span>数据源 <b>data/picks/'+esc(D.date||'')+'</b></span>'
+    +'<span>库内 <b>'+S.total+'</b> 条</span>'
+    +'<span>插图 <b>NASA 公有领域</b></span><span>字体 <b>Smiley Sans / Bebas Neue（OFL）</b></span><span>离线 · 无外部请求</span>';
+
+  /* 换骨：a/b 共用同一份数据 */
+  var m=(new URLSearchParams(location.search).get('layout')||'a').toLowerCase();
+  if(m!=='a'&&m!=='b'){m='a'}
+  document.body.className='mode-'+m;
+  var ml=document.getElementById('modeLabel');
+  if(ml) ml.textContent = m==='b' ? 'layout=b · 粗野主义拼贴' : 'layout=a · 实验性编辑排版';
+  var mt=document.getElementById('modeTag');
+  if(mt) mt.textContent='LAYOUT '+m.toUpperCase();
+  var hero=document.querySelector('.hero');
+  if(hero) hero.style.display = (m==='a') ? 'contents' : '';
+  var pp=document.getElementById('pull'), ff=document.getElementById('fl');
+  if(pp&&ff){ pp.style.display = (m==='a') ? '' : 'none'; ff.style.display = (m==='b') ? 'block' : 'none'; }
+})();
+</script>
+</body>
+</html>

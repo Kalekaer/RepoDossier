@@ -65,7 +65,7 @@ Local-first, zero dependencies, double-click to open; all data lives in plain-te
 
 ![根据目标组合工具，而不是收藏链接](docs/screenshots/3-plans.jpg)
 
-> 上图是 **demo 数据**的站点（15 条公开项目 / 5 条主推荐）。第 3 张是计划页：11 个组合预设 +「我的工作区」（demo 包里工作区为空，属正常空态）。拍摄说明见 [docs/screenshots/README.md](docs/screenshots/README.md)（**截图源页只允许用 demo 数据生成** —— 这条有自检兜着）。
+> 上图是 **demo 数据**的站点（15 条公开项目 / 5 条主推荐）。第 3 张是计划页：11 个组合预设 +「我的工作区」（demo 包里工作区为空，属正常空态）。拍摄说明见 [docs/screenshots/README.md](docs/screenshots/README.md)（文件名兼容说明：旧版 `docs/screenshots/3-workspace`，当前 demo 为 `docs/screenshots/3-plans.jpg`）（**截图源页只允许用 demo 数据生成** —— 这条有自检兜着）。
 > Screenshots show the **demo** site (15 public projects / 5 main picks). The third is the plans page: 11 presets + "My Workspaces" (empty in the demo, which is normal). See [docs/screenshots/README.md](docs/screenshots/README.md) for shooting notes (**screenshots must be taken from demo data only** — this is enforced by a check).
 
 | 图 / Image | 展示什么 / What it shows | 图注 / Caption |
@@ -312,13 +312,13 @@ Status lives in the **raw ledger**; `status` must be one of these five values:
 | 星数看起来不对 / Stars look wrong | 日报头部「抓取时间」 | 数据是快照时点，不是实时 / snapshot time, not live |
 | 定时没触发 / Schedule missed | 第 1 节限制 | **DSH 必须开着** / DSH must be running |
 | 配置改了没效果 / Config ignored | 跑 `check-config.ps1` | 字段名写错，或改到了不生效的 `schedule` / wrong field |
-| 想确认文件没互相矛盾 / Want consistency | 跑 `audit.ps1` | **167 项不变量**，报红=文档打架 / 167 invariants |
+| 想确认文件没互相矛盾 / Want consistency | 跑 `audit.ps1` | **168 项不变量**，报红=文档打架 / 168 invariants |
 | **页面缺块 / 路由坏了** / Broken page | 跑 `audit.ps1`（第 22 节） | 静态检查站点 5 页：入口、路由、搜索、**日报 01–06**、BUILD-STAMP、图表 aria |
 
 **两条自检命令 / Two self-checks**:
 ```powershell
-# 1) skill + 站点一致性（167 项不变量；本演示包应得 165 通过 / 2 跳过 / 0 失败，退出码 0）
-# 1) skill + site consistency (167 invariants; demo package should get 165 pass / 2 skip / 0 fail)
+# 1) skill + 站点一致性（168 项不变量；本演示包应得 165 通过 / 2 跳过 / 0 失败，退出码 0）
+# 1) skill + site consistency (168 invariants; demo package should get 166 pass / 2 skip / 0 fail)
 & ".dsh\skills\github-daily-picks\audit.ps1"
 
 # 2) 配置 + 状态读写往返（本演示包应得 17 通过 / 0 失败）

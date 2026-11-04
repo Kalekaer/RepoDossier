@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>HUD v5 · 一点透视走廊（圆在左 · 卡全在右 · 无遮挡）</title>
+<style>
+:root{
+  --bg:#05070a;--panel:rgba(18,23,27,.92);--line:#28333a;--line2:#3a4750;
+  --text:#eef1ea;--dim:#99a3a2;--faint:#66706b;--acc:#e8ff2a;--amber:#ffa028;--red:#ff3b2f;--blue:#3aa4ff;--teal:#22e3c6;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Cascadia Mono",monospace;
+  --scan:repeating-linear-gradient(0deg,rgba(255,255,255,.045) 0 1px,transparent 1px 3px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif}
+.hud{display:flex;align-items:center;gap:20px;padding:9px 22px;border-bottom:1px solid var(--line);
+  font:11px/1 var(--mono);letter-spacing:.16em;color:var(--dim);background:rgba(5,7,10,.95);position:relative;z-index:60}
+.hud b{color:var(--acc)}.hud .sp{flex:1}
+.hud .ic{width:20px;height:20px;border:1px solid var(--line2);position:relative;opacity:.8}
+.hud .ic::before{content:"";position:absolute;left:5px;top:9px;width:8px;height:2px;background:var(--dim)}
+
+/* ================= 一点透视走廊 ================= */
+/* 消失点 VP 定在 34% / 46%：圆钮正好坐在它上面，右侧卡列往它收敛 */
+.corridor{position:relative;height:850px;overflow:hidden;
+  perspective:640px;                    /* 640 比 v4 的 900 更强（数越小越"长"） */
+  perspective-origin:34% 46%;           /* = VP */
+  transform-style:preserve-3d;
+  background:radial-gradient(ellipse at 34% 46%,#0e1a20 0%,#080c10 46%,#040607 78%)}
+/* 透视构造线（一点透视最直观的信号）：从四周收向 VP */
+.guides{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5}
+.guides line{stroke:#2f4a56;stroke-width:1}
+.guides line.hot{stroke:rgba(232,255,42,.5)}
+/* 地面 / 天花板（rotateX 90° 铺成平面，网格压上去） */
+.plane{position:absolute;left:34%;top:46%;pointer-events:none;transform-style:preserve-3d}
+.floor{width:2600px;height:2600px;margin:-1300px 0 0 -1300px;top:0;
+  transform:translateY(300px) rotateX(90deg);
+  background-image:linear-gradient(rgba(58,164,255,.11) 1px,transparent 1px),linear-gradient(90deg,rgba(58,164,255,.11) 1px,transparent 1px);
+  background-size:150px 150px;
+  -webkit-mask:radial-gradient(ellipse at 50% 0%,#000 0%,#000 30%,transparent 66%);mask:radial-gradient(ellipse at 50% 0%,#000 0%,#000 30%,transparent 66%)}
+.ceil{width:2600px;height:2600px;margin:-1300px 0 0 -1300px;top:0;
+  transform:translateY(-300px) rotateX(90deg);
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:150px 150px;
+  -webkit-mask:radial-gradient(ellipse at 50% 100%,#000 0%,#000 26%,transparent 62%);mask:radial-gradient(ellipse at 50% 100%,#000 0%,#000 26%,transparent 62%)}
+/* 右墙：贴在右侧，竖缝 + 透视收线感 */
+.rwall{position:absolute;right:0;top:46%;width:2600px;height:900px;margin-top:-450px;
+  transform-origin:right center;transform:rotateY(-46deg);pointer-events:none;
+  background-image:linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:200px 100%;opacity:.35}
+/* 尽头：消失点光晕 + 雾 */
+.vpglow{position:absolute;left:34%;top:46%;width:620px;height:520px;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at 50% 50%,rgba(58,164,255,.26),rgba(58,164,255,.07) 40%,transparent 66%);filter:blur(3px)}
+.fog{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 34% 46%,transparent 26%,rgba(4,6,7,.55) 72%,rgba(4,6,7,.9) 100%)}
+
+/* ---------- 左：圆钮（坐在消失点上，悬浮） ---------- */
+.orbzone{position:absolute;left:34%;top:46%;transform:translate(-50%,-50%) translateZ(-30px);transform-style:preserve-3d;z-index:30}
+.orbwrap{position:relative;width:330px;height:330px;animation:bob 8s ease-in-out infinite}
+.ring{position:absolute;inset:0;border-radius:50%;border:1px dashed #2b3a41}
+.ring.a{animation:spin 56s linear infinite}
+.ring.b{inset:20px;border:1px solid #22323a}
+.ring.c{inset:42px;border:1px dotted #2f434c}
+.gauge{position:absolute;inset:40px;border-radius:50%;
+  background:conic-gradient(var(--acc) 0 11%,transparent 11% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%);opacity:.62}
+.orb{position:absolute;inset:66px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  text-decoration:none;color:var(--text);border:1px solid var(--line2);
+  background:linear-gradient(165deg,rgba(32,39,43,.98),rgba(7,10,12,.99));
+  box-shadow:inset 0 0 50px #000,0 0 0 8px rgba(5,7,10,.85),0 40px 90px -46px #000,0 0 64px -20px rgba(58,164,255,.4);
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.orb:hover,.orb:focus-visible{transform:scale(1.05);border-color:var(--acc);
+  box-shadow:inset 0 0 50px #000,0 0 0 8px rgba(5,7,10,.85),0 0 70px -14px rgba(232,255,42,.46)}
+.orb .k{font:9px/1 var(--mono);letter-spacing:.34em;color:var(--acc)}
+.orb .t{font-size:25px;font-weight:800;letter-spacing:-.02em}
+.orb .s{font:10px/1.45 var(--mono);color:var(--dim);text-align:center}
+.orb .n{font:700 29px/1 var(--mono);margin-top:3px}
+.orb .n em{font:400 10px/1 var(--mono);color:var(--faint);font-style:normal;margin-left:5px}
+.seg{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;gap:3px}
+.seg i{width:8px;height:3px;background:#2c3a40}.seg i.on{background:var(--acc)}
+.orbshadow{position:absolute;left:34%;top:calc(46% + 176px);width:290px;height:50px;transform:translate(-50%,0);
+  background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.88),transparent 70%);filter:blur(10px);z-index:6}
+
+/* ---------- 右：三张卡沿一点透视线梯次退深，互不遮挡 ---------- */
+.deck{position:absolute;right:34px;top:50%;width:660px;height:0;transform-style:preserve-3d}
+.wcard{position:absolute;right:0;display:block;text-decoration:none;color:var(--text);
+  border:1px solid var(--line2);background:var(--panel);transform-style:preserve-3d;
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+  transition:transform .34s cubic-bezier(.2,.75,.2,1),border-color .34s ease,box-shadow .34s ease;
+  box-shadow:0 34px 70px -44px #000}
+.wcard::before{content:"";position:absolute;inset:0;background-image:var(--scan);pointer-events:none;opacity:.4}
+.wcard::after{content:"";position:absolute;right:-3px;top:0;bottom:0;width:3px;background:var(--h,var(--acc))}
+/* 铰链钉在**右缘**（靠右墙那侧），所以旋转时它像从右墙展开 */
+.wcard{transform-origin:right center}
+/* 高度错开 + 深度拉开 ⇒ 投影后互不遮挡 */
+.k1{--h:var(--blue); --z:-30px;   --y:-188%; width:600px; transform:translateY(var(--y)) translateZ(var(--z)) rotateY(-9deg)}
+.k2{--h:var(--teal); --z:-560px;  --y:-46%;  width:560px; transform:translateY(var(--y)) translateZ(var(--z)) rotateY(-15deg)}
+.k3{--h:var(--amber);--z:-1090px; --y:96%;   width:520px; transform:translateY(var(--y)) translateZ(var(--z)) rotateY(-21deg)}
+.wcard:hover,.wcard:focus-visible{border-color:var(--h);z-index:45;box-shadow:0 30px 64px -30px #000}
+.k1:hover{transform:translateY(var(--y)) translateZ(calc(var(--z) + 110px)) rotateY(-4deg)}
+.k2:hover{transform:translateY(var(--y)) translateZ(calc(var(--z) + 110px)) rotateY(-9deg)}
+.k3:hover{transform:translateY(var(--y)) translateZ(calc(var(--z) + 110px)) rotateY(-14deg)}
+.wcard .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wcard .no{font:10px/1 var(--mono);letter-spacing:.2em;color:var(--h);border:1px solid var(--line);padding:4px 7px;background:rgba(0,0,0,.45)}
+.wcard .lv{font:9px/1 var(--mono);letter-spacing:.18em;color:var(--faint)}
+.wcard h3{margin:11px 0 5px;font-size:27px;line-height:1.05;letter-spacing:-.02em}
+.wcard p{margin:0;color:var(--dim);font-size:13px}
+.wcard .foot{display:flex;gap:14px;margin-top:10px;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
+.wcard .foot b{color:var(--text)}
+.wcard .bars{display:flex;gap:3px;margin-top:11px}
+.wcard .bars i{height:3px;flex:1;background:#253137}
+.wcard .bars i.on{background:var(--h)}
+/* 远处信息递减（透视会继续缩小它） */
+.k2 p,.k2 .bars{display:none}
+.k3 p,.k3 .bars,.k3 .foot{display:none}
+.k3 h3{font-size:23px}
+/* 深度标尺（右侧竖排小刻度，强化一点透视的"距离感"） */
+.ruler{position:absolute;right:14px;top:50%;width:14px;height:70%;transform:translateY(-50%);
+  background-image:repeating-linear-gradient(0deg,#33424a 0 1px,transparent 1px 26px);opacity:.5;z-index:8}
+.rdepth{position:absolute;right:32px;top:50%;transform:translateY(-50%);font:9px/1 var(--mono);color:var(--faint);
+  letter-spacing:.2em;writing-mode:vertical-rl;z-index:8}
+
+.news{position:absolute;left:22px;bottom:16px;display:flex;align-items:stretch;border:1px solid var(--line2);background:rgba(6,8,10,.94);z-index:50}
+.news .tag{background:var(--red);color:#fff;font:600 10px/1 var(--mono);letter-spacing:.16em;padding:9px 10px;display:flex;align-items:center}
+.news .txt{padding:8px 12px;font:11px/1.5 var(--mono);color:var(--dim)}.news .txt b{color:var(--text)}
+.hint{position:absolute;left:34%;bottom:18px;transform:translateX(-50%);font:10px/1 var(--mono);letter-spacing:.2em;color:var(--faint);z-index:50}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(-7px)}50%{transform:translateY(7px)}}
+
+/* ---------- 统计带（走廊之外） ---------- */
+.band{position:relative;padding:34px 26px 64px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(58,164,255,.05),transparent 28%)}
+.bhead{display:flex;align-items:baseline;gap:16px;margin-bottom:18px}
+.bhead .no{font:11px/1 var(--mono);letter-spacing:.24em;color:var(--acc)}
+.bhead h2{margin:0;font-size:24px}.bhead .side{margin-left:auto;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
+.cols{display:grid;grid-template-columns:1.3fr 1fr .95fr;gap:14px}
+.box{border:1px solid var(--line);background:rgba(14,19,22,.94);padding:16px}
+.box h4{margin:0 0 12px;font:10px/1 var(--mono);letter-spacing:.22em;color:var(--dim)}
+.catrow{display:grid;grid-template-columns:90px 1fr 40px;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}
+.catrow .bar{height:7px;background:var(--c);position:relative}
+.catrow .bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(0,0,0,.55) 5px 7px)}
+.catrow .n{font:10px/1 var(--mono);color:var(--dim);text-align:right}
+.stackbar{display:flex;height:12px;border:1px solid var(--line2);margin-bottom:8px;background:#0a0e10}
+.stackbar i{height:100%}
+.lg{display:flex;flex-wrap:wrap;gap:8px;font:10px/1.6 var(--mono);color:var(--dim)}
+.lg i{width:8px;height:8px;display:inline-block;margin-right:4px}
+.spark{display:flex;align-items:flex-end;gap:7px;height:112px}
+.spark .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.spark .col i{width:100%;background:linear-gradient(180deg,var(--acc),#55600d)}
+.spark .col b{font:9px/1 var(--mono);color:var(--dim)}.spark .col span{font:8px/1 var(--mono);color:var(--faint)}
+.tagcloud{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tagcloud span{font:10px/1 var(--mono);border:1px solid var(--line);padding:4px 6px;color:var(--dim)}
+.tagcloud span.hot{color:var(--acc);border-color:#454d20}
+.note{font:10px/1.8 var(--mono);color:var(--faint);margin-top:20px;letter-spacing:.06em}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:1180px){
+  .corridor{height:auto;perspective:none;overflow:visible;padding:20px 16px 80px}
+  .plane,.rwall,.vpglow,.guides,.fog,.orbshadow,.ruler,.rdepth,.hint{display:none}
+  .orbzone{position:static;transform:none;margin:0 auto 22px;width:330px}
+  .deck{position:static;width:auto;height:auto}
+  .wcard{position:static;width:auto!important;transform:none!important;margin-bottom:12px}
+  .k2 p,.k2 .bars,.k3 p,.k3 .bars,.k3 .foot{display:block}
+  .news{position:static;margin-top:14px}
+  .cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="hud">
+  <span class="ic"></span>
+  <span>ARCHIVE&nbsp;CORRIDOR</span><span>VP 34°/46% · ONE-POINT</span><span>SYNC <b>/*__LATEST__*/—</b></span>
+  <span class="sp"></span><span>NODE <b>/*__TOTAL__*/0</b></span>
+</div>
+
+<section class="corridor">
+  <!-- 透视构造线（收向消失点） -->
+  <svg class="guides" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+    <line x1="1600" y1="0"   x2="544" y2="414"/><line x1="1600" y1="150" x2="544" y2="414"/>
+    <line x1="1600" y1="300" x2="544" y2="414"/><line class="hot" x1="1600" y1="450" x2="544" y2="414"/>
+    <line x1="1600" y1="600" x2="544" y2="414"/><line x1="1600" y1="750" x2="544" y2="414"/>
+    <line x1="1600" y1="900" x2="544" y2="414"/>
+    <line x1="0" y1="900" x2="544" y2="414"/><line x1="0" y1="750" x2="544" y2="414"/><line x1="0" y1="0" x2="544" y2="414"/>
+  </svg>
+  <div class="plane floor"></div><div class="plane ceil"></div>
+  <div class="rwall"></div>
+  <div class="vpglow"></div>
+  <div class="fog"></div>
+  <div class="orbshadow"></div>
+
+  <!-- 圆钮：左侧，坐在消失点上 -->
+  <div class="orbzone">
+    <div class="orbwrap">
+      <div class="ring a"></div><div class="ring b"></div><div class="ring c"></div><div class="gauge"></div>
+      <a class="orb" href="#/picks" aria-label="进入每日精选（日报）">
+        <span class="k">01 · DAILY</span>
+        <span class="t">每日精选</span>
+        <span class="s">日报 / 精选同一件事<br>按天看新增 · 按档位看精品</span>
+        <span class="n">/*__REC__*/0<em>条已推荐</em></span>
+        <span class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 右侧卡列：沿一点透视退深，上中下错开，互不遮挡 -->
+  <div class="ruler"></div><div class="rdepth">DEPTH ▸ 0 · 560 · 1090</div>
+  <div class="deck">
+    <a class="wcard k1" href="#/all">
+      <div class="row"><span class="no">02 / LIBRARY</span><span class="lv">LEVEL-2 · NEAR</span></div>
+      <h3>完整项目库</h3>
+      <p>全部档案：分类、标签、徽章、风险、成长记录。</p>
+      <div class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+      <div class="foot"><span>ITEMS <b>/*__TOTAL__*/0</b></span><span>CAT 11</span></div>
+    </a>
+    <a class="wcard k2" href="#/plans">
+      <div class="row"><span class="no">03 / OPS</span><span class="lv">LEVEL-2 · MID</span></div>
+      <h3>计划与工作区</h3>
+      <p>按需求的工具组合与工作区。</p>
+      <div class="foot"><span>PLANS <b>/*__PLANS__*/0</b></span></div>
+    </a>
+    <a class="wcard k3" href="#/legend">
+      <div class="row"><span class="no">04 / SPEC</span><span class="lv">MODAL · FAR</span></div>
+      <h3>图例与标准</h3>
+    </a>
+  </div>
+
+  <div class="news"><span class="tag">LATEST</span><span class="txt"><b>/*__LATEST__*/</b> 精选已入库 · 共 <b>/*__REC__*/0</b> 条推荐</span></div>
+  <div class="hint">SCROLL ↓ TELEMETRY</div>
+</section>
+
+<section class="band">
+  <div class="bhead"><span class="no">§ 01 / TELEMETRY</span><h2>库里现在长什么样</h2><span class="side">走廊之外</span></div>
+  <div class="cols">
+    <div class="box"><h4>DISTRIBUTION</h4><div id="catRows"></div></div>
+    <div class="box"><h4>TIER / STATUS</h4><div id="tierBar" class="stackbar"></div><div id="tierLg" class="lg"></div>
+      <div style="height:10px"></div><div id="stBar" class="stackbar"></div><div id="stLg" class="lg"></div></div>
+    <div class="box"><h4>EVENTS / 近 7 天</h4><div id="spark" class="spark"></div><div id="tagCloud" class="tagcloud"></div></div>
+  </div>
+  <p class="note">v5 · 一点透视：单消失点 (34%,46%) ｜ perspective 640px（比 v4 的 900 更强）｜ 圆钮 translateZ(-30) 坐在消失点上 + 地面投影 ｜ 三张卡全在右侧、Z 0/−560/−1090 梯次退深、Y 上中下错开 ⇒ **投影后互不遮挡** ｜ 透视构造线 + 右墙竖缝 + 雾 + 深度标尺 ｜ 零外部请求</p>
+</section>
+
+<script>
+const CATS = /*__CATS__*/[];
+const TIER = /*__TIER__*/[];
+const STATUS = /*__STATUS__*/[];
+const SPARK = /*__SPARK__*/[];
+const TAGS = /*__TAGS__*/[];
+const COLORS = ['#e8ff2a','#3aa4ff','#22e3c6','#ffa028','#b06bff','#ff3b2f','#ffd166','#ff4d6d','#4dd0e1','#9ccc65','#66706b'];
+(function(){
+  const max = Math.max.apply(null, CATS.map(c=>c.n));
+  document.getElementById('catRows').innerHTML = CATS.map(function(c){
+    return '<div class="catrow" style="--c:'+c.c+'"><span>'+c.l1+'</span>'
+      + '<span class="bar" style="width:'+Math.max(3,Math.round(c.n/max*100))+'%"></span>'
+      + '<span class="n">'+c.n+'</span></div>';
+  }).join('');
+  function bar(h,l,rows,pal){
+    const t = rows.reduce((s,r)=>s+r.n,0)||1;
+    document.getElementById(h).innerHTML = rows.map(function(r,i){return '<i style="width:'+(r.n/t*100)+'%;background:'+pal[i%pal.length]+'"></i>';}).join('');
+    document.getElementById(l).innerHTML = rows.map(function(r,i){return '<span><i style="background:'+pal[i%pal.length]+'"></i>'+r.k+' '+r.n+'</span>';}).join('');
+  }
+  bar('tierBar','tierLg', TIER, ['#e8ff2a','#3aa4ff','#22e3c6','#3a4750','#66706b']);
+  bar('stBar','stLg', STATUS, ['#b06bff','#22e3c6','#ffd166','#ff3b2f','#66706b']);
+  const smax = Math.max.apply(null, SPARK.map(s=>s.n))||1;
+  document.getElementById('spark').innerHTML = SPARK.map(function(s){
+    return '<div class="col"><b>'+s.n+'</b><i style="height:'+Math.max(4,Math.round(s.n/smax*100))+'%"></i><span>'+s.d+'</span></div>';
+  }).join('');
+  document.getElementById('tagCloud').innerHTML = TAGS.slice(0,12).map(function(t,i){
+    return '<span class="'+(i<4?'hot':'')+'">'+t.t+' '+t.n+'</span>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

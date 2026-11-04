@@ -3,8 +3,8 @@
 # 为什么：检索式以前只活在文档里，Agent 每次手拼 URL、也没有地方存原始返回。
 # 现在：
 #   1. -PlanOnly（默认）：从 data/queries.json 生成当天该跑的 URL 清单 → data/raw/<date>/r<N>/plan.json
-#   2. -Import <Q> -File <json>：把 web_fetch 取回的响应登记成 raw，并更新 meta.json
-# 本机直连已被禁止（config.forbid_local_direct_connect），脚本**不发任何网络请求**。
+#   2. -Import <Q> -File <json>：把宿主 HTTP 工具取回的响应登记成 raw，并更新 meta.json
+# 脚本本身**不发任何网络请求**；Codex 可用 curl.exe/gh api 取回 JSON，DSH 可用 web_fetch。
 #
 # 用法：
 #   & .\tools\fetch-daily.ps1 -PlanOnly
@@ -20,12 +20,15 @@ param(
   [switch]$PlanOnly,
   [string]$Import = '',
   [string]$File = '',
+  [string]$RequestUrl = '',
+  [string]$QueryTask = '',
   [switch]$Json
 )
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 function P($r) { Join-Path $root $r }
+. (P 'tools\query-partitions.ps1')
 $enc = New-Object System.Text.UTF8Encoding($false)
 
 if (-not $Date) { $Date = (Get-Date).ToString('yyyy-MM-dd') }
@@ -43,18 +46,27 @@ if (-not $dayCfg) { Write-Host "✗ queries.json 缺星期 $wd" -ForegroundColor
 
 function Resolve-Q([string]$q) {
   $q = $q.Replace('{D7}', $dt.AddDays(-7).ToString('yyyy-MM-dd'))
+  $q = $q.Replace('{D8}', $dt.AddDays(-8).ToString('yyyy-MM-dd'))
   $q = $q.Replace('{D14}', $dt.AddDays(-14).ToString('yyyy-MM-dd'))
   $q = $q.Replace('{D30}', $dt.AddDays(-30).ToString('yyyy-MM-dd'))
+  $q = $q.Replace('{D180}', $dt.AddDays(-180).ToString('yyyy-MM-dd'))
   $q = $q.Replace('{TODAY_TOPIC}', [string]$dayCfg.topic)
   $q = $q.Replace('{TODAY_TOPIC2}', [string]$dayCfg.topic2)
   return $q
 }
 
-function Build-Url($item) {
+function Build-Url($item, $partition = $null) {
   $q = Resolve-Q $item.q
+  if ($partition) { $q = $q.Replace('stars:200..800', ('stars:{0}..{1}' -f $partition.low,$partition.high)) }
   $u = 'https://api.github.com/search/repositories?q=' + ($q.Replace(' ', '+').Replace('>', '%3E'))
   if ($item.sort) { $u += "&sort=$($item.sort)&order=$($item.order)" }
   if ($item.per_page) { $u += "&per_page=$($item.per_page)" }
+  if ($partition) { $u += "&page=$($partition.page)" }
+  elseif ($item.page) { $u += "&page=$($item.page)" }
+  elseif ($item.page_rotate) {
+    $pg = ($dt.DayOfYear % [int]$item.page_rotate) + 1
+    $u += "&page=$pg"
+  }
   return $u
 }
 
@@ -72,14 +84,22 @@ function New-Plan {
     if (-not $take) { continue }
 
     $isCond = ($freq -eq 'conditional')
+    $partition = $null
+    if ($q.adaptive_star_partition -and -not $q.acquisition) {
+      $observations = @(Get-SearchPartitionEvidence -RawRoot (P 'data\raw') -QueryId $q.id -Date $Date)
+      $partition = Get-NextSearchPartition -Observations $observations -PageSize $q.per_page -Reverse:($q.sort -eq 'updated')
+      if ($partition.blocked) { throw "Query $($q.id) exceeds 1000 results even at one star value; add a pushed-date split before continuing." }
+    }
     $items += [ordered]@{
       id          = [string]$q.id
       name        = [string]$q.name
       kind        = if ($isCond) { 'conditional' } elseif ($q.mode -eq 'probe') { 'probe' } else { 'search' }
-      url         = if ($q.mode -eq 'search') { Build-Url $q } else { '' }
+      url         = if ($q.mode -eq 'search') { Build-Url $q $partition } else { '' }
       per_page    = [int]$q.per_page
       required    = [bool]$q.required
       conditional = if ($isCond) { $q.when } else { $null }
+      partition   = $partition
+      acquisition = $q.acquisition
     }
   }
   # 计划里永远包含 Q3s 的条件说明；是否真的跑由 coverage 判定
@@ -124,22 +144,35 @@ if ($Import) {
   $next = 1
   if ($prev.Count) { $next = ([int](($prev | ForEach-Object { [int]$_.attempt }) | Measure-Object -Maximum).Maximum) + 1 }
   $fileName = if ($ok) { "$Import.$next.json" } else { "$Import.$next.error.json" }
+  if (Test-Path (Join-Path $dir $fileName)) { throw 'Raw response already exists; refusing overwrite.' }
   if ($ok) {
-    [IO.File]::WriteAllText((Join-Path $dir $fileName), ($resp | ConvertTo-Json -Depth 20 -Compress), $enc)
+    [IO.File]::WriteAllText((Join-Path $dir $fileName), (Extract-Json $raw), $enc)
   } else {
     [IO.File]::WriteAllText((Join-Path $dir $fileName), $raw.Substring(0, [Math]::Min(2000, $raw.Length)), $enc)
   }
   $newFaces = $null
+  $queryTotal = if($ok){[int]$resp.total_count}else{$null}
   if ($ok -and $Import -eq 'Q3') {
     $seen = @{}
     if (Test-Path (P 'data\seen.jsonl')) { foreach ($line in (Get-Content (P 'data\seen.jsonl') -Encoding UTF8 | Where-Object { $_.Trim() })) { try { $o = $line | ConvertFrom-Json; $seen[([string]$o.full_name).ToLower()] = 1 } catch { } } }
-    $newFaces = @($items | Where-Object { -not $seen.ContainsKey(([string]$_.full_name).ToLower()) }).Count
+    $q3Ids=@{};foreach($item in $items){$q3Ids[([string]$item.full_name).ToLowerInvariant()]=$true}
+    foreach($old in @($list|Where-Object{$_.id -eq 'Q3' -and $_.ok})){
+      $oldPath=Join-Path $dir $old.file
+      if($old.sha256 -and (Get-FileHash -LiteralPath $oldPath).Hash -ne $old.sha256){throw 'Previous Q3 raw changed'}
+      foreach($item in @((Get-Content $oldPath -Raw|ConvertFrom-Json).items)){$q3Ids[([string]$item.full_name).ToLowerInvariant()]=$true}
+      $queryTotal=[math]::Max($queryTotal,[int]$old.total_count)
+    }
+    $newFaces = @($q3Ids.Keys | Where-Object { -not $seen.ContainsKey($_) }).Count
   }
   $list += [pscustomobject]@{
     id = $Import; attempt = $next; at = (Get-Date).ToString('s'); ok = [bool]$ok
     items = $items.Count; total_count = if ($ok) { [int]$resp.total_count } else { $null }
     newFaces = $newFaces
     file = $fileName
+    sha256 = (Get-FileHash -LiteralPath (Join-Path $dir $fileName) -Algorithm SHA256).Hash
+    request_url = $RequestUrl
+    query_task = $QueryTask
+    query_total_count = $queryTotal
   }
   $meta | Add-Member -NotePropertyName imports -NotePropertyValue $list -Force
   [IO.File]::WriteAllText($metaPath, ($meta | ConvertTo-Json -Depth 8), $enc)
@@ -171,6 +204,7 @@ $plan = [ordered]@{
   generated_at = (Get-Date).ToString('s')
   items = $items
 }
+if (Test-Path $planPath) { throw 'Plan already exists; use a new round instead of overwriting history.' }
 [IO.File]::WriteAllText($planPath, ($plan | ConvertTo-Json -Depth 8), $enc)
 
 if ($Json) { $plan | ConvertTo-Json -Depth 8; exit 0 }
@@ -179,3 +213,4 @@ foreach ($i in $items) {
   Write-Host ("  [{0}] {1}  {2}" -f $i.id, $(if ($i.kind -eq 'search') { '搜索' } elseif ($i.kind -eq 'probe') { '实验' } else { '条件' }), $(if ($i.url) { $i.url } else { '—' }))
 }
 Write-Host ("→ {0}" -f $planPath) -ForegroundColor DarkGray
+exit 0

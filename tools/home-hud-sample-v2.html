@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>HUD 样片 v2 · 一级页面（游戏内交互语言）</title>
+<style>
+:root{
+  --bg:#08090a;--void:#0c0d0e;--panel:rgba(20,22,23,.82);--panel-solid:#141617;
+  --line:#2b2f31;--line-2:#3c4244;--text:#eef0ea;--dim:#98a09b;--faint:#68706b;
+  --acc:#e8ff2a;--amber:#ffa028;--red:#ff3b2f;--blue:#4aa8ff;--teal:#25e6c8;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Cascadia Mono",monospace;
+  --scan:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);
+  --grid:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.6 -apple-system,"Segoe UI","Microsoft YaHei UI",system-ui,sans-serif}
+body{background-image:var(--grid);background-size:34px 34px,34px 34px;background-attachment:fixed}
+/* ---------- 顶部 HUD 状态条 ---------- */
+.hud{display:flex;align-items:center;gap:18px;padding:10px 26px;border-bottom:1px solid var(--line);
+  font:11px/1 var(--mono);letter-spacing:.14em;color:var(--dim);background:rgba(8,9,10,.9)}
+.hud b{color:var(--acc);font-weight:600}
+.hud .dot{width:6px;height:6px;background:var(--acc);border-radius:50%;box-shadow:0 0 8px var(--acc);animation:bpulse 2.6s ease-in-out infinite}
+.hud .sp{flex:1}
+.hud .lv{color:var(--faint)}
+/* ---------- 舞台 ---------- */
+.stage{position:relative;padding:26px 26px 0;display:grid;grid-template-columns:392px 1fr;gap:0;align-items:center;min-height:640px}
+.stage::before,.stage::after{content:"";position:absolute;width:26px;height:26px;border:1px solid var(--line-2)}
+.stage::before{left:18px;top:18px;border-right:0;border-bottom:0}
+.stage::after{right:18px;bottom:18px;border-left:0;border-top:0}
+.hudlabel{position:absolute;left:26px;top:8px;font:10px/1 var(--mono);letter-spacing:.28em;color:var(--faint)}
+/* ---------- 左：圆钮（HUD 环形核心） ---------- */
+.orbwrap{position:relative;width:352px;height:352px;margin:0 auto}
+.ring{position:absolute;inset:0;border-radius:50%;border:1px dashed #2a2e2f}
+.ring.a{animation:spin 44s linear infinite}
+.ring.b{inset:22px;border-style:solid;border-color:#232728;border-width:1px}
+.ring.c{inset:46px;border:1px dotted #2f3536}
+.arc{position:absolute;inset:44px;border-radius:50%;
+  background:conic-gradient(var(--acc) 0 11%,transparent 11% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 61%,#000 62%);mask:radial-gradient(circle,transparent 61%,#000 62%);opacity:.55}
+.orb{position:absolute;inset:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  text-decoration:none;color:var(--text);background:linear-gradient(160deg,rgba(28,30,30,.96),rgba(10,11,11,.98));
+  border:1px solid var(--line-2);border-radius:50%;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.9),0 0 0 6px rgba(8,9,10,.9),0 26px 70px -34px #000;
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.orb:hover,.orb:focus-visible{transform:scale(1.04);border-color:var(--acc);box-shadow:inset 0 0 40px rgba(0,0,0,.9),0 0 0 6px rgba(8,9,10,.9),0 0 46px -10px rgba(232,255,42,.4)}
+.orb .k{font:9px/1 var(--mono);letter-spacing:.3em;color:var(--acc)}
+.orb .t{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.orb .s{font:10px/1.5 var(--mono);color:var(--dim);text-align:center}
+.orb .n{font:700 32px/1 var(--mono);margin-top:4px}
+.orb .n em{font:400 10px/1 var(--mono);color:var(--faint);font-style:normal;margin-left:5px}
+.seg{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);display:flex;gap:3px}
+.seg i{width:9px;height:3px;background:#31383a}
+.seg i.on{background:var(--acc)}
+.orbcap{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font:9px/1.6 var(--mono);color:var(--faint);white-space:nowrap;letter-spacing:.12em}
+/* ---------- 右：弧形纵深卡列（切角 + 毛玻璃 + 扫描线） ---------- */
+.stack{position:relative;perspective:1600px;perspective-origin:16% 50%;min-height:520px}
+.pcard{position:absolute;left:0;top:50%;display:block;text-decoration:none;color:var(--text);width:588px;
+  padding:20px 22px 18px;border:1px solid var(--line-2);background:var(--panel);backdrop-filter:blur(7px);
+  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));
+  transition:transform .24s cubic-bezier(.2,.75,.2,1),border-color .24s ease,background .24s ease;
+  box-shadow:0 30px 64px -44px #000}
+.pcard::before{content:"";position:absolute;inset:0;background-image:var(--scan);pointer-events:none;opacity:.5}
+.pcard::after{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--h,var(--acc))}
+.pcard .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pcard .no{font:11px/1 var(--mono);letter-spacing:.22em;color:var(--h,var(--acc));
+  border:1px solid var(--line);padding:4px 8px;background:rgba(0,0,0,.35)}
+.pcard .lv{font:9px/1 var(--mono);letter-spacing:.2em;color:var(--faint)}
+.pcard h3{margin:12px 0 6px;font-size:24px;letter-spacing:-.02em;line-height:1.08}
+.pcard p{margin:0;color:var(--dim);font-size:13px}
+.pcard .bars{display:flex;gap:3px;margin-top:12px}
+.pcard .bars i{height:3px;flex:1;background:#2c3233}
+.pcard .bars i.on{background:var(--h,var(--acc))}
+.pcard .foot{display:flex;gap:16px;margin-top:10px;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.08em}
+.pcard .foot b{color:var(--text)}
+.pcard.c1{--h:var(--blue);transform:translate(0,-44%) rotateY(-8deg);z-index:3}
+.pcard.c2{--h:var(--teal);transform:translate(-58px,10%) rotateY(-13deg) translateZ(-95px) scale(.952);z-index:2;opacity:.96}
+.pcard.c3{--h:var(--amber);transform:translate(-116px,64%) rotateY(-18deg) translateZ(-190px) scale(.9);z-index:1;opacity:.9}
+.pcard:hover,.pcard:focus-visible{border-color:var(--h);background:rgba(30,33,34,.92);z-index:9}
+.pcard.c1:hover{transform:translate(12px,-44%) rotateY(-3deg) translateZ(46px)}
+.pcard.c2:hover{transform:translate(-46px,10%) rotateY(-8deg) translateZ(-44px) scale(.952)}
+.pcard.c3:hover{transform:translate(-104px,64%) rotateY(-13deg) translateZ(-136px) scale(.9)}
+/* ---------- 统计带 ---------- */
+.band{position:relative;margin-top:30px;padding:34px 26px 64px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(232,255,42,.03),transparent 34%)}
+.slash{position:absolute;left:0;top:-1px;height:3px;width:180px;background:var(--acc);transform:skewX(-32deg)}
+.bhead{display:flex;align-items:baseline;gap:16px;margin-bottom:20px}
+.bhead .no{font:11px/1 var(--mono);letter-spacing:.24em;color:var(--acc)}
+.bhead h2{margin:0;font-size:25px;letter-spacing:-.01em}
+.bhead .side{margin-left:auto;font:10px/1 var(--mono);color:var(--faint);letter-spacing:.12em}
+.cols{display:grid;grid-template-columns:1.3fr 1fr .95fr;gap:16px}
+.box{position:relative;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(5px);padding:16px}
+.box h4{margin:0 0 12px;font:10px/1 var(--mono);letter-spacing:.22em;color:var(--dim)}
+.catrow{display:grid;grid-template-columns:92px 1fr 42px;gap:9px;align-items:center;margin-bottom:6px;font-size:12px}
+.catrow .bar{height:7px;background:var(--c);position:relative}
+.catrow .bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(0,0,0,.55) 5px 7px)}
+.catrow .n{font:10px/1 var(--mono);color:var(--dim);text-align:right}
+.stackbar{display:flex;height:13px;border:1px solid var(--line-2);margin-bottom:9px;background:#0e1011}
+.stackbar i{height:100%}
+.lg{display:flex;flex-wrap:wrap;gap:9px;font:10px/1.6 var(--mono);color:var(--dim)}
+.lg i{width:8px;height:8px;display:inline-block;margin-right:4px}
+.spark{display:flex;align-items:flex-end;gap:8px;height:118px;padding-top:6px}
+.spark .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.spark .col i{width:100%;background:linear-gradient(180deg,var(--acc),#5d6a0e);position:relative}
+.spark .col i::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 4px,rgba(0,0,0,.45) 4px 5px)}
+.spark .col b{font:9px/1 var(--mono);color:var(--dim)}
+.spark .col span{font:8px/1 var(--mono);color:var(--faint)}
+.tagcloud{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tagcloud span{font:10px/1 var(--mono);border:1px solid var(--line);padding:4px 6px;color:var(--dim);background:rgba(0,0,0,.3)}
+.tagcloud span.hot{color:var(--acc);border-color:#4a5220}
+.note{font:10px/1.8 var(--mono);color:var(--faint);margin-top:22px;letter-spacing:.06em}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bpulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:1100px){.stage{grid-template-columns:1fr;min-height:auto;gap:24px}.stack{min-height:640px;perspective:none}
+ .pcard{position:static;width:auto;transform:none!important;margin-bottom:12px}.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hud">
+  <span class="dot"></span><span>SYS://ARCHIVE</span><span>NODE <b>/*__TOTAL__*/0</b></span>
+  <span>REC <b>/*__REC__*/0</b></span><span class="sp"></span>
+  <span class="lv">LEVEL-1 / 一级页面</span>
+</div>
+
+<section class="stage">
+  <span class="hudlabel">// PRIMARY NODE</span>
+  <div class="orbwrap">
+    <div class="ring a"></div><div class="ring b"></div><div class="ring c"></div><div class="arc"></div>
+    <a class="orb" href="#/picks" aria-label="进入每日精选（日报）">
+      <span class="k">01 · DAILY</span>
+      <span class="t">每日精选</span>
+      <span class="s">日报 / 精选同一件事<br>按天看新增 · 按档位看精品</span>
+      <span class="n">/*__REC__*/0<em>条已推荐</em></span>
+      <span class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>
+    </a>
+    <div class="orbcap">LATEST /*__LATEST__*/— ｜ CLICK TO ENTER</div>
+  </div>
+
+  <div class="stack">
+    <a class="pcard c1" href="#/all">
+      <div class="row"><span class="no">02 / LIBRARY</span><span class="lv">LEVEL-2</span></div>
+      <h3>完整项目库</h3>
+      <p>全部档案：分类、标签、徽章、风险、成长记录。标签球 / 分类按钮 / 单列滚动标签条 / 放大镜搜索。</p>
+      <div class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+      <div class="foot"><span>ITEMS <b>/*__TOTAL__*/0</b></span><span>CAT 11</span><span>TAGS 499</span></div>
+    </a>
+    <a class="pcard c2" href="#/plans">
+      <div class="row"><span class="no">03 / OPS</span><span class="lv">LEVEL-2</span></div>
+      <h3>计划与工作区</h3>
+      <p>按需求配好的工具组合与工作区：谁干什么、还缺什么，一屏看完。</p>
+      <div class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="foot"><span>PLANS <b>/*__PLANS__*/0</b></span><span>WORKSPACE 3</span></div>
+    </a>
+    <a class="pcard c3" href="#/legend">
+      <div class="row"><span class="no">04 / SPEC</span><span class="lv">MODAL 小窗</span></div>
+      <h3>图例与标准</h3>
+      <p>档位 / 状态 / 风险 / 徽章是什么意思 —— 点开是小窗，不占独立页面。</p>
+      <div class="bars"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="foot"><span>ESC 关闭</span><span>不跳页</span></div>
+    </a>
+  </div>
+</section>
+
+<section class="band">
+  <span class="slash"></span>
+  <div class="bhead"><span class="no">§ 01 / TELEMETRY</span><h2>库里现在长什么样</h2><span class="side">SCROLL TO READ</span></div>
+  <div class="cols">
+    <div class="box"><h4>DISTRIBUTION / 分类</h4><div id="catRows"></div></div>
+    <div class="box"><h4>TIER / STATUS</h4><div id="tierBar" class="stackbar"></div><div id="tierLg" class="lg"></div>
+      <div style="height:12px"></div><div id="stBar" class="stackbar"></div><div id="stLg" class="lg"></div></div>
+    <div class="box"><h4>EVENTS / 近 7 天</h4><div id="spark" class="spark"></div><div id="tagCloud" class="tagcloud"></div></div>
+  </div>
+  <p class="note">HUD 样片 v2 · 数据全部来自 data/projects.jsonl 与 data/events.jsonl 实测 ｜ 元素：切角面板 / 扫描线 / 分段条 / 环形刻度 / 等宽 HUD 标签 / 弧形纵深卡列（纯 CSS perspective）｜ 零外部请求</p>
+</section>
+
+<script>
+const CATS = /*__CATS__*/[];
+const TIER = /*__TIER__*/[];
+const STATUS = /*__STATUS__*/[];
+const SPARK = /*__SPARK__*/[];
+const TAGS = /*__TAGS__*/[];
+const COLORS = ['#e8ff2a','#4aa8ff','#25e6c8','#ffa028','#b06bff','#ff3b2f','#ffd166','#ff4d6d','#4dd0e1','#9ccc65','#68706b'];
+(function(){
+  const max = Math.max.apply(null, CATS.map(c=>c.n));
+  document.getElementById('catRows').innerHTML = CATS.map(function(c){
+    return '<div class="catrow" style="--c:'+c.c+'"><span>'+c.l1+'</span>'
+      + '<span class="bar" style="width:'+Math.max(3,Math.round(c.n/max*100))+'%"></span>'
+      + '<span class="n">'+c.n+'</span></div>';
+  }).join('');
+  function bar(h,l,rows,pal){
+    const t = rows.reduce((s,r)=>s+r.n,0)||1;
+    document.getElementById(h).innerHTML = rows.map(function(r,i){return '<i style="width:'+(r.n/t*100)+'%;background:'+pal[i%pal.length]+'"></i>';}).join('');
+    document.getElementById(l).innerHTML = rows.map(function(r,i){return '<span><i style="background:'+pal[i%pal.length]+'"></i>'+r.k+' '+r.n+'</span>';}).join('');
+  }
+  bar('tierBar','tierLg', TIER, ['#e8ff2a','#4aa8ff','#25e6c8','#3c4244','#68706b']);
+  bar('stBar','stLg', STATUS, ['#b06bff','#25e6c8','#ffd166','#ff3b2f','#68706b']);
+  const smax = Math.max.apply(null, SPARK.map(s=>s.n))||1;
+  document.getElementById('spark').innerHTML = SPARK.map(function(s){
+    return '<div class="col"><b>'+s.n+'</b><i style="height:'+Math.max(4,Math.round(s.n/smax*100))+'%"></i><span>'+s.d+'</span></div>';
+  }).join('');
+  document.getElementById('tagCloud').innerHTML = TAGS.slice(0,12).map(function(t,i){
+    return '<span class="'+(i<4?'hot':'')+'">'+t.t+' '+t.n+'</span>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

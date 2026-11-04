@@ -21,6 +21,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+. (Join-Path $PSScriptRoot 'github-transport.ps1')
 function P($r) { Join-Path $root $r }
 $enc = New-Object System.Text.UTF8Encoding($false)
 
@@ -80,8 +81,21 @@ $metaPath = Join-Path $roundDir.FullName 'meta.json'
 $imports = @()
 if (Test-Path $metaPath) { $imports = @((Get-Content $metaPath -Raw -Encoding UTF8 | ConvertFrom-Json).imports) }
 $byId = @{}
+$invalidRaw = @{}
 foreach ($m in $imports) {
   $id = [string]$m.id
+  if ([bool]$m.ok) {
+    try {
+      $rawFile = [IO.Path]::GetFullPath((Join-Path $roundDir.FullName ([string]$m.file)))
+      if (-not $rawFile.StartsWith($roundDir.FullName + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Outside round directory' }
+      if (-not (Test-Path -LiteralPath $rawFile -PathType Leaf)) { throw 'Missing raw' }
+      if ($m.sha256 -and (Get-FileHash -LiteralPath $rawFile).Hash -ne $m.sha256) { throw 'Raw checksum mismatch' }
+      $response = Get-Content -LiteralPath $rawFile -Raw -Encoding UTF8 | ConvertFrom-Json
+      if ($response.incomplete_results) { throw 'GitHub returned incomplete results' }
+      if (-not $response.PSObject.Properties['items'] -or $response.items -isnot [array]) { throw 'Invalid raw response' }
+      if (@($response.items).Count -ne [int]$m.items) { throw 'Raw item count mismatch' }
+    } catch { $invalidRaw[$id] = $true; continue }
+  }
   $cur = $byId[$id]
   if (-not $cur) { $byId[$id] = $m; continue }
   if ([bool]$m.ok -and -not [bool]$cur.ok) { $byId[$id] = $m; continue }
@@ -99,7 +113,7 @@ foreach ($it in @($plan.items)) {
   $id = [string]$it.id
   $m = $byId[$id]
   $isCond = ($it.kind -eq 'conditional')
-  $condMet = $false; $condWhy = ''
+  $condMet = $false; $condWhy = ''; $condAssessed=$false
 
   if ($isCond) {
     $q3 = $byId['Q3']
@@ -108,16 +122,17 @@ foreach ($it in @($plan.items)) {
       if (Test-Path $q3file) {
         $q3json = Get-Content $q3file -Raw -Encoding UTF8 | ConvertFrom-Json
         $newFaces = if ($null -ne $q3.newFaces) { [int]$q3.newFaces } else { @($q3json.items | Where-Object { -not $seen.ContainsKey(([string]$_.full_name).ToLower()) }).Count }
-        $total = if ($null -ne $q3.total_count) { [int]$q3.total_count } else { [int]$q3json.total_count }
-        $condMet = ($newFaces -lt 3) -or ($total -lt 10)
-        $condWhy = "Q3 newFaces=$newFaces total=$total"
+        $total = if ($null -ne $q3.query_total_count){[int]$q3.query_total_count}elseif ($null -ne $q3.total_count) { [int]$q3.total_count } else { [int]$q3json.total_count }
+        $decision=Get-Q3FallbackDecision ([pscustomobject]@{ok=$true;newFaces=$newFaces;total_count=$total}) $it.conditional
+        $condMet=$decision.required;$condAssessed=$decision.assessed;$condWhy=$decision.reason
       }
     } else { $condWhy = 'Q3 未成功，条件无法评估' }
   }
 
   $st = 'missing'
   if ($isCond) {
-    if ($condMet) { $st = if ($m -and $m.ok) { 'ok' } elseif ($m) { 'failed' } else { 'missing' } }
+    if(-not $condAssessed){$st='blocked'}
+    elseif ($condMet) { $st = if ($m -and $m.ok) { 'ok' } elseif ($m) { 'failed' } else { 'missing' } }
     else { $st = 'skipped' }
   } elseif ($it.kind -eq 'probe') {
     $st = if ($m -and $m.ok) { 'ok' } else { 'skipped' }
@@ -125,9 +140,11 @@ foreach ($it in @($plan.items)) {
     if ($m -and $m.ok) { $st = 'ok' } elseif ($m) { $st = 'failed' } else { $st = 'missing' }
   }
 
-  if ($st -eq 'missing' -and [bool]$it.required) { $fail++ }
+  if ($st -in @('missing','blocked') -and [bool]$it.required) { $fail++ }
   if ($st -eq 'failed') { $warn++ }
-  $results += [ordered]@{ id = $id; status = $st; required = [bool]$it.required; reason = $(if ($isCond) { $condWhy } else { '' }) }
+  $progressPath=Join-Path $roundDir.FullName "search-progress-$id.json"
+  $progress=if(Test-Path $progressPath){Get-Content $progressPath -Raw|ConvertFrom-Json}else{$null}
+  $results += [ordered]@{ id = $id; status = $st; required = [bool]$it.required; reason = $(if ($invalidRaw[$id] -and $st -eq 'missing') { 'raw missing, corrupt or changed' } elseif ($isCond) { $condWhy } else { '' }); coverage_mode=$(if($progress -and @($progress.pending).Count){'budgeted-sampling'}elseif($progress){'observed-cycle-complete'}else{'single-response'}); remaining_tasks=$(if($progress){@($progress.pending).Count}else{$null});cohort=$(if($progress){$progress.cohort}else{$null});expires=$(if($progress){$progress.expires}else{$null}) }
 }
 
 $status = if ($fail -gt 0) { 'fail' } elseif ($warn -gt 0) { 'warn' } else { 'pass' }
@@ -141,7 +158,7 @@ $cov = [ordered]@{
 
 if ($Json) { $cov | ConvertTo-Json -Depth 6; exit $(if ($status -eq 'fail') { 1 } elseif ($status -eq 'warn') { 2 } else { 0 }) }
 switch ($status) {
-  'pass' { Write-Host ("✓ 覆盖 pass：r{0}，{1} 条查询" -f $plan.round, $results.Count) -ForegroundColor Green; exit 0 }
+  'pass' { Write-Host ("✓ 覆盖 pass：r{0}，{1} 条查询（必跑响应已登记；不是 GitHub 全集覆盖）" -f $plan.round, $results.Count) -ForegroundColor Green; exit 0 }
   'warn' { Write-Host ("⚠ 覆盖 warn：{0} 条失败（日报需标「数据不完整」）" -f $warn) -ForegroundColor Yellow; exit 2 }
   default {
     Write-Host ("✗ 覆盖 fail：{0} 条必跑未登记" -f $fail) -ForegroundColor Red

@@ -159,12 +159,12 @@ if (Test-Path $taxonomyPath) {
   try { $taxonomy = Get-Content $taxonomyPath -Raw -Encoding UTF8 | ConvertFrom-Json } catch { Write-Warning "taxonomy.json 解析失败，两级分类将全部落到「其他」" }
 }
 function Get-TwoLevelCategory {
-  param([string]$StrongText, [string]$WeakText)
+  param([string]$StrongText, [string]$WeakText, [string]$PurposeText = '')
   if (-not $taxonomy) { return @{ l1 = '其他'; l2 = '其他工具' } }
   # 两档匹配：**人话层标签（function_tags / user_keywords / synonyms）是强信号**，优先；
   # 描述 / topics / 备注是弱信号，强信号匹配不到才用。
   # 理由：描述里一个 "notes" 就能把文件搜索工具拽进「AI办公」（2026-10-13 实测 DigUp 踩坑）。
-  foreach ($text in @($StrongText, $WeakText)) {
+  foreach ($text in @($PurposeText, $StrongText, $WeakText)) {
   $isWeak = ($text -eq $WeakText)   # 弱信号：宽词不参与定分类（B7）
     if (-not $text) { continue }
     $t = "$text".ToLower()
@@ -202,7 +202,7 @@ function Get-TwoLevelCategory {
           # 短关键词必须整词出现。ASCII 关键词放宽到 ≤4 字符（如 book 不能匹配 bookmark）；
           # **中文不做整词匹配**——中文没有词边界，`\b表格\b` 会漏掉「表格软件」这种真实用法。
           $ascii = ($k -match '^[\x00-\x7F]+$')
-          $needBoundary = if ($ascii) { $k.Length -le 4 } else { $k.Length -le 3 }
+          $needBoundary = if ($ascii) { $k.Length -le 4 } else { $k.Length -le 3 -and $text -ne $PurposeText }
           $hit = if ($needBoundary) { ($t -match ('\b' + [regex]::Escape($k) + '\b')) } else { $t.Contains($k) }
           # 宽词在**弱信号**里降权而不是忽略（B7）：完全忽略会让「唯一信号是 mcp/desktop/agents」的项目
 # 掉进「其他」，反而更难找（实测 4 条里 3 条变差）。降权后：非宽词总能赢，只有宽词命中时它仍兜底。
@@ -645,7 +645,16 @@ foreach ($s in $seen) {
   if (-not $desc -and -not $topicsStr -and $s.status -ne 'dropped') { $noteFallback = "$($s.note)" }
   $strongText = @(($functionTags -join ' '), ($userKeywords -join ' '), ($synonyms -join ' ')) -join ' '
   $weakText   = @($desc, $topicsStr, $noteFallback, $id) -join ' '
+  # Automatically copied topics describe integrations as well as purpose. For
+  # machine tags, give the factual opening sentence priority over capabilities.
+  $purposeText = ''
   $l2cat = Get-TwoLevelCategory -StrongText $strongText -WeakText $weakText
+  if ($l2cat.l2 -eq 'AI Agent' -and $ftag -and [string]$ftag.source -match '^auto\(' -and
+      $desc -match '(?i)支持\s*(?:AI|智能体)|支持[^。.!]{0,12}智能体|可由|supports?\s+(?:AI|agents?)|works with|compatible with') {
+    $purposeText = (($desc -split '[。.!！?？\r\n]', 2)[0] -split '(?:，|,|；|;)\s*(?:支持|可由|可用|supports?|works with|compatible with)', 2)[0]
+    $purposeCategory = Get-TwoLevelCategory -StrongText '' -WeakText '' -PurposeText $purposeText
+    if ($purposeCategory.l1 -ne '其他' -and $purposeCategory.l2 -ne 'AI Agent') { $l2cat = $purposeCategory }
+  }
 
   # --- 使用体验五星（独立于 S/A/B 推荐档；**不看 star 数**）---
   $exp = Get-ExperienceRating -Desc $desc -PushedAt $pushedAt -Risk $tags['风险等级'] `
@@ -826,4 +835,8 @@ Write-Host "  输入指纹       : $($sig.Substring(0,12))…"
 # 明确退出码：**不写这句，成功时 $LASTEXITCODE 不会被更新**（它在同进程里是"粘"的，
 # 会残留上一条脚本的退出码）→ 调用方（如 rebuild-page.ps1）会误判成功为失败 ✗
 # 2026-10-16 实测：audit 刚 exit 1，紧接着跑本脚本成功，调用方却读到 1。
+if(Test-Path (Join-Path $PSScriptRoot 'evidence-queue.ps1')){
+ & (Join-Path $PSScriptRoot 'evidence-queue.ps1') sync-events -Root $root | Out-Host
+ if($LASTEXITCODE -ne 0){throw 'Change-to-review queue synchronization failed'}
+}
 exit 0

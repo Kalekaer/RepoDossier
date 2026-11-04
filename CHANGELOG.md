@@ -15,6 +15,18 @@
 
 ---
 
+## [1.2.0] — 2026-11-04 · Codex 新版规则与工具同步
+
+- 同步 Codex 新版采集/证据/审阅工具：`collect-daily`、`query-partitions`、`search-scheduler`、`evidence-store/queue`、`review-workbench`、`release-readiness`。
+- 术语、评分、检索式、检索策略、配置、schema、分类树与 Codex 保持一致（同 SHA256）。
+- 日报发布改为“当期审阅范围 + 发布门禁”；工程验收与发布验收分开。
+- 本发布包仍只带 15 条 demo 数据，不含作者真实库、picks、报告、候选积压。
+- 演示包保留本机页面服务入口；没有真实库数据时，archive / 周报入口按 demo 形态处理。
+- 新增说明：`docs/daily-permissions.md`；`RUNBOOK` 路径已修正。
+- 演示页面重新构建，截图/README 引用与 168 项 audit 对齐。
+
+---
+
 ---
 
 ---

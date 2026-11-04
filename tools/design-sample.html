@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>DSH 档案 · 设计系统样张 v1</title>
+<style>
+/* ============================================================================
+   设计系统样张 v1（2026-10-17）——**独立文件，不进发布页面** ✓
+   用途：在改真页面之前，先把「配色 / 纹理 / 版式层次 / 动效」一次看清。
+   硬约束（样张阶段就要成立）：
+     · 全部内联，零外部请求（字体只用系统栈 + 可选拉丁刊头）✓
+     · 深底浅字，正文对比度 ≥ 7:1；彩色只做**小面积**强调，不铺满 ✓
+     · 动效必须带 prefers-reduced-motion 兜底 ✓
+   ============================================================================ */
+:root{
+  /* ---- 基础层：结构 + 可读性（不参与"表意"）---- */
+  --bg:#0b0b0b; --surface:#111111; --surface-2:#161616; --surface-3:#1c1c1c; --surface-4:#131313;
+  --border:#2a2a28; --border-strong:#3d3d3a;
+  --text:#f4f2ec; --text-dim:#9a9a94; --text-faint:#6b6b66;
+  /* ---- 识别色：荧光黄（站点的"签名"，永远配合黑字）---- */
+  --accent:#e8ff2a; --accent-ink:#0b0b0b;
+  /* ---- 焦点色：警示红（高风险 / 淘汰 / 切割线）---- */
+  --danger:#ff2d20;
+  /* ---- 辅助色（本轮新增，按"用得上才用"而不是凑数）---- */
+  --blue:#2f7bff;      /* 系统 / 官方 / DSH 生态 */
+  --teal:#19e0c4;      /* 工程 / 开发工具 */
+  --violet:#a06bff;    /* 效率 / 自动化 */
+  --orange:#ff7a1a;    /* 设计 / 图像 */
+  --amber:#ffd166;     /* 办公 / 文档 */
+  --rose:#ff4d6d;      /* 安全 */
+  --cyan:#4dd0e1;      /* 数据 */
+  --lime:#9ccc65;      /* 学习 / 教程 */
+  /* ---- 一级分类固定色相（全局一套，星图/分类按钮/标签/详情共用 ✓）---- */
+  --c-ai:var(--accent); --c-dsh:var(--blue); --c-dev:var(--teal); --c-design:var(--orange);
+  --c-eff:var(--violet); --c-ops:var(--danger); --c-office:var(--amber); --c-sec:var(--rose);
+  --c-data:var(--cyan); --c-learn:var(--lime); --c-other:var(--text-faint);
+  /* ---- 纹理（内联 SVG，data URI，全部 ASCII ⇒ 无编码坑）---- */
+  --tx-grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M24 0H0V24' fill='none' stroke='%23242422' stroke-width='1'/%3E%3C/svg%3E");
+  --tx-hatch:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M-2 2L2 -2M0 8L8 0M6 10L10 6' stroke='%23262624' stroke-width='1.2'/%3E%3C/svg%3E");
+  --tx-dots:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='%2330302c'/%3E%3C/svg%3E");
+  --tx-ruler:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12'%3E%3Cpath d='M0 11h40M0 11V7M10 11V9M20 11V5M30 11V9' stroke='%233d3d3a' stroke-width='1'/%3E%3C/svg%3E");
+  /* ---- 版式与间距刻度 ---- */
+  --fs-xs:12px; --fs-sm:13px; --fs-base:15px; --fs-lg:18px; --fs-xl:24px; --fs-2xl:32px; --fs-3xl:52px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:40px; --sp-7:64px;
+  --font-body:-apple-system,"Segoe UI","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Cascadia Mono",monospace;
+  --radius:0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-base)/1.6 var(--font-body);
+     background-image:var(--tx-grid);background-attachment:fixed}
+.wrap{max-width:1180px;margin:0 auto;padding:var(--sp-6) var(--sp-5) var(--sp-7)}
+.mono{font-family:var(--font-mono)}
+h1{font-size:var(--fs-3xl);line-height:1.02;letter-spacing:-.02em;margin:0 0 var(--sp-2)}
+h1 small{display:block;font-size:var(--fs-sm);font-weight:400;color:var(--text-dim);letter-spacing:.08em;
+     text-transform:uppercase;margin-top:var(--sp-3)}
+/* 段头：§ 编号 + 大标题 + 细线 + 侧注 —— 全站统一的"档案馆"版式 */
+.sec{display:grid;grid-template-columns:88px 1fr auto;gap:var(--sp-4);align-items:baseline;
+     border-top:1px solid var(--border-strong);padding-top:var(--sp-4);margin:var(--sp-7) 0 var(--sp-5)}
+.sec .no{font-family:var(--font-mono);font-size:var(--fs-lg);color:var(--accent)}
+.sec h2{margin:0;font-size:var(--fs-xl);letter-spacing:-.01em}
+.sec .side{font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-faint);text-align:right}
+.note{color:var(--text-dim);font-size:var(--fs-sm);margin:var(--sp-2) 0 var(--sp-4)}
+/* 色卡 */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:var(--sp-3)}
+.sw{border:1px solid var(--border);background:var(--surface)}
+.sw i{display:block;height:52px}
+.sw div{padding:var(--sp-3)}
+.sw b{display:block;font-size:var(--fs-sm)}
+.sw span{display:block;font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-faint);margin-top:2px}
+/* 分类色相条（带真实统计） */
+.cats{display:grid;gap:6px}
+.cat{display:grid;grid-template-columns:132px 1fr 64px;gap:var(--sp-3);align-items:center;
+     border-left:6px solid var(--h);background:linear-gradient(90deg,color-mix(in srgb,var(--h) 14%,transparent),transparent 62%);
+     padding:6px var(--sp-3)}
+.cat b{font-weight:600;font-size:var(--fs-sm)}
+.cat .bar{height:10px;background:var(--h);width:var(--w);opacity:.85}
+.cat .n{font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-dim);text-align:right}
+/* 纹理条 */
+.tx{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-3)}
+.tx div{height:88px;border:1px solid var(--border);display:flex;align-items:flex-end;padding:var(--sp-2);
+     font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-dim)}
+/* 动效样张 */
+.mo{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--sp-3)}
+.mo .box{border:1px solid var(--border);background:var(--surface);padding:var(--sp-4);overflow:hidden;position:relative}
+.mo .box p{margin:var(--sp-3) 0 0;font-size:var(--fs-xs);color:var(--text-dim)}
+.band{height:14px;background:var(--accent);animation:slide 2.6s ease-in-out infinite}
+.band2{height:14px;background:repeating-linear-gradient(90deg,var(--danger) 0 8px,transparent 8px 16px);
+     animation:slide 3.4s linear infinite reverse}
+.pulse{width:16px;height:16px;background:var(--blue);border-radius:50%;animation:pulse 1.6s ease-out infinite}
+.lift{display:inline-block;padding:6px 12px;border:1px solid var(--accent);color:var(--accent);
+     transition:transform .18s ease,background .18s ease,color .18s ease}
+.lift:hover{transform:translate(-2px,-2px);background:var(--accent);color:var(--accent-ink)}
+@keyframes slide{0%,100%{transform:translateX(0)}50%{transform:translateX(calc(100% - 100%))}50.01%{transform:translateX(38%)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 60%,transparent)}100%{box-shadow:0 0 0 18px transparent}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* 不对称版面示范 */
+.demo{display:grid;grid-template-columns:1.35fr .85fr;gap:var(--sp-5);align-items:start}
+.demo .big{border:1px solid var(--border-strong);background:var(--surface-2);padding:var(--sp-5);
+     background-image:var(--tx-hatch)}
+.demo .big h3{margin:0 0 var(--sp-3);font-size:var(--fs-2xl);letter-spacing:-.02em}
+.demo .big .meta{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-4)}
+.pill{font-family:var(--font-mono);font-size:var(--fs-xs);border:1px solid var(--border-strong);padding:2px 8px;color:var(--text-dim)}
+.pill.y{border-color:var(--accent);color:var(--accent)}
+.demo .side{border-top:6px solid var(--danger);background:var(--surface);padding:var(--sp-4);
+     background-image:var(--tx-dots)}
+.demo .side ul{margin:0;padding-left:18px;font-size:var(--fs-sm);color:var(--text-dim)}
+.tick{height:12px;background-image:var(--tx-ruler);background-repeat:repeat-x;margin-top:var(--sp-6)}
+footer{margin-top:var(--sp-7);border-top:1px solid var(--border);padding-top:var(--sp-4);
+     font-size:var(--fs-xs);color:var(--text-faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>DESIGN&nbsp;SYSTEM · 样张 v1<small>DSH 本地档案 · 配色 / 纹理 / 版式 / 动效 · 独立文件，不进发布页面</small></h1>
+  <p class="note">这一页只做一件事：让你在改真页面之前**看见**新设计语言。所有色块、统计和纹理都是真实值与真实实现（内联 SVG，零外部请求）。</p>
+  <div class="tick"></div>
+
+  <!-- 01 基础与识别色 -->
+  <div class="sec"><span class="no">§ 01</span><h2>基础色 + 识别色 + 焦点色</h2><span class="side">结构与可读性优先</span></div>
+  <p class="note">底色与文字负责「读得清」，荧光黄是站点签名（永远配黑字），警示红只做焦点与切割线。</p>
+  <div class="swatches">
+    <div class="sw"><i style="background:#0b0b0b;border-bottom:1px solid #2a2a28"></i><div><b>纸黑 --bg</b><span>#0b0b0b · 页面底</span></div></div>
+    <div class="sw"><i style="background:#111111"></i><div><b>面板 --surface</b><span>#111111</span></div></div>
+    <div class="sw"><i style="background:#161616"></i><div><b>面板 2 --surface-2</b><span>#161616 · 卡片</span></div></div>
+    <div class="sw"><i style="background:#1c1c1c"></i><div><b>面板 3 --surface-3</b><span>#1c1c1c</span></div></div>
+    <div class="sw"><i style="background:#f4f2ec"></i><div><b>硬白 --text</b><span>#f4f2ec · 正文</span></div></div>
+    <div class="sw"><i style="background:#9a9a94"></i><div><b>灰阶 --text-dim</b><span>#9a9a94 · 次要</span></div></div>
+    <div class="sw"><i style="background:#e8ff2a"></i><div><b>荧光黄 --accent</b><span>#e8ff2a · 签名色</span></div></div>
+    <div class="sw"><i style="background:#ff2d20"></i><div><b>警示红 --danger</b><span>#ff2d20 · 焦点/风险</span></div></div>
+  </div>
+
+  <!-- 02 辅助色 -->
+  <div class="sec"><span class="no">§ 02</span><h2>辅助色（新增）</h2><span class="side">用得上才用，不凑数</span></div>
+  <p class="note">每个辅助色都有**稳定职责**：它出现在分类、标签、图表里时含义一致。深底上做小面积强调，不做大面积铺色。</p>
+  <div class="swatches">
+    <div class="sw"><i style="background:#2f7bff"></i><div><b>电光蓝 --blue</b><span>#2f7bff · 系统/官方</span></div></div>
+    <div class="sw"><i style="background:#19e0c4"></i><div><b>青绿 --teal</b><span>#19e0c4 · 工程/开发</span></div></div>
+    <div class="sw"><i style="background:#a06bff"></i><div><b>紫 --violet</b><span>#a06bff · 效率/自动化</span></div></div>
+    <div class="sw"><i style="background:#ff7a1a"></i><div><b>橙 --orange</b><span>#ff7a1a · 设计/图像</span></div></div>
+    <div class="sw"><i style="background:#ffd166"></i><div><b>琥珀 --amber</b><span>#ffd166 · 办公/文档</span></div></div>
+    <div class="sw"><i style="background:#ff4d6d"></i><div><b>玫红 --rose</b><span>#ff4d6d · 安全</span></div></div>
+    <div class="sw"><i style="background:#4dd0e1"></i><div><b>青 --cyan</b><span>#4dd0e1 · 数据</span></div></div>
+    <div class="sw"><i style="background:#9ccc65"></i><div><b>柠檬绿 --lime</b><span>#9ccc65 · 学习</span></div></div>
+  </div>
+
+  <!-- 03 分类色相 -->
+  <div class="sec"><span class="no">§ 03</span><h2>一级分类固定色相</h2><span class="side">数字为库内真实条数</span></div>
+  <p class="note">同一套色相会在**标签分布图 / 分类按钮 / 项目标签 / 详情页**四处复用；二级分类用同色相的明度/透明度变化，不另配新色。</p>
+  <div class="cats">
+    <div class="cat" style="--h:var(--c-ai);--w:100%"><b>AI</b><span class="bar"></span><span class="n">90</span></div>
+    <div class="cat" style="--h:var(--c-dsh);--w:48%"><b>DSH 生态</b><span class="bar"></span><span class="n">43</span></div>
+    <div class="cat" style="--h:var(--c-dev);--w:28%"><b>开发</b><span class="bar"></span><span class="n">25</span></div>
+    <div class="cat" style="--h:var(--c-other);--w:24%"><b>其他</b><span class="bar"></span><span class="n">22</span></div>
+    <div class="cat" style="--h:var(--c-design);--w:20%"><b>设计</b><span class="bar"></span><span class="n">18</span></div>
+    <div class="cat" style="--h:var(--c-eff);--w:12%"><b>效率</b><span class="bar"></span><span class="n">11</span></div>
+    <div class="cat" style="--h:var(--c-ops);--w:9%"><b>运维</b><span class="bar"></span><span class="n">8</span></div>
+    <div class="cat" style="--h:var(--c-office);--w:7%"><b>办公</b><span class="bar"></span><span class="n">6</span></div>
+    <div class="cat" style="--h:var(--c-sec);--w:4%"><b>安全</b><span class="bar"></span><span class="n">3</span></div>
+    <div class="cat" style="--h:var(--c-data);--w:3%"><b>数据</b><span class="bar"></span><span class="n">2</span></div>
+    <div class="cat" style="--h:var(--c-learn);--w:2%"><b>学习</b><span class="bar"></span><span class="n">1</span></div>
+  </div>
+
+  <!-- 04 纹理 -->
+  <div class="sec"><span class="no">§ 04</span><h2>背景纹理（内联 SVG）</h2><span class="side">零外部请求</span></div>
+  <p class="note">纹理只做「底子」，亮度压得很低，保证不抢正文；网格用于整页底，斜线用于区块，圆点用于侧注，刻度尺用于分隔。</p>
+  <div class="tx">
+    <div style="background-image:var(--tx-grid)">--tx-grid 细网格</div>
+    <div style="background-image:var(--tx-hatch);background-color:var(--surface)">--tx-hatch 斜线</div>
+    <div style="background-image:var(--tx-dots);background-color:var(--surface)">--tx-dots 圆点</div>
+    <div style="background-image:var(--tx-ruler);background-repeat:repeat-x;background-position:bottom">--tx-ruler 刻度</div>
+    <div style="background:linear-gradient(135deg,var(--accent) 0 22%,transparent 22%) , var(--surface)">切割块（黄）</div>
+    <div style="background:repeating-linear-gradient(90deg,var(--danger) 0 10px,transparent 10px 20px);opacity:.5">警戒带（红）</div>
+  </div>
+
+  <!-- 05 版式层次 + 不对称构图 -->
+  <div class="sec"><span class="no">§ 05</span><h2>版式层次与不对称构图</h2><span class="side">2026-10-17</span></div>
+  <p class="note">字阶：12 / 13 / 15 / 18 / 24 / 32 / 52px。段头统一「§ 编号 + 大标题 + 细线 + 侧注」，主区与侧区宽度比约 1.35 : 0.85，不再每块都套同一个卡片。</p>
+  <div class="demo">
+    <div class="big">
+      <h3>主区：大标题 + 一句人话 + 元数据</h3>
+      <p class="note" style="margin:0">信息优先级的做法是「尺寸 + 位置 + 颜色」三件事一起用，而不是把所有东西塞进等宽卡片。</p>
+      <div class="meta">
+        <span class="pill y">S 档</span><span class="pill">★ 12,345</span><span class="pill">开发 / 编程助手</span><span class="pill">风险 低</span>
+      </div>
+    </div>
+    <div class="side">
+      <b class="mono">§ 侧注区</b>
+      <ul><li>窄栏放"补充事实"</li><li>用红/黄细线标边界</li><li>圆点纹理压低存在感</li></ul>
+    </div>
+  </div>
+
+  <!-- 06 动效 -->
+  <div class="sec"><span class="no">§ 06</span><h2>动效（少量、有目的）</h2><span class="side">带 reduced-motion 兜底</span></div>
+  <p class="note">动效只用于三件事：① 切割带的缓慢推移（营造档案/机械感）② 状态点的呼吸（提示"活着"）③ 交互元素的位移反馈。系统开了"减少动态效果"时全部关闭。</p>
+  <div class="mo">
+    <div class="box"><div class="band"></div><p>切割带：2.6s 往复（黄）</p></div>
+    <div class="box"><div class="band2"></div><p>警戒带：3.4s 反向（红）</p></div>
+    <div class="box"><div class="pulse"></div><p>状态点：1.6s 呼吸（蓝）</p></div>
+    <div class="box"><span class="lift">悬停我</span><p>hover：位移 2px + 反色</p></div>
+  </div>
+
+  <div class="tick"></div>
+  <footer>
+    样张 v1 · 内联实现、零外部请求 · 分类数字取自本轮实测（229 条：AI 90 / DSH 生态 43 / 开发 25 / 其他 22 / 设计 18 / 效率 11 / 运维 8 / 办公 6 / 安全 3 / 数据 2 / 学习 1）
+  </footer>
+</div>
+</body>
+</html>

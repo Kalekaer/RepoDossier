@@ -1,5 +1,32 @@
 # 数据字典
 
+## evidence/ 与 series/ — 取证和刷新（2026-11-02）
+
+`data/evidence/blobs/<SHA256>.json` 保存经校验的公开API事实，内容不可覆盖；`state.json` 是由 evidence-store/evidence-queue 维护的运行状态，包含独立资源任务、缓存索引、冷却及变化复核记录，不是项目投影或规则评分。任务使用 pending/running/retry/blocked/succeeded/superseded；succeeded 只说明一次取证有明确结果，`outcome=absent` 表示API明确404，并不表示项目被排除。ETag304只更新 checked_at，保留原始 fetched_at、内容与指纹。内容缓存默认README/许可168小时，其他24小时；版本线索变化会要求重新验证。版本线索不冒充Git提交SHA。
+
+变化事件共用项目和资源的取数任务，各自原因仍保留。`release_detected` 是推送变化的近似线索；只有 releases/latest 的有效返回才是最新正式发行证据，404不等于没有任何历史/预发行版本。issues缓存是最近最多100条公开issue评论，不自动证明维护者回复或全量覆盖。
+
+`data/series/YYYY-MM-DD.jsonl` 为刷新原始观测，成功和失败分开；失败行不算当天已完成。`_state.json` 保存成功时间；`_measure-*.json` 为实际执行汇总。实时刷新只写当前北京时间日期，历史日期只可预览。项目事实仍须通过既有投影流程进入页面；审阅任务本身不自动入库、改档或发布。
+
+`data/api-usage/YYYY-MM-DD.jsonl` 记录本工作区托管HTTP请求的额度预留；按北京时间日期，以独立锁在发请求前记账，失败和304也记请求。首次启用会从已有Search回执和证据历史计算当日基线。Search和证据入口共同遵守config.sources.daily_api_ceiling，维护入口另预留verify_max_calls给报告核实。不统计绕过这些入口的外部手写请求，不把本地预算当GitHub实际剩余额度。
+
+`data/audit/review-metrics.jsonl` 为实测审阅记录：id、reviewer、reviewed_at、phase(primary/secondary/adjudication)、elapsed_seconds（未测为空）、error_confirmed（仅明确裁定时为布尔值）、evidence_file及指纹。缺少耗时不估算，评审分歧不自动计作误判。渠道报告分别列历史有效规则分、S/A、当日自动入库S/A、独有贡献及实测成本；多个渠道会重复归因，不代表GitHub总体召回。
+
+## candidates.jsonl — 检索项目处置账（2026-10-29）
+
+由 `tools/candidate-ledger.ps1` 统一维护，主键 id。记录首次发现、观察日期、渠道、
+粗筛疑点、state、理由、证据、分数/档位、延期复核日期和处置历史；不是项目投影，
+也不是推荐台账。所有观察项都保留，粗筛 flagged 不等于质量不合格。
+状态沿用 new/screened/scored/accepted/rejected/deferred/known。
+scored 需要匹配项目的真实评分证据；历史缺分或分档冲突转待复核，不改原 picks。
+deferred 需理由与未来七天内复核日期。发现留存不等于当期审阅、入库或主推荐。
+未来日报以评分前固定的当期审阅范围检查处置；范围内过期或未处置阻止发布。
+范围外积压保留并披露，不批量猜分或延期。库内规则分为空按术语表§2.2处理。
+旧 queue prune 不再删除审计证据。
+
+`data/search-state/` 是可恢复的采集游标；实际 URL/task 和校验和仍在 raw 的 Import
+元数据中，不能把游标当成完整覆盖证据。search-progress 标明未完成范围及过期日。
+
 ## seen.jsonl — 去重台账（主键 `full_name`）
 
 一行一个 JSON 对象：
@@ -47,7 +74,7 @@
 
 **不要把评分、风险等级、D 档/剔除原因写进快照**，那会让这个文件变成大杂烩，污染增速基线；这些内容放 `picks/`（见下）。
 
-**同日多轮的唯一键是 `date+full_name+round`（2026-10-19 起）**：同一天同一仓库再次采集时写 `round: 2`、`3`……，`round` 从 1 起、按采集轮次递增；这样「合法多轮」与「失败重试重复追加」才分得开。存量行由 `tools/migrate-snapshots-round.ps1` 补号（幂等，可反复跑）；本演示包不含快照数据，实际行数以运行时文件为准，`tools/validate-lib.ps1` 会校验 `round` 必填且唯一。
+**同日多轮的唯一键是 `date+full_name+round`（2026-10-19 起）**：同一天同一仓库再次采集时写 `round: 2`、`3`……，`round` 从 1 起、按采集轮次递增；这样「合法多轮」与「失败重试重复追加」才分得开。存量行由 `tools/migrate-snapshots-round.ps1` 补号（幂等，可反复跑）；截至 2026-10-24 快照共 **670 行**，均已带 `round`，`tools/validate-lib.ps1` 会校验 `round` 必填且唯一。
 
 `captured_at` 格式统一为带 **`+08:00` 偏移**的 ISO 8601（如 `2026-10-11T09:03:00+08:00`）。存量行没有该字段 → 用**文件日期补齐**即可，不作为硬校验。
 
@@ -303,3 +330,33 @@
 - 日报流程写 meta 时**必须写**；`tools/add-repo.ps1` 已经会写。
 - 存量行若缺该字段：**用文件日期补齐**即可，不作硬校验（与 `captured_at` 同一口径）。
 - `audit.ps1` 第 20 节会检查这一点；**跑完日报若报红，就是这一步漏了**。
+
+## candidates.jsonl + audit/ — 发现层审计（2026-10-25 新增）
+
+> 只服务「发现 / 召回」审计，**不进 seen/projects，不参与日报与配额**。
+
+### `data/candidates.jsonl`
+
+发现队列，一行一个 JSON：
+
+```json
+{"id":"owner/repo","state":"new","channel":"Q7a","discovered_at":"2026-10-25","score":null,"tier":null,"reason":null,"updated_at":"2026-10-25T15:00:00+08:00"}
+```
+
+`state` 白名单：`new` / `screened` / `scored` / `accepted` / `rejected` / `deferred` / `known`。
+- `known`：已在 `projects.jsonl` 或 `seen.jsonl` 里，不再重复处理；
+- 入库仍走 `add-repo` / picks，**不要直接写 seen**；
+- SLA：proxy S/A 3 天、其余 14 天；30 天未动 → `deferred`。
+
+### `data/audit/`
+
+| 文件 | 内容 |
+|---|---|
+| `pool/<date>.jsonl` | 发现池（含 eligible / exclude_reason / layer / in_library） |
+| `recall/<date>.json` | `known_share` / `yield_new` / 分层 / 漏检 top |
+| `stageb/<date>.jsonl` | 每月 20–30 条 RUBRIC 评分样本（S/A 漏检估计） |
+| `frame/<date>.jsonl` | 分层抽样（`N_s` + 样本），P2 才启用 |
+| `meta/<id>.json` | 元数据 sidecar（仅 P1 临时用；长期回填走 `data/meta/`） |
+| `coverage-matrix.csv` | 需求 × 通道覆盖矩阵，P2 才启用 |
+
+> `known_share` 是「渠道产出里已有比例」，**不是总体召回**；总体召回 `R_pop` 需 frame 抽样（P2）。

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>日报页示例 · 实验编辑设计 / 拼贴报纸</title>
+<style>
+/* ============================================================================
+   二级页 · 日报（实验编辑设计 × 拼贴报纸 × 后朋克粗野主义）
+   依据：用户 brief「报纸排版错落有致、非规则、非对称、有图有文字；
+        类似独立杂志 / 实验性编辑设计（Editorial Design）/ 拼贴式报纸」
+   内容：**真实** —— data/picks/2026-10-16.jsonl + reports/2026-10-16.md
+        24 候选 → 3 条 A 档推荐（S 0/A 3）→ 5 条退稿（含原因）
+   图片：assets/bg/ NASA 公有领域（署名见 SOURCES.md）
+   ============================================================================ */
+@font-face{font-family:"Anton";src:url("../../assets/anton-latin.woff2") format("woff2");font-weight:400;font-display:swap}
+:root{
+  --ink:#0a0a0a; --ink-2:#141414; --paper:#f5f5f0; --paper-2:#e7e7e0;
+  --fluoro:#e9ff2e; --magenta:#ff1f6b; --cyan:#2ef2d0; --grey:#8a8a86;
+  --anton:"Anton","Arial Narrow",Impact,sans-serif;
+  --mono:SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Noto Sans SC","Microsoft YaHei UI",system-ui,sans-serif;
+  --serif:"Noto Serif SC",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ink);color:var(--paper);font:15px/1.5 var(--sans)}
+.cap{padding:14px 22px 6px;font:11px/1 var(--mono);letter-spacing:.18em;color:#5f5f5a}
+.cap b{color:var(--fluoro);letter-spacing:.06em;font-size:12px}
+.anton{font-family:var(--anton);font-weight:400;line-height:.84;letter-spacing:-.02em;text-transform:uppercase}
+.lab{font:700 10px/1.4 var(--mono);letter-spacing:.2em;text-transform:uppercase}
+/* 半调点覆盖（印刷感） */
+.half{position:relative}
+.half::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend-mode:multiply;
+  background-image:radial-gradient(#000 0.6px,transparent 0.7px);background-size:3px 3px}
+
+/* ================= 报头 ================= */
+.paper{margin:6px 16px 34px;border:8px solid var(--paper);background:var(--ink);position:relative;overflow:hidden}
+.mast{position:relative;border-bottom:8px solid var(--paper);padding:14px 18px 10px}
+.mast .trule{position:absolute;left:0;right:0;top:0;height:8px;background:var(--fluoro)}
+.mast .row{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.mast .name{font-size:104px;letter-spacing:-.03em;margin:0}
+.mast .name em{font-style:normal;color:var(--fluoro)}
+.mast .sub{flex:1;min-width:220px;font:700 11px/1.6 var(--mono);letter-spacing:.16em;color:#c9c9c2;text-transform:uppercase}
+.mast .sub b{color:var(--paper)}
+.mast .issue{background:var(--magenta);color:#fff;padding:6px 10px;font:700 11px/1.4 var(--mono);letter-spacing:.14em;text-align:center}
+.mast .issue b{display:block;font-family:var(--anton);font-size:26px;letter-spacing:0;line-height:1}
+.mast .meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:8px;font:600 10px/1.5 var(--mono);letter-spacing:.14em;color:var(--grey);text-transform:uppercase}
+.mast .meta i{font-style:normal;color:var(--fluoro)}
+
+/* ================= 头条区（非对称：图左出血 + 标题压图 + 右侧统计板） ================= */
+.top{display:grid;grid-template-columns:1.55fr 1fr;gap:0;border-bottom:8px solid var(--paper)}
+.top .left{position:relative;border-right:8px solid var(--paper)}
+.top .leadimg{position:relative;height:340px;background:url("../../assets/bg/nasa-vab-highbay.jpg") center/cover;
+  filter:grayscale(1) contrast(1.5) brightness(.55)}
+.top .leadimg .credit{position:absolute;right:6px;bottom:6px;font:600 9px/1 var(--mono);letter-spacing:.1em;
+  color:#e8e8e2;background:rgba(10,10,10,.72);padding:3px 6px}
+.top .headline{position:relative;padding:0 18px 0;margin-top:-46px;z-index:3}
+.top .kicker{display:inline-block;background:var(--fluoro);color:var(--ink);font:700 10px/1 var(--mono);
+  letter-spacing:.2em;padding:5px 8px;text-transform:uppercase}
+.top h1{margin:8px 0 6px;font-size:76px;line-height:.86;letter-spacing:-.035em;font-weight:900;text-shadow:0 3px 0 rgba(0,0,0,.35)}
+.top h1 em{font-style:normal;color:var(--fluoro)}
+.top .dek{font:13px/1.6 var(--mono);color:#cfcfc8;max-width:56ch;border-left:3px solid var(--magenta);padding-left:10px;margin-top:8px}
+/* 右侧统计板（反白纸面） */
+.top .right{background:var(--paper);color:var(--ink);padding:14px 14px 10px;display:flex;flex-direction:column}
+.top .right .h{font:700 10px/1 var(--mono);letter-spacing:.2em;background:var(--ink);color:var(--paper);padding:4px 6px;align-self:flex-start}
+.top .right .big{font-family:var(--anton);font-size:88px;line-height:.8;margin:10px 0 0}
+.top .right .big span{font:700 11px/1 var(--mono);letter-spacing:.14em;display:block;margin-top:4px}
+.top .right dl{margin:12px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.top .right dt{font:600 9px/1.3 var(--mono);letter-spacing:.14em;color:#55554f;text-transform:uppercase}
+.top .right dd{margin:0;font-family:var(--anton);font-size:30px;line-height:1}
+.top .right .note{margin-top:auto;padding-top:10px;font:600 9px/1.5 var(--mono);letter-spacing:.1em;color:#4d4d47}
+
+/* ================= 正文两栏 + 拼贴 ================= */
+/* 混合纸张：报头/头条是黑场，正文翻成纸白（白纸黑字）——独立杂志的"换纸"手法 */
+.body{display:grid;grid-template-columns:1fr 1fr 240px;gap:0;border-bottom:8px solid var(--ink);
+  background:var(--paper);color:var(--ink)}
+.body .col{padding:16px 16px 18px;border-right:2px solid #cfcfc8}
+.body .col:nth-child(2){border-right:8px solid var(--ink)}
+.body p{margin:0 0 10px;font:13.5px/1.75 var(--sans);color:#1b1b18}
+.body p:first-of-type::first-letter{float:left;font-family:var(--anton);font-size:64px;line-height:.78;
+  padding:4px 8px 0 0;color:var(--magenta)}
+.body b{color:var(--paper);background:var(--ink);padding:0 3px}
+.body .mono{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:#4d4d47}
+/* 抽引（斜体大字 + 黄底） */
+.pull{grid-column:1 / 3;padding:14px 16px;border-top:8px solid var(--ink);background:var(--fluoro);color:var(--ink)}
+.pull q{display:block;font:italic 900 34px/1.1 var(--serif);letter-spacing:-.02em;quotes:"«" "»"}
+.pull cite{display:block;margin-top:8px;font:700 10px/1 var(--mono);letter-spacing:.18em;font-style:normal;text-transform:uppercase}
+/* 右侧竖排标签 + 旋转小图 */
+.body .side{border-right:0;padding:14px 12px;position:relative}
+.body .vert{writing-mode:vertical-rl;font:800 11px/1 var(--mono);letter-spacing:.3em;color:var(--magenta);text-transform:uppercase}
+.body .polaroid{margin-top:16px;transform:rotate(-5deg);border:5px solid var(--paper);background:var(--paper);color:var(--ink);
+  box-shadow:6px 6px 0 var(--ink)}
+.body .polaroid .ph{height:120px;background:url("../../assets/bg/nasa-mobile-launcher.jpg") center/cover;
+  filter:grayscale(1) contrast(1.45) brightness(.66)}
+.body .polaroid .tx{padding:5px 6px;font:700 9px/1.4 var(--mono);letter-spacing:.1em}
+
+/* ================= 简报双栏（02 / 03） ================= */
+.briefs{display:grid;grid-template-columns:1fr 1fr;border-bottom:8px solid var(--paper)}
+.briefs .b{padding:14px 16px;border-right:8px solid var(--paper);display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:start}
+.briefs .b:last-child{border-right:0}
+.briefs .b .th{height:96px;background-size:cover;background-position:center;filter:grayscale(1) contrast(1.45) brightness(.62);
+  border:3px solid var(--paper)}
+.briefs .b .no{font-family:var(--anton);font-size:34px;line-height:.8;color:var(--magenta)}
+.briefs .b h3{margin:4px 0 4px;font-size:26px;font-weight:900;line-height:1.02;letter-spacing:-.03em}
+.briefs .b p{margin:0;font:12px/1.65 var(--sans);color:#d9d9d2}
+.briefs .b .tag{display:inline-block;margin-top:8px;border:2px solid var(--fluoro);color:var(--fluoro);
+  font:700 9px/1 var(--mono);letter-spacing:.16em;padding:3px 6px;text-transform:uppercase}
+
+/* ================= 退稿栏（报纸的"更正/退稿"位） ================= */
+.reject{border-bottom:8px solid var(--paper);padding:14px 16px 16px}
+.reject .hd{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+.reject .hd b{font-family:var(--anton);font-size:26px;line-height:1;color:var(--magenta)}
+.reject .hd span{font:700 10px/1 var(--mono);letter-spacing:.18em;color:var(--grey);text-transform:uppercase}
+.reject .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:2px solid #2a2a28}
+.reject .it{padding:8px 8px 8px 0;border-right:1px solid #222220}
+.reject .it:last-child{border-right:0}
+.reject .it .nm{font:700 10.5px/1.3 var(--mono);color:#e8e8e2;word-break:break-all}
+.reject .it .rs{font:600 9.5px/1.5 var(--mono);color:#9a9a94;margin-top:4px}
+.reject .it .why{font:600 9px/1.4 var(--mono);color:var(--grey);margin-top:4px;letter-spacing:.04em}
+
+/* ================= 页脚 ================= */
+.foot{padding:10px 16px;display:flex;gap:18px;flex-wrap:wrap;font:600 9px/1.6 var(--mono);letter-spacing:.12em;color:var(--grey);text-transform:uppercase}
+.foot b{color:var(--paper)}
+
+@media (max-width:1180px){
+  .top,.body,.briefs,.reject .grid{grid-template-columns:1fr}
+  .top .left,.body .col,.briefs .b{border-right:0;border-bottom:2px solid #262624}
+  .mast .name{font-size:52px}.top h1{font-size:40px}.top .leadimg{height:220px}
+  .body .vert{writing-mode:horizontal-tb}
+  .reject .grid{grid-template-columns:1fr 1fr}
+  .body p:first-of-type::first-letter{font-size:42px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="cap"><b>日报 · 二级页</b> 实验编辑设计 / 拼贴报纸 · 真实内容（2026-10-16：24 候选 → 3 A 档 → 5 退稿）</div>
+
+<article class="paper">
+  <!-- 报头 -->
+  <header class="mast">
+    <div class="trule"></div>
+    <div class="row">
+      <h1 class="name anton">DAILY<em>/</em>ARCHIVE</h1>
+      <div class="sub">GitHub 每日实用榜 · 只收<em>能立刻用</em>的东西<br>候选 <b>24</b> → 推荐 <b>3</b>（S 0 / A 3）· 退稿 <b>5</b> · 新面孔 <b>6</b></div>
+      <div class="issue">ISSUE<b>/*__ISSUE__*/0</b>2026·10·16</div>
+    </div>
+    <div class="meta">
+      <span>FRIDAY 周五</span><span>抓取 <i>13:40 +08:00</i></span><span>API <i>3 次</i>（匿名）</span>
+      <span>限流 <i>正常</i></span><span>方向 <i>topic:automation</i></span><span>增速口径 <i>0.64 天</i></span>
+    </div>
+  </header>
+
+  <!-- 头条 -->
+  <section class="top">
+    <div class="left">
+      <div class="leadimg half"><span class="credit">NASA/GLENN BENSON · 公有领域（示意插图）</span></div>
+      <div class="headline">
+        <span class="kicker">头条 / LEAD · 创建仅 1 天</span>
+        <h1>把 JavaScript<br>编译成<em>神经网络</em></h1>
+        <p class="dek">chenglou/handwired —— 不需要训练、可微、能跑 WebGPU。24 小时 <b style="background:none;color:var(--fluoro)">+1,201★/天</b>，本期最猛的一条。</p>
+      </div>
+    </div>
+    <aside class="right">
+      <span class="h">今日数字</span>
+      <div class="big">24<span>候选 CA NDIDATES</span></div>
+      <dl>
+        <div><dt>推荐</dt><dd>3</dd></div>
+        <div><dt>S / A</dt><dd>0 / 3</dd></div>
+        <div><dt>新面孔</dt><dd>6</dd></div>
+        <div><dt>老朋友</dt><dd>18</dd></div>
+        <div><dt>退稿</dt><dd>5</dd></div>
+        <div><dt>去重</dt><dd>1</dd></div>
+      </dl>
+      <p class="note">增速与 10-15 快照对比；6 条新面孔无基线，按 RUBRIC 冷启动规则并入实用性，标 <b>est.</b>（不参与排序）。</p>
+    </aside>
+  </section>
+
+  <!-- 正文 + 抽引 + 侧栏 -->
+  <section class="body">
+    <div class="col">
+      <p>把普通 JavaScript 程序编译成神经网络，这件事听起来像论文标题，但它已经在 24 小时内吃掉 1,201 颗星。handwired 的定位是"研究型工具"——给那些愿意在编译层动手的人，而不是给应用开发者。</p>
+      <p>它<b>不需要训练</b>：权重由程序结构直接推导，因此没有反向传播、没有数据集、没有调参窗口。它<b>可微</b>：你能对编译出来的网络求梯度。它<b>能上 WebGPU</b>：推理跑在浏览器里。</p>
+      <p class="mono">⚠ 研究型工具不是生产线工具：没有文档站、没有版本承诺、API 会变。适合"先看它怎么想"，不适合"明天上线"。</p>
+    </div>
+    <div class="col">
+      <p>同期的 BRUTAL 走的是相反路线：把游戏引擎的底座做成 C# 框架，互操作层直连原生 API，附带 Vulkan / GLFW / Dear ImGui / FMOD / RakNet / Jolt / Box2D 绑定。RimWorld 用它做了 Waylith 引擎，自测是 Unity 版的 2–4 倍性能；Kitten Space Agency 直接跑在上面。</p>
+      <p>代价很清楚：它<b>不是 Unity/Godot</b>——没有编辑器、没有场景图、没有渲染器，README 自己写"某些方面比 Unity 难得多"。许可是"MIT + 署名要求"：游戏 credits 要写明、开场显示 BRUTAL logo、随包发 NOTICE.txt。</p>
+      <p class="mono">上手：.NET 10 SDK → dotnet add package Ahwoo.Brutal.Glfw → dotnet run（README 给了最小窗口代码）。</p>
+    </div>
+    <aside class="side">
+      <div class="vert">INSIDE · 3 STORIES + 5 REJECTIONS</div>
+      <figure class="polaroid">
+        <div class="ph"></div>
+        <div class="tx">移动发射塔 / NASA/BEN SMEGELSKY</div>
+      </figure>
+    </aside>
+    <div class="pull">
+      <q>把「每次重新交代 agent 要干什么」变成可复用配置——你始终掌握每一次工具调用的批准权。</q>
+      <cite>gitbot-hq/GitBot · A 档 · MIT · 本地无账号无遥测</cite>
+    </div>
+  </section>
+
+  <!-- 简报 -->
+  <section class="briefs">
+    <div class="b">
+      <div class="th" style="background-image:url('../../assets/bg/nasa-pad39b-steel.jpg')"></div>
+      <div>
+        <span class="no">02</span>
+        <h3>BRUTAL：C# 引擎底座，RimWorld 在用</h3>
+        <p>互操作层直连原生 API；Vulkan / GLFW / Dear ImGui / FMOD / Jolt / Box2D 绑定齐全。许可 MIT + 署名，无版税。</p>
+        <span class="tag">A 档 · 研究</span>
+      </div>
+    </div>
+    <div class="b">
+      <div class="th" style="background-image:url('../../assets/bg/nasa-vab-highbay.jpg')"></div>
+      <div>
+        <span class="no">03</span>
+        <h3>GitBot：把已装的 agent 包成机器人</h3>
+        <p>Claude Code / Codex / OpenCode → 固定职责 + 权限策略 + 指定仓库。⚠ 无鉴权且监听所有网卡，只能在可信网络用。</p>
+        <span class="tag">A 档 · 试玩</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 退稿栏 -->
+  <section class="reject">
+    <div class="hd"><b>REJECTED / 退稿</b><span>5 条 · 每条都有明确原因（不是"感觉不行"）</span></div>
+    <div class="grid">
+      <div class="it"><div class="nm">jamespolyakov9829/captcha-api</div><div class="rs">验证码代解</div><div class="why">硬排除：爬虫绕过与反检测</div></div>
+      <div class="it"><div class="nm">Hinln/ARTEX</div><div class="rs">源码备份</div><div class="why">同项目换皮搬运；原项目已按合规剔除</div></div>
+      <div class="it"><div class="nm">AgentMemoryRepo/agentmemoryrepo</div><div class="rs">只有规格</div><div class="why">无可执行产物，命中硬排除</div></div>
+      <div class="it"><div class="nm">blendi-remade/agentcraft</div><div class="rs">描述为空</div><div class="why">description 为空，硬性排除</div></div>
+      <div class="it"><div class="nm">h0m3us3r/w1700k-sdr</div><div class="rs">描述为空</div><div class="why">description 为空，硬性排除</div></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>数据源 <b>GitHub Search API（匿名）</b></span><span>README 核实 <b>3 次</b>（raw.githubusercontent，不占额度）</span>
+    <span>插图 <b>NASA 公有领域</b> · 署名见 assets/bg/SOURCES.md</span><span>本页 <b>离线</b> · 无外部请求</span>
+  </footer>
+</article>
+
+</body>
+</html>

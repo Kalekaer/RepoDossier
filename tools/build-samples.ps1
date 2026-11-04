@@ -34,6 +34,7 @@ function Info($msg) { Write-Host "· $msg" -ForegroundColor DarkGray }
 if (-not $Root) { $Root = Split-Path -Parent $PSScriptRoot }
 $Root = (Resolve-Path $Root).Path
 function P([string]$rel) { Join-Path $Root $rel }
+. (P 'tools\weekly-utils.ps1')
 $tmp = P 'data\_tmp'
 if (-not (Test-Path $tmp)) { New-Item -ItemType Directory -Path $tmp | Out-Null }
 
@@ -61,6 +62,19 @@ if (-not $Date) {
 $pickPath = Join-Path $pickDir "$Date.jsonl"
 if (-not (Test-Path $pickPath)) { Fail "找不到 $pickPath" }
 $dt = [datetime]::ParseExact($Date, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture)
+$searchPolicy=P 'data/search-policy.json'
+$editorialApproved=$false
+$hasEditorialScope = Test-Path (P "data/audit/editorial/$Date.json")
+if($hasEditorialScope -and (Test-Path $searchPolicy) -and (Test-Path (P "reports/$Date.md"))) {
+  $policy=Get-Content $searchPolicy -Raw -Encoding UTF8|ConvertFrom-Json
+  if($Date -ge $policy.disposition_enforce_from -and @($Layout|ForEach-Object{$_.ToLower()}) -contains 'c') {
+    if($policy.publication_mode -eq 'declared-editorial-batch'){
+      & (P 'tools/editorial-batch.ps1') check -Date $Date -Root $Root
+      if($LASTEXITCODE -eq 0){$editorialApproved=$true}
+    }else{& (P 'tools/candidate-ledger.ps1') -Action check -Date $Date -Root $Root -Publish}
+    if($LASTEXITCODE -ne 0){Fail '候选未逐项处置；评分或有理由、有复核日期地延期后再发布。'}
+  }
+}
 
 # ---------- 事件：候选数 = 当天 discovered；最近 release 日期用于二次推荐 ----------
 $cand = 0
@@ -205,7 +219,7 @@ foreach ($card in @($picksAll | Sort-Object @{ Expression = { if ($_.tier -eq 'S
   }
 }
 # 只有 B/C 的日子也要能出页（watch 非空）；0 候选仍拒绝重建，避免把抓取失败日写成空版。
-if ($picks.Count -eq 0 -and $rejects.Count -eq 0 -and $overflow.Count -eq 0 -and $watch.Count -eq 0) { Fail "$pickPath 里没有可用条目" }
+if ($picks.Count -eq 0 -and $rejects.Count -eq 0 -and $overflow.Count -eq 0 -and $watch.Count -eq 0 -and -not $editorialApproved) { Fail "$pickPath 里没有可用条目" }
 
 # ---------- 版面展示上限（2026-10-18 用户定：B≤4、C+D≤8）----------
 # 只影响「每日精选」版面；picks / CSV / 台账 / 全库 / 冷却全部保留全量。
@@ -676,6 +690,8 @@ $enc = New-Object System.Text.UTF8Encoding($false)
 $dailyKey = 'c'
 $dailyFile = 'daily-layout-c-finsara.generated.html'
 Info "日报版面：STRUCTURE AXIS（$dailyFile）"
+$weeklyPeriod = $null
+if (@($Layout | ForEach-Object { $_.ToLower() }) -contains 'c') { $weeklyPeriod = Ensure-WeeklyForDaily -Root $Root -DailyDate $Date }
 
 # 手账本的页数（按 5/4/3 循环切）：与页面里的 planSizes() 同一算法
 $nbPages = 0; $leftN = $all.Count; $k3 = 0
@@ -688,6 +704,11 @@ foreach ($k in $Layout) {
   $srcPath = P $t.src
   if (-not (Test-Path $srcPath)) { Fail "找不到源文件 $srcPath" }
   $s = [System.IO.File]::ReadAllText($srcPath, [Text.Encoding]::UTF8)
+  if ($key -eq 'home') {
+    $weeklyArchive = ConvertTo-Json -InputObject @(Get-WeeklyArchive -Root $Root) -Depth 8 -Compress
+    $s = [regex]::Replace($s,'(?s)weekly:\s*\[.*?\]',('weekly: '+$weeklyArchive))
+    $s = [regex]::Replace($s,"var state = \{ kind: 'daily', y: \d+, m: \d+ \};",("var state = { kind: 'daily', y: "+$dt.Year+", m: "+($dt.Month-1)+" };"))
+  }
 
   $tokens = switch ($key) {
     'c' { @{ DAILY = $daily; FULLREPORT = $reportHtml; RELATED = $relatedHtml; DETAIL_CSS = $detailCss; DETAIL_JS = $detailJs } }
@@ -724,6 +745,7 @@ if ($key -eq 'c' -and -not (Test-Path (P 'data\site\kiosk-return.js'))) {
   if ($s -match '</head>') { $s = $s -replace '</head>', ($stampLine + "`n</head>") } else { $s = $stampLine + "`n" + $s }
 
   $outFile = $t.out
+  if ($key -eq 'c') { $s = Set-DailyWeeklyEntry -Html $s -DailyDate $Date -Root $Root }
   $outPath = Join-Path $tmp $outFile
   [System.IO.File]::WriteAllText($outPath, $s, $enc)
   $kb = [math]::Round((Get-Item $outPath).Length / 1KB, 1)

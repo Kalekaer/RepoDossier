@@ -1,7 +1,7 @@
 # add-repo.ps1 — 用户主动添加项目（第二阶段功能 ⑥，2026-10-13 产品决策）
 #
 # 场景：用户在对话里说「这个 GitHub 项目不错：owner/repo」。
-# Agent 先用 web_fetch 取 https://api.github.com/repos/{owner}/{repo}（1 次调用，计入当日额度），
+# Agent 先用宿主 HTTP 工具取 https://api.github.com/repos/{owner}/{repo}（1 次调用，计入当日额度），
 # 核实存在性 / License / 活跃度 / 风险，再把返回字段传给本脚本入库。
 #
 # 本脚本**不做网络请求**（本机 shell 连不通 GitHub）——只负责落盘原始来源并同步。
@@ -45,6 +45,10 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 function P([string]$rel) { Join-Path $root $rel }
+. (P 'tools\date-utils.ps1')
+function To-Iso([string]$v) {
+  ConvertTo-GitHubTimestamp $v
+}
 
 if ($FullName -notmatch '^[A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+$') {
   Write-Host "❌ full_name 格式不对：'$FullName'（应为 owner/repo）" -ForegroundColor Red; exit 1
@@ -113,11 +117,11 @@ if ($exists) {
     license=$(if ($License) { $License } else { $null })
     topics=$topicsArr
     archived=($Archived -eq 'true')
-    pushed_at=$PushedAt
+    pushed_at=(To-Iso $PushedAt)
     stars=$(if ($Stars -match '^\d+$') { [int]$Stars } else { $null })
     forks=$(if ($Forks -match '^\d+$') { [int]$Forks } else { 0 })
     open_issues=$(if ($OpenIssues -match '^\d+$') { [int]$OpenIssues } else { $null })
-    created_at=$CreatedAt
+    created_at=(To-Iso $CreatedAt)
     fetched_at=$now
   }
 
@@ -128,7 +132,7 @@ if ($exists) {
     full_name=$FullName
     stars=$(if ($Stars -match '^\d+$') { [int]$Stars } else { 0 })
     forks=$(if ($Forks -match '^\d+$') { [int]$Forks } else { 0 })
-    created_at=$CreatedAt; pushed_at=$PushedAt; captured_at=$now
+    created_at=(To-Iso $CreatedAt); pushed_at=(To-Iso $PushedAt); captured_at=$now
   }
 
   # 写前校验：坏行不落盘

@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>GitHub 周报 · W01 · 2026-10-12 — 2026-10-18</title>
+<script>document.documentElement.classList.add('js')</script>
+<style>
+@font-face{font-family:Anton;src:url(../../assets/anton-latin.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Bebas;src:url(../../assets/fonts/BebasNeue-Regular.ttf) format('truetype');font-display:swap}
+:root{
+  --ink:#0a0a09;--paper:#d2c9b9;--paper2:#c5bbaa;--paper3:#b7ac98;
+  --red:#c81f16;--red2:#9f1009;--cyan:#2ef2d0;--acid:#e9ff2e;--steel:#4c463c;--line:rgba(10,10,9,.28);
+  --disp:'Anton',Impact,'Arial Black',sans-serif;--num:'Bebas','Anton',Impact,sans-serif;
+  --sans:'Microsoft YaHei UI','Noto Sans SC','PingFang SC',system-ui,sans-serif;
+  --mono:'Cascadia Mono',Consolas,'SFMono-Regular',monospace;
+  --chart2-span:5;--chart4-span:7;--chart4-h:360px;--rank-cols:1.15fr .85fr;--cover-pad:24px;
+}
+*{box-sizing:border-box}
+html{background:#050504}
+body{margin:0;background:#050504;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.paper{max-width:1540px;margin:0 auto;background:var(--paper);display:grid;grid-template-columns:64px minmax(0,1fr);position:relative;overflow:hidden;box-shadow:0 0 0 1px #000}
+.paper::before{content:"";position:absolute;inset:0;background:url(../../assets/bg/weekly-plaster.jpg) center/520px;opacity:.13;mix-blend-mode:multiply;pointer-events:none;z-index:0}
+.paper::after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(10,10,9,.14) .6px,transparent .7px);background-size:4px 4px;opacity:.13;mix-blend-mode:multiply;pointer-events:none;z-index:0}
+.paper>*{position:relative;z-index:1}
+.progress{position:fixed;left:0;top:0;width:100%;height:3px;z-index:300;background:rgba(10,10,9,.35)}
+.progress i{display:block;height:100%;width:0;background:var(--cyan)}
+/* left rail */
+.rail{position:sticky;top:0;height:100vh;background:var(--paper);border-right:1px solid var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 0 18px;z-index:10}
+.rail .mark{font:400 30px/.8 var(--disp);color:var(--red);writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:-.04em}
+.rail .dates{font:700 8px/1.5 var(--mono);letter-spacing:.16em;writing-mode:vertical-rl;transform:rotate(180deg);color:var(--steel);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:10px 0}
+.rail nav{display:flex;flex-direction:column;gap:9px;align-items:center}
+.rail nav a{font:700 8px/1 var(--mono);text-decoration:none;color:var(--steel);border:1px solid transparent;padding:3px}
+.rail nav a:hover{border-color:var(--red);color:var(--red)}
+.rail .stamp{width:28px;height:28px;border:2px solid var(--ink);display:grid;place-items:center;font:700 7px/1 var(--mono);transform:rotate(-8deg);position:relative}
+.rail .stamp::after{content:"";position:absolute;right:-5px;top:-5px;width:5px;height:5px;background:var(--red);animation:blink 1.8s steps(1,end) infinite}
+/* cover */
+.cover{background:var(--ink);color:var(--paper);padding:var(--cover-pad) 34px 0;position:relative;overflow:hidden;min-height:760px;display:flex;flex-direction:column}
+.cover::before{content:"";position:absolute;inset:0;background:url(../../assets/bg/weekly-control-2.jpg) center/cover;filter:grayscale(1) contrast(1.16) brightness(.42);opacity:.6}
+.cover::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,9,.96),rgba(10,10,9,.58) 56%,rgba(10,10,9,.92)),linear-gradient(0deg,rgba(10,10,9,.9),transparent 60%)}
+.cover>*{position:relative;z-index:1}
+.scan{position:absolute;left:0;right:0;top:0;height:1px;background:var(--cyan);opacity:.45;z-index:2;pointer-events:none;animation:scan 8s linear infinite}
+.cover-top{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #3a3730;padding-bottom:8px;font:700 8px/1.4 var(--mono);letter-spacing:.18em;color:#9c9588;text-transform:uppercase}
+.cover-top b{color:var(--cyan)}
+.cover-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:24px;padding:18px 0 16px;flex:1;align-items:center}
+.eyebrow{font:700 9px/1.4 var(--mono);letter-spacing:.22em;color:var(--red);margin:0 0 7px;text-transform:uppercase}
+.cover h1{font:400 clamp(170px,20vw,300px)/.7 var(--disp);letter-spacing:-.045em;margin:0;display:flex;align-items:flex-end}
+.cover h1 .w{color:var(--paper)}.cover h1 .no{color:var(--red);font-size:.82em}
+.dates-line{font:700 10px/1.8 var(--mono);letter-spacing:.04em;color:#e4ddd0;margin:12px 0 0;max-width:72ch}
+.dates-line b{color:var(--cyan)}
+.headline{font:900 clamp(19px,2vw,30px)/1.35 var(--sans);letter-spacing:-.015em;margin:12px 0 0;max-width:46ch}
+.headline em{font-style:normal;color:var(--cyan)}
+/* vertical 7-day ladder */
+.ladder{border-left:1px solid #4a463e;padding-left:12px;display:flex;flex-direction:column;gap:4px;align-self:stretch;justify-content:center}
+.ladder .lh{font:700 8px/1.4 var(--mono);letter-spacing:.14em;color:#8e887c;display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #3a3730;padding-bottom:5px;margin-bottom:2px}
+.day{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:6px;min-height:26px;text-decoration:none}
+.day .d{font:700 9px/1 var(--mono);color:var(--cyan);letter-spacing:.04em}
+.day .bar{height:9px;background:#2b2823;display:flex;overflow:hidden}
+.day .bar .a{background:var(--paper);height:100%}.day .bar .s{background:var(--red);height:100%}
+.day .n{font:700 8px/1 var(--mono);color:#b8b1a4;text-align:right}
+.day:hover .bar{outline:1px solid var(--cyan)}
+.cover-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 -34px;padding:0 34px 16px;border-top:1px solid #3a3730}
+.cstat{padding:10px 14px 0 0;border-right:1px solid #3a3730;margin-right:14px;min-width:0}
+.cstat:last-child{border-right:0;margin-right:0}
+.cstat .k{font:700 8px/1 var(--mono);letter-spacing:.18em;color:#8e887c}
+.cstat .v{font:400 62px/.82 var(--num);color:var(--paper);margin:4px 0 2px}
+.cstat.main .v{color:var(--red)}
+.cstat .sub{font:700 8px/1.45 var(--mono);color:#7d776c}
+.cstat .chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.chip{font:700 8px/1 var(--mono);padding:2px 4px;border:1px solid #4a463e;color:#c9c2b5}
+.chip.s{background:var(--red);border-color:var(--red);color:#fff}.chip.a{background:var(--paper);border-color:var(--paper);color:var(--ink)}.chip.b{background:#7a7367;border-color:#7a7367;color:#fff}.chip.c{border-color:#6c6458}.chip.d{border-color:#3f3a33;color:#8e887c}
+/* section framing */
+.main{min-width:0}
+.sec{position:relative;padding:30px 34px 36px;border-top:1px solid var(--ink)}
+.sec-head{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:end;border-bottom:4px solid var(--ink);padding-bottom:8px;margin-bottom:18px}
+.sec-no{font:400 52px/.68 var(--num);color:var(--red)}
+.sec-head h2{font:900 clamp(28px,3vw,42px)/1 var(--sans);margin:0;letter-spacing:-.02em}
+.sec-head .side{font:700 8px/1.4 var(--mono);letter-spacing:.14em;color:var(--steel);text-align:right;max-width:30ch}
+.sec-head .side b{color:var(--red2)}
+/* lead */
+.lead{background:var(--paper)}
+.lead-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+.lead-copy h3{font:900 clamp(24px,2.7vw,38px)/1.12 var(--sans);letter-spacing:-.02em;margin:0 0 12px;max-width:24ch}
+.judges{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+.judge{display:grid;grid-template-columns:58px minmax(0,1fr);gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.judge .n{font:400 38px/.8 var(--num);color:var(--red)}
+.judge h4{font:900 17px/1.25 var(--sans);margin:0 0 3px}
+.judge p{font-size:12px;line-height:1.7;color:var(--steel);margin:0}
+.judge .ev{font:700 8px/1.5 var(--mono);color:var(--ink);margin-top:4px}
+.judge .rep{font:700 8px/1.4 var(--mono);color:var(--red2);margin-top:2px;word-break:break-all}
+.top-card{background:var(--ink);color:var(--paper);border:1px solid var(--ink);clip-path:polygon(0 0,100% 2.5%,100% 100%,0 97.5%);overflow:hidden}
+.top-card .plate{height:150px;overflow:hidden;position:relative;border-bottom:1px solid #3a3730}
+.top-card .plate img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.16) brightness(.8)}
+.top-card .plate b{position:absolute;left:10px;bottom:7px;font:700 7px/1 var(--mono);letter-spacing:.08em;background:var(--red);color:#fff;padding:3px 5px}
+.top-card .body{padding:12px 14px 14px}
+.top-card .rk{font:400 72px/.72 var(--num);color:var(--red);letter-spacing:-.03em}
+.top-card h3{font:900 22px/1.1 var(--sans);margin:2px 0 5px;word-break:break-all;color:var(--paper)}
+.top-card .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font:700 8px/1.3 var(--mono);color:#b8b1a4}
+.top-card .tier{background:var(--paper);color:var(--ink);padding:2px 5px}
+.top-card .score{font:400 32px/.8 var(--num);color:var(--cyan)}
+.top-card p{font-size:12px;line-height:1.7;color:#cfc7b8;margin:8px 0 0}
+/* rankings */
+.rankings{background:var(--ink);color:var(--paper);border-top:1px solid #3a3730}
+.rankings .sec-head{border-bottom-color:#4a463e}
+.rankings .sec-head h2{color:var(--paper)}
+.rankings .sec-head .side{color:#9c9588}
+.rank-grid{display:grid;grid-template-columns:var(--rank-cols);gap:22px;align-items:start}
+.rank-block h3{font:900 18px/1.2 var(--sans);margin:0 0 2px;color:var(--paper)}
+.rank-block h3 .fig{font:700 8px/1 var(--mono);color:var(--cyan);letter-spacing:.1em;margin-left:6px;vertical-align:2px}
+.rank-block .rsub{font:700 8px/1.5 var(--mono);letter-spacing:.1em;color:#8e887c;border-bottom:1px solid #3a3730;padding-bottom:6px;margin-bottom:0}
+.rank-list{display:flex;flex-direction:column}
+.rank-row{display:grid;grid-template-columns:66px minmax(0,1fr) 86px;gap:10px;align-items:center;border-bottom:1px solid #33302a;padding:9px 0;position:relative}
+.rank-row .n{font:400 54px/.75 var(--num);color:#5f594d;letter-spacing:-.04em;text-align:center}
+.rank-row .nm{font:900 19px/1.15 var(--sans);word-break:break-all;color:var(--paper)}
+.rank-row .one{font-size:10.5px;line-height:1.5;color:#a9a294;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rank-row .meta{text-align:right;font:700 8px/1.3 var(--mono);color:#b8b1a4}
+.rank-row .meta .sc{display:block;font:400 30px/.8 var(--num);color:var(--cyan)}
+.rank-row .meta .tier{display:inline-block;background:var(--paper);color:var(--ink);padding:2px 5px;margin-bottom:3px}
+.rank-row.top{background:var(--red);color:#fff;padding:11px 8px;margin:4px -8px}
+.rank-row.top .n{color:#fff}.rank-row.top .nm{color:#fff}.rank-row.top .one{color:#ffe0db}.rank-row.top .meta{color:#ffe0db}.rank-row.top .meta .sc{color:#fff}.rank-row.top .meta .tier{background:#fff;color:var(--red2)}
+/* star rank bars */
+.star-list{display:flex;flex-direction:column}
+.star-row{display:grid;grid-template-columns:38px minmax(0,1fr);gap:8px;align-items:start;border-bottom:1px solid #33302a;padding:8px 0}
+.star-row .n{font:400 30px/.75 var(--num);color:#5f594d;text-align:center}
+.star-row .nm{font:900 13px/1.2 var(--sans);color:var(--paper);word-break:break-all;display:flex;justify-content:space-between;gap:6px}
+.star-row .nm em{font:700 8px/1.3 var(--mono);color:var(--cyan);font-style:normal;white-space:nowrap}
+.star-row .bar{height:8px;background:#2b2823;margin-top:4px;display:flex}
+.star-row .bar i{display:block;height:100%;background:var(--red)}
+.star-row:first-child .bar i{background:var(--cyan)}
+.star-row .tier{font:700 7px/1 var(--mono);color:#8e887c;margin-left:4px}
+.all-links{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:16px;border-top:1px solid #3a3730;padding-top:10px}
+.all-links span{font:700 8px/1 var(--mono);letter-spacing:.16em;color:#8e887c;margin-right:4px}
+.all-links button{appearance:none;border:1px solid #6c6458;background:transparent;color:var(--paper);font:700 9.5px/1.2 var(--mono);padding:8px 10px;cursor:pointer}
+.all-links button:hover{background:var(--cyan);border-color:var(--cyan);color:var(--ink)}
+button.all{appearance:none;border:1px solid var(--ink);background:transparent;color:var(--ink);font:700 8px/1.2 var(--mono);padding:6px 8px;cursor:pointer;margin-top:8px}
+button.all:hover{background:var(--ink);color:var(--paper)}
+.chart [data-collection]{cursor:pointer}
+.chart [data-collection]:hover{opacity:.82}
+/* data charts */
+.data{background:var(--paper)}
+.grid12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.panel{background:var(--paper2);border:1px solid var(--ink);clip-path:polygon(0 0,100% 1.5%,100% 100%,0 98.5%);min-width:0;overflow:hidden}
+.panel.dark{background:#111;color:var(--paper)}
+.panel .phead{display:flex;justify-content:space-between;gap:8px;align-items:baseline;background:var(--ink);color:var(--paper);padding:8px 11px;border-bottom:1px solid var(--ink)}
+.panel .phead b{font:700 8px/1 var(--mono);letter-spacing:.14em;color:var(--cyan)}
+.panel .phead span{font:700 7px/1.4 var(--mono);letter-spacing:.08em;color:#9c9588;text-align:right}
+.panel .pbody{padding:10px 12px 12px;min-width:0}
+.chart-wrap{min-width:0}
+.panel h3{font:900 18px/1.2 var(--sans);margin:0 0 2px}
+.panel .cap{font:700 8px/1.5 var(--mono);color:var(--steel);margin:0 0 6px}
+.p4{grid-column:span var(--chart4-span)}.p2{grid-column:span var(--chart2-span)}.p1{grid-column:span 12}
+.chart{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:9px;flex-wrap:wrap;font:700 8px/1.4 var(--mono);color:var(--steel);margin:2px 0 4px}
+.legend i{display:inline-block;width:8px;height:8px;margin-right:3px;background:var(--ink)}
+.legend .s i{background:var(--red)}.legend .a i{background:var(--ink)}.legend .b i{background:#7a7367}
+details.tbl{margin-top:5px;border-top:1px solid var(--line);padding-top:4px}
+details.tbl summary{cursor:pointer;font:700 8px/1.5 var(--mono);color:var(--steel);letter-spacing:.06em}
+details.tbl table{width:100%;border-collapse:collapse;margin-top:5px;font-size:10px}
+details.tbl th,details.tbl td{border:1px solid var(--line);padding:4px;text-align:left}
+details.tbl th{background:var(--ink);color:var(--paper)}
+/* changes */
+.changes{background:var(--paper)}
+.change-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:22px;align-items:start}
+.metrics{display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--ink);border-left:1px solid var(--line)}
+.metric{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 10px;min-height:74px}
+.metric .n{font:400 34px/.8 var(--num);color:var(--ink)}
+.metric .k{font:700 8px/1.4 var(--mono);color:var(--steel);margin-top:5px}
+.metric .x{font:700 7px/1.4 var(--mono);color:var(--red2);margin-top:2px}
+.notes{border-left:3px solid var(--red);padding-left:12px}
+.notes h3{font:900 18px/1.2 var(--sans);margin:0 0 6px}
+.notes p{font-size:11px;line-height:1.75;color:var(--steel);margin:0 0 8px}
+.notes b{color:var(--ink)}
+/* next */
+.next{background:var(--paper2)}
+.next-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.next-card{border-top:4px solid var(--red);padding-top:8px;min-width:0}
+.next-card h3{font:900 17px/1.25 var(--sans);margin:0 0 5px}
+.next-card p{font-size:11px;line-height:1.7;color:var(--steel);margin:0}
+.next-card .tag{font:700 8px/1.4 var(--mono);letter-spacing:.08em;color:var(--red2);display:block;margin-bottom:3px}
+/* quality */
+.quality{background:linear-gradient(rgba(10,10,9,.92),rgba(10,10,9,.92)),url(../../assets/bg/weekly-control-3.jpg) center 42%/cover;color:var(--paper);padding:22px 34px;display:grid;grid-template-columns:1.1fr .9fr 1fr;gap:18px;border-top:1px solid #3a3730}
+.quality .qh{font:400 34px/.8 var(--num);color:var(--cyan);grid-column:1/-1}
+.quality .qi{border-top:1px solid #3a3730;padding-top:6px;font:700 8px/1.5 var(--mono);color:#a9a294}
+.quality .qi b{display:block;color:var(--paper);font-size:9px;letter-spacing:.08em}
+.quality .qi em{font-style:normal;color:var(--red)}
+/* appendix / footer */
+.appendix{background:linear-gradient(rgba(10,10,9,.94),rgba(10,10,9,.94)),url(../../assets/bg/weekly-plaster-worn.jpg) center/520px;color:var(--paper);padding:26px 34px 34px;border-top:1px solid #3a3730}
+.appendix summary{cursor:pointer;font:700 9px/1.5 var(--mono);letter-spacing:.14em;color:var(--cyan)}
+.appendix h3{font:900 17px/1.2 var(--sans);margin:16px 0 5px}
+.appendix ul{columns:2;column-gap:22px;padding-left:16px;font-size:10.5px;line-height:1.7;color:#c9c2b5;margin:0}
+.appendix .note{font:700 8px/1.7 var(--mono);color:#7d776c;margin-top:12px}
+.foot{background:var(--ink);color:#9c9588;padding:20px 34px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;border-top:1px solid #3a3730}
+.foot .end{font:400 42px/.8 var(--disp);color:var(--paper)}.foot .end b{color:var(--red)}
+.foot dt{font:700 8px/1.4 var(--mono);letter-spacing:.12em;color:#6f6a60}.foot dd{margin:1px 0 6px;font:700 9px/1.5 var(--mono);color:#cfc8ba}
+/* modal / project file */
+.modal{position:fixed;inset:0;z-index:250;display:none}
+.modal.open{display:block}
+.modal-bg{position:absolute;inset:0;background:rgba(10,10,9,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.file{position:relative;max-width:620px;margin:8vh auto 0;background:var(--paper);border:1px solid var(--ink);clip-path:polygon(0 0,100% 1.5%,100% 100%,0 98.5%);max-height:82vh;display:flex;flex-direction:column;animation:fileIn .3s cubic-bezier(.2,.8,.2,1) both}
+.file-head{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:var(--paper);padding:9px 12px;font:700 8px/1.3 var(--mono);letter-spacing:.14em}
+.file-close{appearance:none;border:1px solid #4a463e;background:transparent;color:var(--paper);width:26px;height:26px;font:400 20px/1 var(--sans);cursor:pointer}
+.file-close:hover{background:var(--red);border-color:var(--red)}
+.file-body{padding:16px 18px 18px;overflow:auto;min-height:0}
+.file .f-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.file .f-tier{font:400 70px/.72 var(--num);color:var(--red);letter-spacing:-.03em}
+.file h2{font:900 23px/1.12 var(--sans);margin:0 0 4px;word-break:break-all}
+.file .f-sub{font:700 8px/1.4 var(--mono);color:var(--steel);word-break:break-all}
+.file .f-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 0}
+.file .f-metrics b{display:block;font:400 28px/.8 var(--num);color:var(--ink)}
+.file .f-metrics span{font:700 7px/1.3 var(--mono);color:var(--steel);letter-spacing:.06em}
+.file .f-one{font-size:13px;line-height:1.8;color:var(--steel);margin:8px 0 0}
+.file .f-link{display:inline-block;margin-top:12px;font:700 9px/1.4 var(--mono);color:var(--red2);text-decoration:none;border-bottom:1px solid var(--red2);padding-bottom:1px}
+.file .f-empty{font:700 9px/1.7 var(--mono);color:var(--steel);padding:12px 0}
+.f-list{display:flex;flex-direction:column}
+.f-row{display:grid;grid-template-columns:34px minmax(0,1fr) 58px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.f-row:hover{background:rgba(10,10,9,.06)}
+.f-row .fn{font:400 28px/.75 var(--num);color:#8f8677;text-align:center}
+.f-row .fid{font:900 12px/1.2 var(--sans);word-break:break-all}
+.f-row .fone{font-size:10px;line-height:1.5;color:var(--steel);margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.f-row .fmeta{text-align:right;font:700 8px/1.3 var(--mono);color:var(--steel)}
+.f-row .fmeta b{display:block;font:400 24px/.8 var(--num);color:var(--red2)}
+.f-note{font:700 8px/1.6 var(--mono);color:var(--steel);margin:0 0 8px}
+body.modal-open{overflow:hidden}
+/* motion */
+.js .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.js .reveal.in{opacity:1;transform:none}
+.day .bar i{transform-origin:left;animation:growX .9s cubic-bezier(.2,.8,.2,1) both}
+.chart .bar{transform-box:fill-box;transform-origin:bottom;animation:growY .9s cubic-bezier(.2,.8,.2,1) both}
+.chart .seg{transform-box:fill-box;transform-origin:left;animation:growX .9s cubic-bezier(.2,.8,.2,1) both}
+.chart polyline{stroke-dasharray:2400;stroke-dashoffset:2400;animation:draw 1.6s ease-out .15s forwards}
+.chart circle{animation:fadeIn .6s ease-out both}
+.top-card .plate img{animation:ken 18s ease-in-out infinite alternate}
+.rank-row.top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--cyan);transform:scaleX(0);transform-origin:left;animation:sweep 3.6s ease-in-out infinite}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes growY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scan{from{top:0}to{top:100%}}
+@keyframes ken{from{transform:scale(1)}to{transform:scale(1.045)}}
+@keyframes sweep{0%,20%{transform:scaleX(0)}50%,70%{transform:scaleX(1)}100%{transform:scaleX(0);transform-origin:right}}
+@keyframes fileIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,45%{opacity:1}50%,95%{opacity:.2}100%{opacity:1}}
+.rail nav a.active{background:var(--ink);color:var(--cyan);border-color:var(--ink)}
+.rank-row{cursor:pointer}
+.rank-row:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.rank-row.open .one{display:block;-webkit-line-clamp:unset;overflow:visible}
+.rank-row.open{background:rgba(46,242,208,.08)}
+.rank-row.top.open{background:var(--red)}
+@media(prefers-reduced-motion:reduce){
+  .js .reveal{opacity:1;transform:none;transition:none}
+  .day .bar i,.chart .bar,.chart .seg,.chart polyline,.chart circle,.scan,.top-card .plate img,.rank-row.top::after,.rail .stamp::after,.file{animation:none}
+}
+@media(max-width:1100px){
+  .paper{grid-template-columns:1fr}
+  .rail{display:none}
+  .cover{padding:18px 20px 0;min-height:0}
+  .cover-grid{grid-template-columns:1fr;gap:14px}
+  .ladder{max-width:520px}
+  .cover-stats{margin:0 -20px;padding:0 20px 14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cstat:nth-child(2){border-right:0}
+  .sec{padding:24px 20px 28px}
+  .sec-head{grid-template-columns:50px 1fr}.sec-head .side{display:none}
+  .lead-grid,.rank-grid,.change-grid,.next-grid{grid-template-columns:1fr}
+  .rankings{overflow:hidden}
+  .rank-block{min-width:0}
+  .rank-row{grid-template-columns:50px minmax(0,1fr) 64px;gap:6px}
+  .rank-row.top{margin-left:0;margin-right:0;padding-left:4px;padding-right:4px}
+  .rank-row .meta{font-size:7px}
+  .rank-row .meta .sc{font-size:26px}
+  .p4,.p2,.p1{grid-column:span 12}
+  .chart-wrap{overflow-x:auto;min-width:0;max-width:100%}
+  .chart{min-width:520px;width:520px}
+  .quality{grid-template-columns:1fr;padding:18px 20px}
+  .appendix{padding:22px 20px 28px}.appendix ul{columns:1}
+  .foot{grid-template-columns:1fr;padding:18px 20px}
+}
+@media(max-width:620px){
+  .cover h1{font-size:120px}.cover h1 .no{font-size:100px}
+  .headline{font-size:17px}
+  .cover-top{font-size:7px}.cover-top span:nth-child(3){display:none}
+  .day{grid-template-columns:38px minmax(0,1fr) 36px}
+  .sec-no{font-size:46px}
+  .lead-copy h3{font-size:25px}
+  .judge{grid-template-columns:44px 1fr}.judge .n{font-size:30px}
+  .rank-row{grid-template-columns:38px minmax(0,1fr);gap:4px}
+  .rank-row .n{font-size:36px}.rank-row .nm{font-size:14px}.rank-row .one{font-size:10px}
+  .rank-row .meta{grid-column:2;display:flex;align-items:center;justify-content:flex-start;gap:6px;text-align:left;margin-top:3px}
+  .rank-row .meta .sc{font-size:23px}
+  .rank-row.top{margin-left:0;margin-right:0;padding-left:4px;padding-right:4px}
+  .star-row .nm{display:block;font-size:12px}
+  .star-row .nm em{display:block;margin-top:2px;white-space:normal}
+  .file{width:calc(100% - 24px);margin:4vh auto 0;max-height:88vh}
+  .file .f-metrics{grid-template-columns:1fr 1fr}
+  .metric .n{font-size:28px}
+  .metrics{grid-template-columns:1fr}
+  .appendix summary{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{body{background:#fff}.paper{box-shadow:none}.cover{min-height:0}.sec,.rank-row,.metric{break-inside:avoid}.js .reveal{opacity:1;transform:none}}
+</style>
+  <link rel="stylesheet" href="../../assets/ui/motion.css">
+</head>
+<body data-motion-page="weekly">
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+<div class="paper">
+<aside class="rail">
+  <div class="mark">W01</div>
+  <div class="dates">2026.10.12 — 2026.10.18 · 北京时间（UTC+8）</div>
+  <nav aria-label="周报章节">
+    <a href="#lead">01</a><a href="#rankings">02</a><a href="#data">03</a><a href="#changes">04</a><a href="#next">05</a><a href="#quality">06</a>
+  </nav>
+  <div class="stamp">7D<br>FILE</div>
+</aside>
+
+<main class="main">
+<header class="cover" id="cover">
+  <div class="cover-top"><span>GITHUB DAILY · WEEKLY DOSSIER · <b>W01</b></span><span>STATISTICAL WINDOW / 7 DAYS / 北京时间（UTC+8）</span><span>READ BY TIME · NOT BY EDITION</span></div>
+  <div class="scan" aria-hidden="true"></div>
+  <div class="cover-grid">
+    <div>
+      <p class="eyebrow">WEEKLY TELEGRAM / 周报</p>
+      <h1><span class="w">W</span><span class="no">01</span></h1>
+      <p class="dates-line">统计区间<br><b>2026-10-12（周一）00:00:00</b> 至 <b>2026-10-18（周日）23:59:59</b><br>北京时间（UTC+8）｜文件名 reports/weekly-2026-10-18.md</p>
+      <p class="headline">补出 · 统计区间找到 0 个项目，已评分 0 个，主推荐 0 条。</p>
+    </div>
+    <div class="ladder" id="ladder" aria-label="统计区间 7 日竖向梯"></div>
+  </div>
+  <div class="cover-stats" id="stats"></div>
+</header>
+
+<section class="sec lead" id="lead"><p class="note">首期</p>
+  <div class="sec-head"><span class="sec-no">01</span><h2>统计区间判断</h2><span class="side">2–3 条 / 数字证据 / 代表项目<br><b>TOP PROJECT 单独成卡</b></span></div>
+  <div class="lead-grid">
+    <div class="lead-copy">
+      <h3>统计区间盘点</h3>
+      <div class="judges" id="judges"></div>
+    </div>
+    <aside class="top-card" id="topProject"></aside>
+  </div>
+</section>
+
+<section class="rankings" id="rankings">
+  <div class="sec-head"><span class="sec-no">02</span><h2>两组榜单</h2><span class="side">主推荐榜 / 星数周增榜<br>前 5 条；名次就是版面</span></div>
+  <div class="rank-grid">
+    <div class="rank-block">
+      <h3>主推荐榜</h3><div class="rsub">按 score → experience → stars 排序 / 前 5 条 / 点击名次展开一句话</div>
+      <div class="rank-list" id="mainRank"></div>
+    </div>
+    <div class="rank-block">
+      <h3>星数周增榜 <span class="fig">FIG 3</span></h3><div class="rsub">库内、两天快照都有 / 前 5 条 / 星数 ≠ 档位</div>
+      <div class="star-list" id="starRank"></div>
+      <details class="tbl"><summary>FIG 3 数据表</summary><div id="table3"></div></details>
+    </div>
+  </div>
+  <div class="all-links">
+    <span>FULL INDEX</span>
+    <button data-collection="main">主推荐全部 0 →</button>
+    <button data-collection="new">入库名单 4 →</button>
+    <button data-collection="scored">本期评分 0 →</button>
+    <button data-collection="star">星数榜 0 →</button>
+  </div>
+</section>
+
+<section class="sec data" id="data">
+  <div class="sec-head"><span class="sec-no">03</span><h2>图版 · 数据</h2><span class="side">4 图 / 坐标可读 / 数据表折叠<br><b>新入库质量趋势是主图</b></span></div>
+  <div class="grid12">
+    <article class="panel p4">
+      <div class="phead"><b>FIG 4 / MAIN CHART</b><span>S·A·B 新入库 / 三线折线</span></div>
+      <div class="pbody"><h3>新入库质量趋势</h3><p class="cap">每天 first_seen 的 S / A / B 个数</p><div class="legend"><span class="s"><i></i>S</span><span class="a"><i></i>A</span><span class="b"><i></i>B</span></div><div class="chart-wrap" id="chart4"></div><details class="tbl"><summary>数据表</summary><div id="table4"></div></details></div>
+    </article>
+    <article class="panel p2">
+      <div class="phead"><b>FIG 2</b><span>档位构成 / 100% STACKED</span></div>
+      <div class="pbody"><h3>找到并评分 vs 新入库</h3><p class="cap">S / A / B / C / D · 标绝对数与占比</p><div class="legend"><span class="s"><i></i>S</span><span class="a"><i></i>A</span><span class="b"><i></i>B</span></div><div class="chart-wrap" id="chart2"></div><details class="tbl"><summary>数据表</summary><div id="table2"></div></details></div>
+    </article>
+    <article class="panel p1">
+      <div class="phead"><b>FIG 1</b><span>每日主推荐 / S·A STACKED</span></div>
+      <div class="pbody"><h3>主推荐节奏</h3><p class="cap">7 天 · S 档 / A 档条数</p><div class="legend"><span class="s"><i></i>S</span><span class="a"><i></i>A</span></div><div class="chart-wrap" id="chart1"></div><details class="tbl"><summary>数据表</summary><div id="table1"></div></details></div>
+    </article>
+  </div>
+</section>
+
+<section class="sec changes" id="changes">
+  <div class="sec-head"><span class="sec-no">04</span><h2>数据变化</h2><span class="side">COUNTS / NO NAMES FOR D &amp; DROPPED<br><b>只给数量与类别</b></span></div>
+  <div class="change-grid">
+    <div class="metrics" id="metrics"></div>
+    <div class="notes">
+      <h3>状态变更（人工）</h3>
+      <p id="stateLine">统计区间没有状态变更。</p>
+      <h3>边界</h3>
+      <p>D 档、不再看、合规红线（含版权类）只给数量 + 原因类别，不列名、不给链接；官方只做标签，不叫特别展示。</p>
+      <p><b>评分分布：</b><span id="scoreDist"></span></p>
+      <p><b>读法：</b>统计区间主推荐 ≠ 推荐过；统计区间入库 ≠ 新面孔；星数 ≠ 档位。</p>
+      <p><b>全库条数：</b><span id="libLine"></span></p>
+    </div>
+  </div>
+</section>
+
+<section class="sec next" id="next">
+  <div class="sec-head"><span class="sec-no">05</span><h2>下一期关注</h2><span class="side">2026-10-19 至 2026-10-25<br><b>只留 3 条，不铺满</b></span></div>
+  <div class="next-grid"><article class="next-card"><span class="tag">数据复核</span><h3>复核记录与证据</h3><p>按统计区间的观察项与数据缺口继续核对；未核实的判断不自动沿用上一期。</p></article></div>
+</section>
+
+<section class="quality" id="quality">
+  <div class="qh">06 / DATA QUALITY / 运行质量</div>
+  <div class="qi"><b>日报落盘天数</b><em id="qReports">7/7</em></div>
+  <div class="qi"><b>运行记录天数</b><em id="qRuns">7/7</em><br>不等于成功；失败见运行日志</div>
+  <div class="qi"><b>查询异常</b>缺失日报日期：2026-10-12、2026-10-13、2026-10-14、2026-10-15、2026-10-16、2026-10-17、2026-10-18</div>
+</section>
+
+<section class="appendix">
+  <details>
+    <summary>附录 / FULL LISTS / SOURCES</summary>
+    <h3>统计区间主推荐全量（S/A）</h3><div id="mainAll"></div>
+    <h3>统计区间入库名单（仅 S/A/B/C）</h3><div id="newAll"></div>
+    <p class="note">D 档、不合规红线不在名单；图表数据见各图「数据表」。素材：NASA PD / Poly Haven CC0；运行期 0 外部请求。</p>
+  </details>
+</section>
+
+<footer class="foot">
+  <div class="end">END OF<br>TELEGRAM <b>/</b></div>
+  <dl><dt>DRAWN</dt><dd>2026-11-04 · W01</dd><dt>WINDOW</dt><dd>2026-10-12 — 2026-10-18</dd><dt><a href="home-brutal-token.generated.html?open=archive&mode=weekly" style="color:#2ef2d0">返回历史档案 →</a></dt><dd></dd></dl>
+  <dl><dt>MATERIAL</dt><dd>NEWSPRINT / HALFTONE / PD PLATES</dd><dt>SET IN</dt><dd>ANTON + BEBAS + MONO</dd></dl>
+</footer>
+</main>
+</div>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-bg" data-close></div>
+  <section class="file" role="dialog" aria-modal="true" aria-labelledby="fileTitle">
+    <header class="file-head"><span>PROJECT FILE / W01</span><button class="file-close" data-close aria-label="关闭">×</button></header>
+    <div class="file-body" id="fileBody"></div>
+  </section>
+</div>
+
+<script>
+var D = {"dates":["2026-10-12","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-17","2026-10-18"],"found":0,"scored":0,"scoredTiers":{"S":0,"A":0,"B":0,"C":0,"D":0},"noNew":0,"new":8,"newTiers":{"S":1,"A":3,"B":0,"C":0,"D":4},"main":0,"bcd":{"S":0,"A":0,"B":0,"C":0,"D":0},"overflow":0,"repeat":0,"tierChanges":0,"drops":0,"libraryStart":5,"libraryEnd":13,"reports":0,"runs":0,"mainTop":[],"dailyMain":[{"date":"2026-10-12","S":0,"A":0},{"date":"2026-10-13","S":0,"A":0},{"date":"2026-10-14","S":0,"A":0},{"date":"2026-10-15","S":0,"A":0},{"date":"2026-10-16","S":0,"A":0},{"date":"2026-10-17","S":0,"A":0},{"date":"2026-10-18","S":0,"A":0}],"newTrend":[{"date":"2026-10-12","S":0,"A":2,"B":0},{"date":"2026-10-13","S":1,"A":0,"B":0},{"date":"2026-10-14","S":0,"A":0,"B":0},{"date":"2026-10-15","S":0,"A":1,"B":0},{"date":"2026-10-16","S":0,"A":0,"B":0},{"date":"2026-10-17","S":0,"A":0,"B":0},{"date":"2026-10-18","S":0,"A":0,"B":0}],"starTop":[],"dropCats":{"未记录":0},"newList":[{"id":"robbietilton/Compositor","tier":"A","first_seen":"2026-10-12","one":"这是一个给 Mac 用户用的修图软件，可以帮你处理照片，而不用按月付 Adobe 的订阅费。"},{"id":"wheresryan22/anatomy","tier":"A","first_seen":"2026-10-12","one":"这是一个给 Claude Code 用户用的绘图技能，可以帮你把抽象的技术概念画成能拆开、会动的立体机械图。"},{"id":"yetone/magpie","tier":"S","first_seen":"2026-10-13","one":"这是一个给开发者用的模型接入层，可以帮你把各家 AI 编程助手接到同一个地方，比如让 Codex 用上 DeepSeek。"},{"id":"AbdelStark/awesome-typesafe-jev","tier":"A","first_seen":"2026-10-15","one":"Awesome Jev: a source-backed field guide to TypeSafe's System One model, with SDKs, live demos, agent tools, and independent evaluations."}],"scoredList":[],"mainByDay":[{"date":"2026-10-12","items":[]},{"date":"2026-10-13","items":[]},{"date":"2026-10-14","items":[]},{"date":"2026-10-15","items":[]},{"date":"2026-10-16","items":[]},{"date":"2026-10-17","items":[]},{"date":"2026-10-18","items":[]}],"judgments":[{"ev":"依据快照与区间 picks","p":"找到 0 个，已评分 0 个，无新评分 0 个。","n":"01","rep":"","h":"统计区间找到与评分"},{"ev":"主推荐排除达线未刊","p":"主推荐 0 条，新入库 8 个。","n":"02","rep":"","h":"主推荐与新入库"}],"period":{"end":"2026-10-18","issue":"W01","generated_on":"2026-11-04","start":"2026-10-12","backfill":true},"stateChanges":[]};
+(function(){
+  if(!D) return;
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]})};
+  var fmt=function(n){return Number(n||0).toLocaleString('en-US')};
+  var mainTop=D.mainTop||[], starTop=D.starTop||[], newList=D.newList||[], newTrend=D.newTrend||[], dailyMain=D.dailyMain||[], scoredList=D.scoredList||[], mainByDay=D.mainByDay||[];
+  var st=D.scoredTiers||{}, nt=D.newTiers||{}, tierOrder=['S','A','B','C','D'];
+  var projectMap={};
+  function putProject(p){if(!p||!p.id)return;var cur=projectMap[p.id]||{};Object.keys(p).forEach(function(k){if(p[k]!==undefined&&p[k]!==null)cur[k]=p[k]});projectMap[p.id]=cur}
+  [mainTop,starTop,newList,scoredList].forEach(function(arr){arr.forEach(putProject)});
+  mainByDay.forEach(function(day){day.items.forEach(putProject)});
+  var tierColor={S:'#c81f16',A:'#0a0a09',B:'#7a7367',C:'#b7ac98',D:'#4c463c'};
+  function band(n,a,b,c){if(n<=a)return 0;if(n<=b)return 1;if(n<=c)return 2;return 3}
+  var fl=band(D.found,40,120,200), sl=band(D.scored,10,35,70), nl=band(D.new,20,90,180), ml=band(D.main,2,8,18);
+  var root=document.documentElement.style;
+  root.setProperty('--cover-pad',(18+fl*4)+'px');
+  root.setProperty('--chart2-span',(4+sl)+'');
+  root.setProperty('--chart4-span',(8-sl)+'');
+  root.setProperty('--chart4-h',(300+nl*50)+'px');
+  root.setProperty('--rank-cols', ml>=2?'1.2fr .8fr':(ml===1?'1fr 1fr':'1fr 1.15fr'));
+  function chips(t){return tierOrder.map(function(k){return '<span class="chip '+k.toLowerCase()+'">'+k+' '+fmt(t[k]||0)+'</span>'}).join('')}
+  document.getElementById('stats').innerHTML=
+    '<div class="cstat"><div class="k">FOUND</div><div class="v">'+fmt(D.found)+'</div><div class="sub">快照去重 / 含库内老面孔与库外结果</div></div>'+
+    '<div class="cstat"><div class="k">SCORED</div><div class="v">'+fmt(D.scored)+'</div><div class="sub">本期已评分 · 无新评分 '+fmt(D.noNew)+'</div><div class="chips">'+chips(st)+'</div></div>'+
+    '<div class="cstat"><div class="k">NEW</div><div class="v">'+fmt(D.new)+'</div><div class="sub">新入库 / first_seen / 不是新面孔</div><div class="chips">'+chips(nt)+'</div></div>'+
+    '<div class="cstat main"><div class="k">MAIN</div><div class="v">'+fmt(D.main)+'</div><div class="sub">统计区间主推荐 / 条</div></div>';
+  var maxMain=Math.max.apply(null,dailyMain.map(function(x){return x.S+x.A}).concat([1]));
+  document.getElementById('ladder').innerHTML='<div class="lh"><span>7 DAYS / S+A</span><span>条</span></div>'+dailyMain.map(function(x){
+    var t=x.S+x.A, w=Math.max(6,Math.round(t/maxMain*100));
+    return '<a class="day" href="#data"><span class="d">'+x.date.slice(5).replace('-','.')+'</span><span class="bar" style="width:'+w+'%"><i class="a" style="flex:'+x.A+'"></i><i class="s" style="flex:'+x.S+'"></i></span><span class="n">'+t+'</span></a>';
+  }).join('');
+  var j=D.judgments||[];
+  document.getElementById('judges').innerHTML=j.map(function(x){return '<article class="judge"><div class="n">'+x.n+'</div><div><h4>'+esc(x.h)+'</h4><p>'+esc(x.p)+'</p><div class="ev">'+esc(x.ev)+'</div><div class="rep">'+esc(x.rep)+'</div></div></article>'}).join('');
+  var tp=mainTop[0];
+  if(tp){document.getElementById('topProject').innerHTML='<div class="plate"><img src="../../assets/bg/weekly-control-1.jpg" alt=""><b>PLATE W1 · APOLLO 12 MOCR / NASA PD</b></div><div class="body"><div class="rk">01</div><h3>'+esc(tp.id)+'</h3><div class="meta"><span class="tier">'+esc(tp.tier)+' 档</span><span class="score">'+esc(tp.score==null?'—':tp.score)+'</span><span>规则分</span></div><p>'+esc(tp.one||'')+'</p></div>';document.getElementById('topProject').dataset.project=tp.id;document.getElementById('topProject').tabIndex=0;document.getElementById('topProject').setAttribute('role','button');}
+  document.getElementById('mainRank').innerHTML=mainTop.slice(0,5).map(function(x,i){
+    return '<article class="rank-row'+(i===0?' top':'')+'" data-project="'+esc(x.id)+'" tabindex="0" role="button"><div class="n">'+String(i+1).padStart(2,'0')+'</div><div><div class="nm">'+esc(x.id)+'</div><div class="one">'+esc(x.one||'')+'</div></div><div class="meta"><span class="tier">'+esc(x.tier)+'</span><span class="sc">'+esc(x.score==null?'—':x.score)+'</span><span>SCORE</span></div></article>';
+  }).join('');
+  var maxStar=Math.max.apply(null,starTop.map(function(x){return x.delta}).concat([1]));
+  document.getElementById('starRank').innerHTML=starTop.slice(0,5).map(function(x,i){
+    return '<div class="star-row" data-project="'+esc(x.id)+'" tabindex="0" role="button"><div class="n">'+String(i+1).padStart(2,'0')+'</div><div><div class="nm"><span>'+esc(x.id)+'<span class="tier">'+esc(x.tier)+'</span></span><em>+'+fmt(x.delta)+'★</em></div><div class="bar"><i style="width:'+Math.max(4,Math.round(x.delta/maxStar*100))+'%"></i></div></div></div>';
+  }).join('');
+  function open(w,h,label){return '<svg class="chart" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+esc(label)+'">'}
+  function chart4(){
+    var w=820,h=360,pad={l:38,r:12,t:16,b:34},iw=w-pad.l-pad.r,ih=h-pad.t-pad.b;
+    var max=1;newTrend.forEach(function(x){max=Math.max(max,x.S,x.A,x.B)});max=Math.ceil(max/10)*10||1;
+    var sx=function(i){return pad.l+iw*(i/(newTrend.length-1||1))}, sy=function(v){return pad.t+ih-ih*(v/max)};
+    var out=open(w,h,'S/A/B 新入库三线折线：每天 first_seen 的 S/A/B 个数')+'<title>新入库质量趋势</title><desc>7 天三条线：S 档、A 档、B 档新入库个数</desc>';
+    for(var g=0;g<=4;g++){var y=pad.t+ih*(g/4), val=Math.round(max*(1-g/4));out+='<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+y+'" y2="'+y+'" stroke="rgba(10,10,9,.16)"/>'+'<text x="'+(pad.l-5)+'" y="'+(y+3)+'" text-anchor="end" font-family="Consolas,monospace" font-size="8" fill="#4c463c">'+val+'</text>'}
+    [['S','#c81f16'],['A','#0a0a09'],['B','#7a7367']].forEach(function(s){
+      var pts=newTrend.map(function(x,i){return sx(i).toFixed(1)+','+sy(x[s[0]]).toFixed(1)}).join(' ');
+      out+='<polyline points="'+pts+'" fill="none" stroke="'+s[1]+'" stroke-width="2.2"/>';
+      newTrend.forEach(function(x,i){out+='<circle cx="'+sx(i)+'" cy="'+sy(x[s[0]])+'" r="2.8" fill="'+s[1]+'" stroke="#d2c9b9" stroke-width="1"><title>'+x.date+' · '+s[0]+' 档 '+x[s[0]]+' 个</title></circle>';out+='<circle class="hit" cx="'+sx(i)+'" cy="'+sy(x[s[0]])+'" r="11" fill="transparent" data-collection="new-day:'+x.date+':'+s[0]+'"><title>'+x.date+' · '+s[0]+' 档 '+x[s[0]]+' 个 · 点击查看</title></circle>'});
+    });
+    newTrend.forEach(function(x,i){out+='<text x="'+sx(i)+'" y="'+(h-12)+'" text-anchor="middle" font-family="Consolas,monospace" font-size="8" fill="#4c463c">'+x.date.slice(5).replace('-','.')+'</text>'});
+    out+='</svg>';return out;
+  }
+  function chart2(){
+    var w=560,h=270,pad=8,rowH=82;
+    var rows=[['本期已评分',st,D.scored],['统计区间新入库',nt,D.new]];
+    var out=open(w,h,'档位构成：本期已评分与新入库的 S/A/B/C/D 百分比')+'<title>档位构成</title><desc>两条 100% 堆叠条</desc>';
+    rows.forEach(function(r,ri){
+      var y=pad+ri*rowH, x=0, total=Math.max(1,tierOrder.reduce(function(a,k){return a+(r[1][k]||0)},0));
+      out+='<text x="0" y="'+(y+12)+'" font-family="Consolas,monospace" font-size="9" fill="#4c463c">'+esc(r[0])+' · '+fmt(r[2])+' 个</text>';
+      tierOrder.forEach(function(k){var n=r[1][k]||0,ww=(n/total)*(w-4);if(!n)return;out+='<rect class="seg clickable" data-collection="'+(r[0]==='本期已评分'?'scored':'new')+'-tier:'+k+'" x="'+x+'" y="'+(y+20)+'" width="'+ww+'" height="30" fill="'+tierColor[k]+'" stroke="#0a0a09"><title>'+esc(r[0])+' · '+k+' 档 '+n+'（'+Math.round(n/total*100)+'%）</title></rect>';if(ww>28)out+='<text x="'+(x+4)+'" y="'+(y+40)+'" font-family="Consolas,monospace" font-size="9" fill="'+(k==='A'||k==='C'||k==='D'?'#f4f0e6':'#fff')+'">'+k+' '+n+'</text>';x+=ww});
+    });
+    out+='<text x="0" y="'+(h-6)+'" font-family="Consolas,monospace" font-size="8" fill="#4c463c">每一行单独归一化到 100%；绝对数看图注</text></svg>';return out;
+  }
+  function chart1(){
+    var w=1000,h=280,pad={l:30,r:10,t:12,b:28},iw=w-pad.l-pad.r,ih=h-pad.t-pad.b,bw=iw/(dailyMain.length*1.4);
+    var max=1;dailyMain.forEach(function(x){max=Math.max(max,x.S+x.A)});max=Math.ceil(max/4)*4||1;
+    var out=open(w,h,'每日主推荐 S/A 堆叠柱：7 天每天 S/A 条数')+'<title>每日主推荐</title><desc>7 天堆叠柱，红色 S，黑色 A</desc>';
+    for(var g=0;g<=4;g++){var y=pad.t+ih*(g/4);out+='<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+y+'" y2="'+y+'" stroke="rgba(10,10,9,.16)"/>'}
+    dailyMain.forEach(function(x,i){
+      var gx=pad.l+iw*(i+0.5)/dailyMain.length,sH=ih*(x.S/max),aH=ih*(x.A/max),x0=gx-bw/2;
+      out+='<rect class="bar clickable" data-collection="main-day:'+x.date+'" x="'+x0+'" y="'+(pad.t+ih-aH)+'" width="'+bw+'" height="'+aH+'" fill="#0a0a09"><title>'+x.date+' · A 档 '+x.A+' 条</title></rect>';
+      out+='<rect class="bar clickable" data-collection="main-day:'+x.date+'" x="'+x0+'" y="'+(pad.t+ih-aH-sH)+'" width="'+bw+'" height="'+sH+'" fill="#c81f16"><title>'+x.date+' · S 档 '+x.S+' 条</title></rect>';
+      out+='<text x="'+gx+'" y="'+(h-10)+'" text-anchor="middle" font-family="Consolas,monospace" font-size="8" fill="#4c463c">'+x.date.slice(5).replace('-','.')+'</text>';
+      out+='<text x="'+gx+'" y="'+(pad.t+ih-aH-sH-4)+'" text-anchor="middle" font-family="Consolas,monospace" font-size="8" fill="#4c463c">'+(x.S+x.A)+'</text>';
+    });
+    out+='<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(pad.t+ih)+'" y2="'+(pad.t+ih)+'" stroke="#0a0a09"/></svg>';return out;
+  }
+  document.getElementById('chart4').innerHTML=chart4();
+  document.getElementById('chart2').innerHTML=chart2();
+  document.getElementById('chart1').innerHTML=chart1();
+  document.getElementById('table2').innerHTML='<table><tr><th>集合</th>'+tierOrder.map(function(k){return '<th>'+k+'</th>'}).join('')+'</tr><tr><td>本期已评分</td>'+tierOrder.map(function(k){return '<td>'+(st[k]||0)+'</td>'}).join('')+'</tr><tr><td>新入库</td>'+tierOrder.map(function(k){return '<td>'+(nt[k]||0)+'</td>'}).join('')+'</tr></table>';
+  document.getElementById('table4').innerHTML='<table><tr><th>日期</th><th>S</th><th>A</th><th>B</th></tr>'+newTrend.map(function(x){return '<tr><td>'+x.date+'</td><td>'+x.S+'</td><td>'+x.A+'</td><td>'+x.B+'</td></tr>'}).join('')+'</table>';
+  document.getElementById('table1').innerHTML='<table><tr><th>日期</th><th>S</th><th>A</th><th>条</th></tr>'+dailyMain.map(function(x){return '<tr><td>'+x.date+'</td><td>'+x.S+'</td><td>'+x.A+'</td><td>'+(x.S+x.A)+'</td></tr>'}).join('')+'</table>';
+  document.getElementById('table3').innerHTML='<table><tr><th>#</th><th>仓库</th><th>档位</th><th>星数</th><th>周增</th></tr>'+starTop.slice(0,5).map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(x.id)+'</td><td>'+esc(x.tier)+'</td><td>'+fmt(x.stars)+'</td><td>+'+fmt(x.delta)+'</td></tr>'}).join('')+'</table>';
+  var ch=[['统计区间入库',D.new,'个 / first_seen'],['统计区间主推荐',D.main,'条 / S '+dailyMain.reduce(function(a,x){return a+x.S},0)+' · A '+dailyMain.reduce(function(a,x){return a+x.A},0)],['入库中 D 档',nt.D||0,'个 / 只计数'],['新增不再看',D.drops,'条 / 未记录'],['二次推荐',D.repeat,'条 / repeat'],['档位变化',D.tierChanges,'条 / tier_changed'],['全库条数',D.libraryStart+' → '+D.libraryEnd,'条 / 不扣 dropped'],['达线未刊',D.overflow,'条 / over_quota']];
+  document.getElementById('metrics').innerHTML=ch.map(function(x){return '<div class="metric"><div class="n">'+esc(x[1])+'</div><div class="k">'+esc(x[0])+'</div><div class="x">'+esc(x[2])+'</div></div>'}).join('');
+  document.getElementById('stateLine').textContent=(D.stateChanges||[]).join('；')||'统计区间没有状态变更。';
+  document.getElementById('libLine').textContent=fmt(D.libraryStart)+' → '+fmt(D.libraryEnd)+' 条';
+  document.getElementById('scoreDist').textContent='B '+(D.bcd.B||0)+' ｜ C '+(D.bcd.C||0)+' ｜ D '+(D.bcd.D||0)+'（全部 picks；D 档不点名）';
+  document.getElementById('qReports').textContent=D.reports+'/7';
+  document.getElementById('qRuns').textContent=D.runs+'/7';
+  document.getElementById('mainAll').innerHTML='<ul>'+mainTop.map(function(x){return '<li data-project="'+esc(x.id)+'" tabindex="0">'+esc(x.id)+'（'+esc(x.tier)+' 档 · '+esc(x.score==null?'—':x.score)+' 分）</li>'}).join('')+'</ul>';
+  document.getElementById('newAll').innerHTML='<ul>'+newList.map(function(x){return '<li data-project="'+esc(x.id)+'" tabindex="0">'+esc(x.id)+'（'+esc(x.tier)+' 档）</li>'}).join('')+'</ul>';
+  // interactions: project file + collections
+  var modal=document.getElementById('modal'), fileBody=document.getElementById('fileBody'), lastFocus=null;
+  function metric(label,value){return '<div><b>'+esc(value==null||value===''?'—':value)+'</b><span>'+esc(label)+'</span></div>'}
+  function openFile(html){
+    lastFocus=document.activeElement;
+    fileBody.innerHTML=html;
+    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+    setTimeout(function(){var x=modal.querySelector('.file-close');if(x)x.focus();},40);
+  }
+  function closeFile(){
+    if(!modal.classList.contains('open'))return;
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open');
+    if(lastFocus&&lastFocus.focus)lastFocus.focus();
+  }
+  function openDetail(id){
+    var p=projectMap[id]; if(!p)return;
+    var metrics=metric('规则分',p.score)+metric('体验分',p.exp)+metric('星数',p.stars)+(p.delta?metric('星数周增','+'+fmt(p.delta)):'');
+    var sub=p.first_seen?'first_seen '+p.first_seen:'统计区间项目';
+    openFile('<div class="f-top"><div><div class="f-sub">'+esc(sub)+'</div><h2 id="fileTitle">'+esc(p.id)+'</h2></div><div class="f-tier">'+esc(p.tier||'—')+'</div></div><div class="f-metrics">'+metrics+'</div><p class="f-one" style="font-size:12px"><b>'+esc(p.tier||'—')+' 档</b> · 统计区间主推荐 / 入库索引</p><p class="f-one">'+esc(p.one||'暂无一句话。')+'</p><a class="f-link" href="https://github.com/'+esc(p.id)+'" target="_blank" rel="noopener">在 GitHub 打开 →</a>');
+  }
+  function rowsHTML(items,metaMode){
+    if(!items.length)return '<div class="f-empty">没有可列出的项目；数量见上方统计。</div>';
+    return '<div class="f-list">'+items.map(function(x,i){
+      var p=projectMap[x.id]||x, val='—', lab='';
+      if(metaMode==='star'){val=(p.delta?'+'+fmt(p.delta):'—');lab='ΔSTARS'}
+      else if(metaMode==='tier'){val=p.tier||x.tier||'—';lab='TIER'}
+      else {val=(p.score==null?'—':p.score);lab='SCORE'}
+      return '<div class="f-row" data-project="'+esc(x.id)+'" tabindex="0" role="button"><div class="fn">'+String(i+1).padStart(2,'0')+'</div><div><div class="fid">'+esc(x.id)+'</div><div class="fone">'+esc(p.one||'')+'</div></div><div class="fmeta"><b>'+esc(val)+'</b><span>'+lab+'</span></div></div>';
+    }).join('')+'</div>';
+  }
+  function openList(key){
+    if(!key)return;
+    var items=[], title='', note='', mode='main';
+    if(key==='main'){items=mainTop;title='统计区间主推荐 · 全部 '+items.length+' 条';note='按 score → experience → stars 排序；点击任意项目打开小卡片。';mode='main'}
+    else if(key==='star'){items=starTop;title='星数周增榜 · 全部 '+items.length+' 条';note='库内、两天快照都有；星数 ≠ 档位。';mode='star'}
+    else if(key==='new'){items=newList;title='统计区间入库名单 · '+items.length+' 个';note='只列 S/A/B/C；D 档 '+(D.new-newList.length)+' 个只计数，不列名。';mode='tier'}
+    else if(key==='scored'){var sc=scoredList.filter(function(x){return x.tier!=='D'});items=sc;title='本期已评分 · '+items.length+' 个（名单 S/A/B/C）';note='D 档 '+scoredList.filter(function(x){return x.tier==='D'}).length+' 条只计数，不列名。';mode='main'}
+    else if(key.indexOf('main-day:')===0){var dt=key.slice(9),day=mainByDay.filter(function(x){return x.date===dt})[0];items=day?day.items:[];title=dt+' · 统计区间主推荐 '+items.length+' 条';note='只列当天已上版主推荐；不把达线未刊算进来。';mode='main'}
+    else if(key.indexOf('new-tier:')===0){var t=key.slice(9);if(t==='D'){openFile('<h2 id="fileTitle">D 档 · 只计数</h2><p class="f-note">D 档只给数量，不列名、不给链接。统计区间入库中 D 档 '+nt.D+' 个。</p>');return}items=newList.filter(function(x){return x.tier===t});title='统计区间入库 · '+t+' 档 · '+items.length+' 个';note='只列 S/A/B/C；点击项目打开小卡片。';mode='tier'}
+    else if(key.indexOf('scored-tier:')===0){var t2=key.slice(12);if(t2==='D'){openFile('<h2 id="fileTitle">D 档 · 只计数</h2><p class="f-note">D 档只给数量，不列名、不给链接。本期评分 D 档 '+scoredList.filter(function(x){return x.tier==='D'}).length+' 条。</p>');return}items=scoredList.filter(function(x){return x.tier===t2});title='本期已评分 · '+t2+' 档 · '+items.length+' 个';note='只列 S/A/B/C；点击项目打开小卡片。';mode='main'}
+    else if(key.indexOf('new-day:')===0){var parts=key.split(':'),d2=parts[1],t3=parts[2];if(t3==='D'){openFile('<h2 id="fileTitle">D 档 · 只计数</h2><p class="f-note">D 档只给数量，不列名、不给链接。</p>');return}items=newList.filter(function(x){return x.first_seen===d2&&x.tier===t3});title=d2+' · 新入库 '+t3+' 档 · '+items.length+' 个';note='按 first_seen 当天；不是「新面孔」。';mode='tier'}
+    if(!title)return;
+    openFile('<h2 id="fileTitle">'+esc(title)+'</h2><p class="f-note">'+esc(note)+'</p>'+rowsHTML(items,mode));
+  }
+  document.addEventListener('click',function(e){
+    var c=e.target.closest('[data-close]'); if(c){e.preventDefault();closeFile();return;}
+    var p=e.target.closest('[data-project]'); if(p){e.preventDefault();openDetail(p.getAttribute('data-project'));return;}
+    var l=e.target.closest('[data-collection]'); if(l){e.preventDefault();openList(l.getAttribute('data-collection'));return;}
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&modal.classList.contains('open')){e.preventDefault();closeFile();return;}
+    if(e.key==='Enter'||e.key===' '){var p=e.target.closest&&e.target.closest('[data-project]');if(p){e.preventDefault();openDetail(p.getAttribute('data-project'));}}
+  });
+  function progress(){var h=document.documentElement.scrollHeight-innerHeight;var b=document.getElementById('progressBar');if(b)b.style.width=(h>0?Math.min(100,scrollY/h*100):0)+'%'}
+  addEventListener('scroll',progress,{passive:true});addEventListener('resize',progress);progress();
+  // interactions: scroll reveal + rail active
+  var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealItems=document.querySelectorAll('.sec,.panel,.top-card,.metric,.next-card');
+  if(!reduce && 'IntersectionObserver' in window){
+    revealItems.forEach(function(el){el.classList.add('reveal');});
+    var rio=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');rio.unobserve(en.target);}})},{threshold:.04,rootMargin:'0px 0px -6% 0px'});
+    revealItems.forEach(function(el){rio.observe(el);});
+    setTimeout(function(){revealItems.forEach(function(el){el.classList.add('in');});},2000);
+  }
+  var navLinks={}; document.querySelectorAll('.rail nav a').forEach(function(a){navLinks[a.getAttribute('href').slice(1)]=a;});
+  var sections=['lead','rankings','data','changes','next','quality'].map(function(id){return document.getElementById(id)}).filter(Boolean);
+  if('IntersectionObserver' in window){
+    var nio=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){Object.keys(navLinks).forEach(function(k){navLinks[k].classList.remove('active')});var a=navLinks[en.target.id];if(a)a.classList.add('active');}})},{rootMargin:'-42% 0px -50% 0px',threshold:0});
+    sections.forEach(function(s){nio.observe(s);});
+  }
+})();
+</script>
+<script src="kiosk-return.js"></script>
+  <script src="../../assets/ui/motion.js" defer></script>
+</body>
+</html>
