@@ -15,6 +15,15 @@
 
 ---
 
+## [1.2.1] — 2026-11-04 · 双宿主发布修正
+
+- 补入 `.agents/skills/` 与 `AGENTS.md`：Codex 下载后可直接使用 `$github-daily-picks` / `$tool-stack`。
+- `README` 第 0 节改为 DSH / Codex 双入口；`QUICKSTART` 明确两套技能路径。
+- 明确页面预览被宿主屏蔽时使用 `打开工具库.cmd` / `start-site.ps1`。
+- 发布包仍为 15 条 demo 数据，不含真实库、picks、报告、候选积压。
+
+---
+
 ## [1.2.0] — 2026-11-04 · Codex 新版规则与工具同步
 
 - 同步 Codex 新版采集/证据/审阅工具：`collect-daily`、`query-partitions`、`search-scheduler`、`evidence-store/queue`、`review-workbench`、`release-readiness`。

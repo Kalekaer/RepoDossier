@@ -22,7 +22,7 @@ Local-first, zero dependencies, double-click to open; all data lives in plain-te
 
 **30 秒看懂 / 30-second tour**
 1. 双击 `index.html` —— 站点能开、能搜、能看方案（离线，不需要服务器）。/ Double-click `index.html` — the site opens, searches, and shows plans offline, no server needed.
-2. 想让它自己更新 —— 按第 0 节把技能装进 DSH，说「**跑今天的日报**」。/ To make it update itself — install the skills into DSH (section 0) and say "run today's daily report".
+2. 想让它自己更新 —— 按第 0 节把技能装进 DSH / Codex，说「**跑今天的日报**」。/ To make it update itself — install the skills into DSH (section 0) and say "run today's daily report".
 3. 想配一套 —— 说「**我要做 ___ **」，它从你自己的库里挑。/ To get a tool stack — say "I want to do ___" and it picks from your own library.
 
 **先看说明书 / Read the guide first** → [`QUICKSTART.md`](QUICKSTART.md)（5 分钟 / 5 minutes）
@@ -102,14 +102,22 @@ Local-first, zero dependencies, double-click to open; all data lives in plain-te
 
 ---
 
-## 0. 先让 DSH 认得这两个技能 / Teach DSH the two skills
+## 0. 先让 DSH / Codex 认得技能 / Teach DSH or Codex the skills
 
 `index.html` **不需要这一步**（双击即用、离线可看）。
 `index.html` **does not need this step** (double-click, offline).
 
-但「跑今天的日报 / 我要做 ___ / 加项目 / 建工作区」都是**在对话里**完成的，所以需要 DSH 能读到本仓库的技能文件：
-But "run the daily report / I want to do ___ / add a project / create a workspace" happen **in chat**, so DSH must be able to read the skill files:
+但「跑今天的日报 / 我要做 ___ / 加项目 / 建工作区」都是**在对话里**完成的，所以需要宿主能读到本仓库的技能文件。
+But "run the daily report / I want to do ___ / add a project / create a workspace" happen **in chat**, so the host must be able to read the skill files:
 
+**Codex**
+
+| 方式 / Option | 怎么做 / How | 适合谁 / For whom |
+|---|---|---|
+| **A. 直接把仓库当工作区**（推荐）/ Open this repo as workspace | 用 Codex 打开解压后的目录；`.agents/skills/` 会被识别，根目录有 `AGENTS.md` | 想一次配好 / One-shot setup |
+| **B. 只借技能** / Borrow skills only | 把 `.agents/skills/github-daily-picks/` 和 `.agents/skills/tool-stack/` 复制到你现有工作区的 `.agents/skills/` | 已有 Codex 工作区 / Existing workspace |
+
+**DSH**
 | 方式 / Option | 怎么做 / How | 适合谁 / For whom |
 |---|---|---|
 | **A. 直接把这个仓库当工作区**（推荐）/ Open this repo as the workspace (recommended) | 解压后用 DSH **打开这个目录**；`.dsh/skills/<技能名>/SKILL.md` 会被自动识别 / Unzip and open the folder in DSH; skills are auto-detected | 想一次配好，数据也放一起 / One-shot setup with data in place |
@@ -129,8 +137,8 @@ But "run the daily report / I want to do ___ / add a project / create a workspac
 
 ## 1. 30 秒跑起来 / Run it in 30 seconds
 
-**前提**：已按第 0 节把技能装进 DSH。
-**Prerequisite**: skills installed into DSH (section 0).
+**前提**：已按第 0 节装好 DSH 或 Codex 技能。
+**Prerequisite**: skills installed into DSH or Codex (section 0).
 
 在 DSH 对话里说任意一句 / Say any of these in chat:
 - 「**跑今天的日报**」「今日 GitHub 精品」「最近热门项目」「有什么值得关注的开源项目」

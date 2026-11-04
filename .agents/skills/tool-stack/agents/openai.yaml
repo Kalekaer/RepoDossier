@@ -1,0 +1,7 @@
+interface:
+  display_name: "本地工具栈搭配"
+  short_description: "按目标从本地项目库组合实用工具"
+  default_prompt: "Use $tool-stack to recommend a stack for my goal."
+policy:
+  allow_implicit_invocation: true
+

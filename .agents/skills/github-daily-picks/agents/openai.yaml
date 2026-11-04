@@ -1,0 +1,7 @@
+interface:
+  display_name: "GitHub 日报与工具库"
+  short_description: "抓取、筛选并归档值得使用的开源项目"
+  default_prompt: "Use $github-daily-picks to run today's GitHub report."
+policy:
+  allow_implicit_invocation: true
+

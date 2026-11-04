@@ -1,5 +1,5 @@
-<!-- Codex adapter -->
-在 Codex 中，从本仓库根目录使用 `.agents/skills/` 下的 `github-daily-picks` 和 `tool-stack`；本机入口为 `index.html`。网络使用可用的原生 HTTP 工具、`gh api` 或经授权的 `curl.exe`。验收统一执行 `tools/check-all.ps1`。
+<!-- DSH + Codex adapter -->
+在 DSH 中，从本仓库根目录使用 `.dsh/skills/` 下的 `github-daily-picks` 和 `tool-stack`；在 Codex 中使用 `.agents/skills/` 下的同名技能。本机入口为 `index.html`。网络优先使用当前宿主的原生 HTTP 工具；Codex 没有 `web_fetch` 时用 `gh api` 或经授权的 `curl.exe`。验收统一执行 `tools/check-all.ps1`。
 
 # 5 分钟上手
 
