@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的开源工具库</title>
+<style>
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;src:url(data:font/woff2;base64,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) format('woff2')}
+/* ============ V1 令牌层（P2-3 前半，2026-10-16） ============
+   设计 §4 定稿：字阶 6 级 / 间距 6 档 / 语义色 / 七态 / 8 个浏览器表面 / 去圆角去彩边。
+   为什么先做令牌层：① 它是后面所有视觉改造的地基；② 换调色板（设计 §10「开源地下档案」：
+   纸黑/硬白/荧光黄/警示红）只需改**这一块** ✓；③ 模板拆分（P2-3 后半）要读整段 ~1160 行
+   字面量，按纪律留给上下文充裕的新会话 ✗
+   ⚠️ 老名字（--panel/--card/--line/--fg/--dim/--acc）**保留为别名**：页面里 JS 生成的内联
+   样式还在用它们，直接改名会当场把那些地方变"没有颜色" ✗ */
+:root{
+  /* 语义色（角色名，供新代码用）—— ⚠️ 这里是**字面值**，别被"全局把 hex 换成 var()"的
+     机械替换碰到：2026-10-16 我第一次做 V1 时用脚本整篇替换，把 token 自己的定义也换成了
+     `--accent:var(--accent)` 这种**自引用** → 全页颜色失效 ✗（踩坑 #26）。改这里请手改 ✓ */
+  /* —— 调色板：Open Source Underground「开源地下档案」（设计 §10.1 定稿，比例写死）——
+     纸黑/墨黑 ~55% ｜ 硬白（微暖纸白）~20% ｜ 高反差灰阶 3 级 ~15%
+     荧光黄 ≤8%（**只做底/块/线**，黄底必黑字 ✓）｜ 警示红 ≤2%（只做警示/编号）
+     ⚠️ 黄与红是**稀缺资源**：卡片/星标/中性标签一律走灰阶与硬白，别拿黄去铺满 ✗ */
+  --bg:#0b0b0b; --surface:#111111; --surface-2:#161616; --surface-3:#1c1c1c; --surface-4:#131313;
+  --border:#2a2a28; --border-strong:#3d3d3a;                       /* 灰阶 1 / 2 */
+  --text:#f4f2ec; --text-dim:#9a9a94;                              /* 硬白 / 灰阶 3 */
+  --accent:#e8ff2a; --accent-ink:#0b0b0b; --accent-bg:#e8ff2a;    /* 荧光黄 + 黄底必黑字 */
+  --gold:#cfcbb4;                                                  /* 星标：暖灰纸色（黄留给真强调 ✓）*/
+  --ok:#f4f2ec; --ok-line:#4a4a46;                                 /* S 档/低风险：中性，靠文字传意 ✓ */
+  --warn:#e8ff2a; --warn-line:#5c5c2a; --warn-bg:#14140a;         /* 待补全＝缺失要显式画出来（设计 §0-6）*/
+  --danger:#ff2d20; --danger-line:#ff2d20;                         /* 警示红：高风险 / 合规剔除 / 门禁 */
+  --info:#f4f2ec; --info-line:#3d3d3a;                             /* 中性（设计里没有蓝/紫 ✗）*/
+  --violet:#f4f2ec; --violet-line:#3d3d3a;                         /* 原「用户推荐 / researching」紫 → 中性 */
+  /* 兼容别名（老代码/JS 内联样式仍在用；新代码请用角色名） */
+  --panel:var(--surface); --card:var(--surface-2); --line:var(--border);
+  --fg:var(--text); --dim:var(--text-dim); --acc:var(--accent);
+  /* 6 级字阶（设计 §4；正文 15px ≥ §10.6 的硬指标） */
+  --fs-xs:12px; --fs-sm:13px; --fs-base:15px; --fs-lg:18px; --fs-xl:24px; --fs-2xl:32px;
+  /* 6 档间距（设计 §4） */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:40px;
+  /* 字体栈（Anton 内嵌后在这里加 --font-display ✓ P2-12；CJK 一律系统栈 ✗ 不内嵌） */
+  --font-body:-apple-system,"Segoe UI","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Cascadia Mono",monospace;
+  --font-display:'Anton',var(--font-mono);   /* P2-12：拉丁刊头；未内嵌时自动回落等宽栈 ✓ */
+  /* 直角（设计 §10.3：去掉全部圆角）——留一个令牌，将来要恢复也不用满页找 */
+  --radius:0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-base)/1.6 var(--font-body)}
+a{color:var(--accent);text-decoration:none;text-underline-offset:.18em}
+/* —— 8 个浏览器表面（设计 §4）—— */
+::selection{background:var(--accent);color:var(--bg)}
+::placeholder{color:var(--text-dim);opacity:1}
+*{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border);border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body,.meta,.stat b,.stars5,.ev time,.kv,.mini .m{font-variant-numeric:tabular-nums}
+header{padding:16px 22px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,11,11,.97);backdrop-filter:blur(8px);z-index:9}
+h1{margin:0 0 4px;font-size:var(--fs-lg);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h1 small{font-weight:400;color:var(--dim);font-size:var(--fs-xs)}
+#q{width:100%;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:var(--radius);padding:12px 15px;font-size:var(--fs-base);margin-top:9px;caret-color:var(--accent)}
+#q:focus{border-color:var(--accent)}   /* ⚠️ 不再写 outline:none（那会让键盘用户失去焦点提示 ✗）；焦点环由 :focus-visible 提供 ✓ */
+.toolbar{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-2);align-items:center}
+select{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:var(--radius);padding:6px 9px;font-size:var(--fs-sm)}
+.chip{cursor:pointer;border:1px solid var(--line);border-radius:var(--radius);padding:4px 12px;font-size:var(--fs-sm);color:var(--dim);background:var(--panel);display:inline-block}
+.chip:hover{border-color:var(--acc);color:var(--fg)}
+.chip.on{background:var(--accent-bg);border-color:var(--acc);color:var(--accent-ink)}
+.wrap{padding:var(--sp-4) 22px var(--sp-5);max-width:1560px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:11px 13px;cursor:pointer}
+.stat:hover{border-color:var(--border-strong)}
+.stat b{display:block;font-size:var(--fs-xl);line-height:1.25}
+.stat span{color:var(--dim);font-size:var(--fs-xs)}
+section{margin-bottom:var(--sp-5)}
+h2{font-size:var(--fs-base);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+h2 em{font-style:normal;color:var(--dim);font-weight:400;font-size:var(--fs-xs)}
+.row-scroll{display:flex;gap:var(--sp-2);overflow-x:auto;padding-bottom:var(--sp-1)}
+.mini{flex:0 0 218px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;cursor:pointer}
+.mini:hover{border-color:var(--border-strong)}
+.mini .n{font-size:var(--fs-sm);font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .d{color:var(--dim);font-size:var(--fs-xs);height:32px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mini .m{color:var(--dim);font-size:var(--fs-xs);margin-top:6px;display:flex;justify-content:space-between}
+.catgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:9px}
+.catbox{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-3)}
+.catbox h3{margin:0 0 8px;font-size:var(--fs-sm);color:var(--fg);font-weight:600}
+.catbox .items{display:flex;flex-wrap:wrap;gap:5px}
+#list{display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fill,minmax(350px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--sp-3);cursor:pointer}
+.card:hover{border-color:var(--border-strong)}
+.card h3{margin:0 0 7px;font-size:var(--fs-base);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.card h3 a{color:var(--fg)}
+.card h3 a:hover{color:var(--acc)}
+.stars5{color:var(--gold);font-size:var(--fs-sm);letter-spacing:1px}
+.stars5 small{color:var(--dim);font-size:var(--fs-xs);letter-spacing:0}
+.one{color:var(--fg);font-size:var(--fs-sm);margin:0 0 8px;min-height:36px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;opacity:.92}
+.one.none{color:var(--dim);font-style:italic}
+/* 待补全的条目：**不隐藏、但降低视觉权重**（GPT 建议）——让库看起来还在长，而不是"就这么点东西" */
+.card.thin{opacity:.82;border-style:dashed}
+.card.thin:hover{opacity:1}
+.soon{font-size:var(--fs-xs);color:var(--warn);background:var(--warn-bg);border:1px dashed var(--warn-line);padding:4px 8px;margin:0 0 8px}   /* 原为 2px 彩色左边框 → 按设计 §10.3 改成"表面色 + 边框" ✓ */
+.pill{border-radius:var(--radius);padding:1px 8px;font-size:var(--fs-xs);border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.pill-fn{border-color:var(--info-line);color:var(--info)}
+.pill-todo{border-color:var(--warn-line);color:var(--warn)}
+.tier-S,.r-low{border-color:var(--ok-line);color:var(--ok)}
+.tier-A{border-color:var(--info-line);color:var(--info)}
+.tier-unrated{border-color:var(--violet-line);color:var(--violet)}
+.r-mid{border-color:var(--warn-line);color:var(--warn)}
+.r-high{border-color:var(--danger-line);color:var(--danger)}
+.s-saved{border-color:var(--accent);color:var(--info)}
+.s-using{border-color:var(--ok-line);color:var(--ok)}
+.s-watching{border-color:var(--warn-line);color:var(--warn)}
+.s-researching{border-color:var(--violet-line);color:var(--violet)}
+.s-dropped{border-color:var(--danger-line);color:var(--danger)}
+.meta{color:var(--dim);font-size:var(--fs-xs);margin-top:7px;display:flex;justify-content:space-between;gap:8px}
+.empty{grid-column:1/-1;text-align:center;color:var(--dim);padding:50px}
+#panel{position:fixed;inset:0 0 0 auto;width:min(660px,95vw);background:var(--panel);border-left:1px solid var(--line);padding:22px;overflow:auto;transform:translateX(105%);transition:transform .18s;z-index:20;box-shadow:-20px 0 40px rgba(0,0,0,.45)}
+#panel.open{transform:none}
+#panel h2{margin:0 0 6px;font-size:var(--fs-lg);display:block}
+#panel .close{position:absolute;top:14px;right:16px;cursor:pointer;color:var(--dim);font-size:22px;line-height:1}
+.sec-h{font-size:var(--fs-xs);color:var(--dim);font-weight:600;margin:16px 0 7px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.hbody{font-size:var(--fs-sm);line-height:1.75;background:var(--surface-3);border:1px solid var(--border);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-2)}   /* 原为 3px 彩色左边框 → 设计 §10.3：改用留白 + 表面色建立层级 ✓ */
+.fnrow{display:flex;gap:10px;font-size:var(--fs-sm);margin:6px 0;line-height:1.7}
+.fnrow b{color:var(--dim);font-weight:500;min-width:92px;flex:0 0 auto}
+.todo-box{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--radius);padding:10px 13px;font-size:var(--fs-sm);line-height:1.8;color:var(--warn);margin-top:10px}
+.kv{margin:12px 0;padding-top:10px;border-top:1px solid var(--line)}
+.kv div{margin:5px 0;font-size:var(--fs-sm)}
+.kv b{color:var(--dim);font-weight:500;display:inline-block;min-width:84px}
+.ev{font-size:var(--fs-sm);margin:4px 0;display:flex;gap:8px}
+.ev time{color:var(--dim);white-space:nowrap}
+.foot{padding:0 22px 26px;color:var(--dim);font-size:var(--fs-xs);line-height:1.9;max-width:1560px}
+code{background:var(--surface-3);padding:1px 5px;border-radius:var(--radius);font-size:var(--fs-xs)}
+/* —— 项目对比（页内，纯前端；数据已内嵌，不调 API）—— */
+.cmp{cursor:pointer;border:1px solid var(--line);border-radius:var(--radius);padding:1px 8px;font-size:var(--fs-xs);color:var(--dim);background:transparent;white-space:nowrap;margin-left:auto}
+.cmp:hover{border-color:var(--acc);color:var(--fg)}
+.cmp.on{background:var(--accent-bg);border-color:var(--acc);color:var(--accent-ink)}
+#cmpBar{position:fixed;bottom:18px;right:18px;background:var(--panel);border:1px solid var(--acc);border-radius:var(--radius);padding:10px 14px;display:none;gap:10px;align-items:center;z-index:15;box-shadow:0 8px 24px rgba(0,0,0,.45);font-size:var(--fs-sm)}
+#cmpBar.on{display:flex}
+table.cmpt{border-collapse:collapse;width:100%;font-size:var(--fs-sm);margin-top:8px}
+table.cmpt th,table.cmpt td{border:1px solid var(--line);padding:6px 8px;vertical-align:top;text-align:left;line-height:1.6}
+table.cmpt th{background:var(--surface-3);color:var(--dim);font-weight:500;white-space:nowrap}
+table.cmpt td:first-child{color:var(--dim);white-space:nowrap;background:var(--surface-4)}
+.cmpnote{color:var(--dim);font-size:var(--fs-xs);margin-top:8px;line-height:1.7}
+.grpNote{grid-column:1/-1;color:var(--dim);font-size:var(--fs-sm);line-height:1.7;margin-bottom:2px}
+.grpHead{grid-column:1/-1;font-size:var(--fs-sm);font-weight:600;color:var(--fg);border-bottom:1px solid var(--line);padding:6px 0 5px;margin-top:6px}
+.grpHead em{font-style:normal;color:var(--dim);font-weight:400;font-size:var(--fs-xs);margin-left:7px}
+@media(max-width:700px){.wrap{padding:12px}}
+/* —— hash 路由骨架（P2-9）：4 个一级区 + 图例抽屉 ——
+   为什么用 hash：#/xxx 在 file:// 下前进/后退/刷新/分享都可靠，且**不依赖 pushState 的版本差异**。
+   ⚠️ 旧注释写「pushState 在 file:// 一律抛 SecurityError」—— **2026-10-16 真机实测推翻**：
+   Edge 155 headless 下"只改 hash"的 pushState({},'','#/x') **不抛**（换路径的情况未实测）。
+   方案不变，但理由要写对：选 hash 是因为 hashchange 语义在所有浏览器一致 ✓ */
+#nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;align-items:center}
+.navlink{cursor:pointer;border:1px solid var(--line);border-radius:var(--radius);padding:5px 12px;font-size:var(--fs-sm);color:var(--dim);background:var(--panel)}
+.navlink:hover{border-color:var(--acc);color:var(--fg)}
+.navlink.on{background:var(--accent-bg);border-color:var(--acc);color:var(--accent-ink)}
+.view{display:none}
+.view.on{display:block}
+.toolbar.off{display:none}
+#crumb{display:none;font-size:var(--fs-sm);color:var(--dim);margin-bottom:10px}
+#crumb.on{display:block}
+#crumb a{color:var(--acc);cursor:pointer}
+#crumb b{color:var(--fg);font-weight:500}
+#legend{position:fixed;inset:0 0 0 auto;width:min(560px,95vw);background:var(--panel);border-left:1px solid var(--line);padding:22px;overflow:auto;transform:translateX(105%);transition:transform .18s;z-index:21;box-shadow:-20px 0 40px rgba(0,0,0,.45)}
+#legend.open{transform:none}
+#legend h2{margin:0 0 6px;font-size:var(--fs-lg);display:block}
+#legend .close{position:absolute;top:14px;right:16px;cursor:pointer;color:var(--dim);font-size:22px;line-height:1}
+.lgrow{display:flex;gap:10px;font-size:var(--fs-sm);margin:6px 0;line-height:1.7}
+.lgrow b{color:var(--dim);font-weight:500;min-width:104px;flex:0 0 auto}
+@media(prefers-reduced-motion:reduce){#panel,#legend{transition:none} *{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+/* ============ 批次 6 · #/legend（技术规范页：纯黑白 + 编号条款 + 表格）============
+   设计 §10.5：图例 = 技术规范页，像规格书 → 这一页**不用荧光黄**（黑白灰三阶即可），
+   靠等宽编号、细线表格与分层标题建立秩序 ✓ */
+#legend .spec-h{font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:.1em;color:var(--text);
+  border-bottom:1px solid var(--border);padding-bottom:var(--sp-1);margin:var(--sp-5) 0 var(--sp-2)}
+#legend .spec-h:first-of-type{margin-top:var(--sp-4)}
+.spec-note{color:var(--text-dim);font-size:var(--fs-xs);line-height:1.9;margin:var(--sp-2) 0 0}
+.spec-dl{margin:0}
+.spec-row{display:grid;grid-template-columns:minmax(9ch,15ch) 1fr;gap:var(--sp-3);padding:6px 0;
+  border-bottom:1px solid var(--border);font-size:var(--fs-sm)}
+.spec-row dt{font-family:var(--font-mono);color:var(--text-dim);font-size:var(--fs-xs);padding-top:2px}
+.spec-row dd{margin:0;line-height:1.75}
+.spec-tbl{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+.spec-tbl th,.spec-tbl td{border:1px solid var(--border);padding:5px var(--sp-2);text-align:left;vertical-align:top}
+.spec-tbl th{font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-dim);font-weight:400;background:var(--surface-3)}
+/* 分数/上限列不许折行 —— 实测"65–79"会被拆成两行 ✗（表格列宽要够） */
+.spec-tbl th:nth-child(2),.spec-tbl td:nth-child(2),.spec-tbl th:nth-child(4),.spec-tbl td:nth-child(4){white-space:nowrap;width:1%}
+.spec-tbl th:nth-child(1),.spec-tbl td:nth-child(1){white-space:nowrap}
+
+/* ============ 批次 6 · #/home（杂志封面 + 目录）============
+   设计 §10.5：home = 杂志封面 + 目录；§10.3：硬边框 / 直角 / 不对称 / 大胆留白；
+   荧光黄只做**块与线**（刊头切割带、§ 编号、KPI 之一、图表 hover），黄底必黑字 ✓ */
+.panel{border-top:2px solid var(--border);padding-top:var(--sp-4);margin-bottom:var(--sp-6)}
+.sec-h2{font-size:var(--fs-lg);font-weight:700;margin:0 0 var(--sp-3);display:flex;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap}
+.sec-h2 em{font-style:normal;color:var(--text-dim);font-weight:400;font-size:var(--fs-xs)}
+.snum{color:var(--accent);font-weight:700;letter-spacing:.06em}
+.masthead{border-bottom:2px solid var(--border);padding-bottom:var(--sp-4);margin-bottom:var(--sp-6)}
+.mh-bar{background:var(--accent);color:var(--accent-ink);font-size:var(--fs-xs);letter-spacing:.1em;padding:3px var(--sp-2);margin-top:var(--sp-3);display:inline-block}
+.mh-title{margin:0;font-family:var(--font-display);font-size:clamp(44px,7.2vw,96px);line-height:.86;letter-spacing:-.01em;text-transform:uppercase;color:var(--text);font-weight:400}
+.mh-hl{color:var(--accent)}
+.mh-cn{margin:var(--sp-3) 0 0;font-size:var(--fs-lg);font-weight:700}
+.mh-cn em{font-style:normal;color:var(--accent)}
+.mh-lede{max-width:64ch;color:var(--text-dim);margin:var(--sp-2) 0 0;font-size:var(--fs-sm);line-height:1.8}
+.mh-actions{margin-top:var(--sp-4);display:flex;flex-wrap:wrap;gap:5px}
+.mh-hint{color:var(--text-dim);font-size:var(--fs-xs);margin-top:var(--sp-3);line-height:1.9}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));border:1px solid var(--border)}
+.kpi{padding:var(--sp-3) var(--sp-4);border-right:1px solid var(--border)}
+.kpi:last-child{border-right:0}
+.kpi.is-yellow{background:var(--accent);color:var(--accent-ink)}
+.kpi.is-yellow em{color:var(--accent-ink);opacity:.72}
+.kpi b{display:block;font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-.02em}
+.kpi span{display:block;font-size:var(--fs-sm);font-weight:700;margin-top:2px}
+.kpi em{display:block;font-style:normal;color:var(--text-dim);font-size:var(--fs-xs);margin-top:var(--sp-1)}
+.dist-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:var(--sp-5)}
+.dist h4{margin:0 0 var(--sp-2);font-size:var(--fs-sm);color:var(--text-dim);font-weight:700;letter-spacing:.05em}
+.stack{display:flex;height:14px;border:1px solid var(--border);overflow:hidden;background:var(--surface-3)}
+.seg{display:block;height:100%}
+.sg-yellow{background:var(--accent)} .sg-white{background:var(--text)} .sg-gray{background:var(--border-strong)} .sg-red{background:var(--danger)}
+.legend{list-style:none;margin:var(--sp-2) 0 0;padding:0}
+.legend li{display:flex;align-items:baseline;gap:var(--sp-2);font-size:var(--fs-sm);padding:3px 0;border-bottom:1px solid var(--border)}
+.legend .rl{flex:1}
+.legend .rn{text-align:right;font-weight:700}
+.legend .rp{min-width:6ch;text-align:right;color:var(--text-dim);font-size:var(--fs-xs)}
+.catrows{display:grid;gap:2px}
+.catrow{display:grid;grid-template-columns:minmax(6ch,13ch) 1fr 4ch 6ch;align-items:center;gap:var(--sp-2);background:transparent;border:0;border-bottom:1px solid var(--border);color:var(--text);font:inherit;text-align:left;padding:7px 0;cursor:pointer}
+.catrow:hover{background:var(--surface-2)}
+.catrow:hover .cbar i{background:var(--accent)}
+.catrow .cbar{display:block;height:10px;background:var(--surface-3)}
+.catrow .cbar i{display:block;height:100%;background:var(--text)}
+.catrow .cn{text-align:right;font-weight:700}
+.catrow .cp{text-align:right;color:var(--text-dim);font-size:var(--fs-xs)}
+.gaps{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:var(--sp-4)}
+.gap{border:1px solid var(--border);padding:var(--sp-3)}
+.gap h4{margin:0 0 var(--sp-2);font-size:var(--fs-sm)}
+.tagx{display:inline-block;border:1px solid var(--border-strong);padding:1px 6px;margin:2px 3px 2px 0;font-size:var(--fs-xs);color:var(--text-dim)}
+.gap .none{color:var(--text-dim);font-size:var(--fs-xs);margin:0;line-height:1.8}
+.spark{display:grid;grid-auto-flow:column;gap:var(--sp-2);align-items:end;height:118px;border-bottom:2px solid var(--border);padding-bottom:var(--sp-2);margin-bottom:var(--sp-3)}
+.spark-col{display:grid;grid-template-rows:1fr auto auto;align-items:end;gap:2px;text-align:center}
+.spark-col i{display:block;background:var(--border-strong);min-height:2px}
+.spark-col:hover i{background:var(--accent)}
+.spark-col b{font-size:var(--fs-xs);color:var(--text)}
+.spark-col span{font-size:var(--fs-xs);color:var(--text-dim)}
+.typelegend{display:flex;flex-wrap:wrap;gap:var(--sp-2);align-items:baseline}
+.typelegend .zh{color:var(--text-dim);font-size:var(--fs-xs)}
+.chart-note{color:var(--text-dim);font-size:var(--fs-xs);line-height:1.85;margin:var(--sp-2) 0 0}
+@media(max-width:700px){.kpi{border-right:0;border-bottom:1px solid var(--border)}.catrow{grid-template-columns:minmax(5ch,10ch) 1fr 3ch 5ch}}
+
+/* ============ 批次 6 · #/all（档案索引/目录：facet 索引列 + 行式密集排版）============
+   设计 §10.5：#/all = 档案索引/目录 → facet 做成**索引标签列**、列表用**行式密集排版**（不是卡片墙 ✗）、
+   编号 + 等宽元数据列。这里用**后置覆盖**改既有规则（原 .card/.catbox 是卡片式）✓ */
+.ix{font-size:var(--fs-xs);color:var(--accent);letter-spacing:.12em;margin-right:var(--sp-2)}
+#list{display:block;border-top:2px solid var(--border);margin-top:var(--sp-2)}
+.card{display:grid;grid-template-columns:4ch minmax(0,1fr) minmax(13ch,17ch);gap:var(--sp-4);align-items:start;
+  background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;padding:var(--sp-3) var(--sp-1);cursor:pointer}
+.card:hover{background:var(--surface-2)}
+.card:hover .rk{color:var(--accent)}
+.card .rk{font-size:var(--fs-xs);color:var(--text-dim);padding-top:4px}
+.card .main{min-width:0}
+.card h3{margin:0 0 3px;font-size:var(--fs-base);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.card .stars{margin:4px 0 0}
+.card .one{margin:4px 0 6px;font-size:var(--fs-sm);color:var(--text-dim);line-height:1.65;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .row.tags{display:flex;gap:5px;flex-wrap:wrap}
+.card .meta{display:block;text-align:right;font-size:var(--fs-xs);color:var(--text-dim);line-height:1.75;
+  margin:0;white-space:nowrap;justify-content:flex-end}
+.card .meta span{display:block}
+.card.thin{opacity:1;border-style:solid}
+.catgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 var(--sp-5);border-top:1px solid var(--border)}
+.catbox{background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;padding:var(--sp-2) 0}
+.catbox h3{margin:0 0 6px;font-size:var(--fs-sm);color:var(--text);font-weight:700}
+@media(max-width:700px){.card{grid-template-columns:3ch minmax(0,1fr)}.card .meta{grid-column:2;text-align:left;white-space:normal}.card .meta span{display:inline;margin-right:var(--sp-2)}}
+/* ============ 批次 6 · #/picks（专题报道：封面稿 + 档位分栏 + 官方侧栏）============
+   设计 §10.5：#/picks = 专题报道 → 首条做大（标题 + 导语 + 风险块）、其余**按档位分栏**、
+   官方动态做侧栏小字条 ✓ （黄色只做"头条"上沿的一条线 ✓） */
+.lead{border:1px solid var(--border);border-top:3px solid var(--accent);padding:var(--sp-4);cursor:pointer;background:var(--surface)}
+.lead:hover{background:var(--surface-2)}
+.lead-k{font-size:var(--fs-xs);color:var(--accent);letter-spacing:.1em;margin-bottom:var(--sp-2)}
+.lead h3{margin:0 0 var(--sp-2);font-size:clamp(20px,2.4vw,30px);line-height:1.15;letter-spacing:-.01em}
+.lead-lede{font-size:var(--fs-base);color:var(--text);line-height:1.75;max-width:70ch;margin:0 0 var(--sp-3)}
+.lead-meta{display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--text-dim)}
+.lead-cta{margin-top:var(--sp-3);font-size:var(--fs-xs);color:var(--text-dim)}
+.picknote{color:var(--text-dim);font-size:var(--fs-sm);line-height:1.8;margin:var(--sp-2) 0}
+.tcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(236px,1fr));gap:var(--sp-4);align-items:start}
+.tcol{border-top:1px solid var(--border);padding-top:var(--sp-2)}
+.tcol h4{margin:0 0 var(--sp-2);font-size:var(--fs-sm);color:var(--text-dim);font-weight:700}
+.tcol .none{color:var(--text-dim);font-size:var(--fs-xs);margin:0}
+.tcol .mini{width:auto;margin:0 0 var(--sp-2)}   /* 原 mini 是横向滚动条用的定宽，列里要自适应 ✓ */
+.offlist{list-style:none;margin:0;padding:0}
+.offlist li{display:flex;justify-content:space-between;gap:var(--sp-2);padding:5px 0;border-bottom:1px solid var(--border);font-size:var(--fs-sm)}
+.offlist .mono{color:var(--text-dim);font-size:var(--fs-xs)}
+/* ============ 批次 6 · #/plans（工作台/工单：角色-工具用**表格线**呈现）============
+   设计 §10.5：黄块标"已配齐"，缺件用警示红（红只做警示 ✓） */
+.wotable{border-top:2px solid var(--border)}
+.worow{display:grid;grid-template-columns:4ch minmax(0,1.5fr) 6ch 8ch 6ch minmax(0,1fr);gap:var(--sp-3);align-items:center;
+  width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--border);color:var(--text);
+  font:inherit;padding:var(--sp-2) var(--sp-1);cursor:pointer}
+.worow:hover{background:var(--surface-2)}
+.wohead{color:var(--text-dim);font-size:var(--fs-xs);cursor:default;border-bottom:1px solid var(--border-strong);font-weight:700}
+.wohead:hover{background:transparent}
+.wo-no{color:var(--text-dim);font-size:var(--fs-xs)}
+.wo-name{font-weight:700}
+.wo-ok{background:var(--accent);color:var(--accent-ink);text-align:center;padding:1px 0}
+.wo-miss{text-align:center;color:var(--text-dim)}
+.wo-miss.on{color:var(--danger);border:1px solid var(--danger-line)}
+.wo-trig{display:flex;gap:4px;flex-wrap:wrap}
+.wosum{display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap;margin:var(--sp-2) 0 var(--sp-3);
+  color:var(--text-dim);font-size:var(--fs-xs)}
+.wo-st{display:inline-block;padding:1px 7px;font-size:var(--fs-xs);font-weight:700}
+.wo-st.ok{background:var(--accent);color:var(--accent-ink)}
+.wo-st.miss{color:var(--danger);border:1px solid var(--danger-line)}
+.wo-role{display:flex;gap:var(--sp-2);align-items:baseline;border-top:2px solid var(--border);
+  padding-top:var(--sp-2);margin:var(--sp-4) 0 var(--sp-2)}
+.wo-role b{font-size:var(--fs-base)}
+.wo-role .wo-st{margin-left:auto}
+.planbox{padding:0}
+@media(max-width:700px){.worow{grid-template-columns:3ch minmax(0,1fr) 5ch 6ch 5ch}.worow > :nth-child(6){display:none}}
+/* P2-2 分层徽章：官方=黄块（稀缺资源，仅 8 条 ✓）；其余走灰阶/硬白，不加新色相 ✓ */
+.pill.b-org{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pill.b-new{border-color:var(--accent);color:var(--text)}
+.pill.b-gem,.pill.b-ever{color:var(--text);border-color:var(--border-strong)}
+.pill.b-watch{color:var(--text-dim)}
+/* P1-13：头条的「适合谁」一行（灰字、限宽、与导语同宽 ✓） */
+.lead-aud{font-size:var(--fs-sm);color:var(--text-dim);line-height:1.7;margin:0 0 var(--sp-3);max-width:70ch}
+.lead-aud b{color:var(--text)}
+
+/* ============================================================================
+   设计系统 v1.1（2026-10-17 第一轮，修订 1）——追加式新增层
+   修订 1（按 ui-check/impeccable 的实测反馈）：
+     · ai-color-palette ✗：紫/蓝这类辅助色**不做文字颜色**，只做色块/边框/底纹 ⇒ 标题文字一律白/黄
+     · cramped-padding ✗ ×5：新加边框或底色的容器必须给足内边距（.dist/.catrows/.gaps/.spark-wrap/.mh-bar）
+   ============================================================================ */
+:root{
+  --blue:#2f7bff; --teal:#19e0c4; --violet:#a06bff; --orange:#ff7a1a;
+  --amber:#ffd166; --rose:#ff4d6d; --cyan:#4dd0e1; --lime:#9ccc65;
+  --c-ai:#e8ff2a; --c-dsh:#2f7bff; --c-dev:#19e0c4; --c-design:#ff7a1a; --c-eff:#a06bff;
+  --c-ops:#ff2d20; --c-office:#ffd166; --c-sec:#ff4d6d; --c-data:#4dd0e1; --c-learn:#9ccc65; --c-other:#6b6b66;
+  --tx-grid:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M24 0H0V24' fill='none' stroke='%23242422' stroke-width='1'/%3E%3C/svg%3E");
+  --tx-hatch:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M-2 2L2 -2M0 8L8 0M6 10L10 6' stroke='%23262624' stroke-width='1.2'/%3E%3C/svg%3E");
+  --tx-dots:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='1.5' cy='1.5' r='1' fill='%2330302c'/%3E%3C/svg%3E");
+  --tx-ruler:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12'%3E%3Cpath d='M0 11h40M0 11V7M10 11V9M20 11V5M30 11V9' stroke='%233d3d3a' stroke-width='1'/%3E%3C/svg%3E");
+  --fs-3xl:52px; --sp-7:64px;
+}
+body{background-image:var(--tx-grid);background-attachment:fixed}
+/* 段头：§ 编号 + 细线 + 侧注（档案馆版式）；文字只用白/黄 ✓ */
+.sec-h2{border-top:1px solid var(--border-strong);padding-top:var(--sp-4);margin-top:var(--sp-6);
+        display:grid;grid-template-columns:auto 1fr;gap:var(--sp-3) var(--sp-4);align-items:baseline}
+.sec-h2 .snum{color:var(--accent);font-size:var(--fs-lg)}
+.sec-h2 em{color:var(--text-faint);font-style:normal;font-family:var(--font-mono);font-size:var(--fs-xs)}
+.tick-rule{height:12px;background-image:var(--tx-ruler);background-repeat:repeat-x;opacity:.7;margin:var(--sp-2) 0 var(--sp-4)}
+/* ---- 首页中央几何导航：三个主入口用真链接（可 Tab / 可复制 / 可后退），路由不变 ✓ ---- */
+#hub{display:grid;grid-template-columns:1.3fr 1fr .9fr;gap:var(--sp-4);margin:var(--sp-5) 0 var(--sp-6);
+     position:relative;padding-top:var(--sp-4);border-top:3px solid var(--accent)}
+#hub::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:12px;
+     background-image:var(--tx-ruler);background-repeat:repeat-x;opacity:.6}
+.hub-node{position:relative;display:block;text-decoration:none;color:var(--text);
+     border:1px solid var(--border-strong);background:var(--surface-2);padding:var(--sp-5) var(--sp-4) var(--sp-4);
+     overflow:hidden;transition:transform .18s ease,background .18s ease,border-color .18s ease}
+.hub-node::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:6px;background:var(--h,var(--accent))}
+.hub-node::after{content:"";position:absolute;right:-40px;bottom:-40px;width:110px;height:110px;
+     background:var(--h,var(--accent));opacity:.08;transform:rotate(45deg)}
+.hub-node:hover,.hub-node:focus-visible{transform:translate(-2px,-2px);border-color:var(--h,var(--accent));
+     background:var(--surface-3);outline:none}
+/* 数字与标题都用白/黄（辅助色只出现在色带/边框/底纹上 ⇒ 不触发 ai-color-palette ✓）*/
+.hub-no{display:block;font-family:var(--font-mono);font-size:var(--fs-2xl);line-height:1;color:var(--text)}
+.hub-node:hover .hub-no{color:var(--accent)}
+.hub-t{display:block;font-size:var(--fs-xl);font-weight:700;margin:var(--sp-3) 0 var(--sp-2);letter-spacing:-.01em;color:var(--text)}
+.hub-d{display:block;color:var(--text-dim);font-size:var(--fs-sm);line-height:1.55}
+.hub-n{display:block;margin-top:var(--sp-3);color:var(--text-dim);font-size:var(--fs-xs)}
+.hub-picks{--h:var(--c-ai)} .hub-all{--h:var(--c-dev)} .hub-plans{--h:var(--c-eff)}
+.hub-meta{grid-column:1 / -1;display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-2)}
+.hub-mini{font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--text-dim);text-decoration:none;
+     border:1px solid var(--border);padding:6px 12px;transition:color .18s ease,border-color .18s ease}
+.hub-mini:hover{color:var(--text);border-color:var(--border-strong)}
+/* ---- 刊头 ---- */
+.masthead{position:relative;padding-bottom:var(--sp-5)}
+.mh-bar{background:var(--accent);color:var(--accent-ink);display:inline-block;padding:6px 12px;
+        font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:.06em}
+.masthead::after{content:"";display:block;height:12px;margin-top:var(--sp-4);
+        background-image:var(--tx-ruler);background-repeat:repeat-x;opacity:.55}
+/* ---- KPI / 图表：**加内边距**（新加边框底色的容器必须留白，否则 cramped-padding ✗）---- */
+.kpis{gap:var(--sp-3)}
+.kpi{border-top:3px solid var(--accent);background:var(--surface-2);background-image:var(--tx-dots);
+     padding:var(--sp-4) var(--sp-4) var(--sp-3)}
+.kpi b{font-family:var(--font-mono)}
+.panel{background:transparent;border-left:0}
+.dist,.gaps,.spark-wrap,.catrows{border:1px solid var(--border);background:var(--surface);padding:var(--sp-4)}
+.gap{border-left:4px solid var(--amber);padding:var(--sp-3) var(--sp-4)}
+/* ---- 动效：三处、有目的，带 reduced-motion 兜底 ✓ ---- */
+@keyframes ds-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ds-band{0%,100%{background-position:0 0}50%{background-position:38% 0}}
+#hub .hub-node{animation:ds-rise .32s ease both}
+#hub .hub-node:nth-child(2){animation-delay:.06s}
+#hub .hub-node:nth-child(3){animation-delay:.12s}
+.mh-bar{background-image:linear-gradient(90deg,var(--accent) 0 60%,#c9dd22 60% 100%);background-size:200% 100%;
+        animation:ds-band 5.2s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+  #hub .hub-node{opacity:1;transform:none}
+}
+@media (max-width:900px){
+  #hub{grid-template-columns:1fr}
+  .hub-meta{grid-column:auto}
+}
+</style>
+<style>
+/* ⑤ 档案站：新视觉六页（外壳 + 首页 + 日报 C/D + 全库 + 计划与工作区） */
+#view-site{padding:0}
+#view-site .site-head{padding:20px 0 6px}
+#view-site .site-head h2{margin:0 0 6px;font-size:22px}
+#view-site .site-head p{margin:0 0 6px;color:var(--dim);font-size:13px;line-height:1.75}
+#view-site .site-links{font-size:12px}
+#view-site .site-links a{margin:0 3px;border-bottom:1px solid currentColor}
+#view-site iframe{display:block;width:100%;height:calc(100vh - 215px);min-height:620px;
+  border:2px solid #0a0a0a;background:#080807;margin:10px 0 24px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧰 我的开源工具库 <small>共 15 个工具 ｜ 已评分 15 ｜ 近 7 天有更新 0 ｜ 生成于 2026-11-05 11:27:28</small></h1>
+  <input id="q" placeholder="想干什么？直接说需求，例如：画图 / 做PPT / 替代PS / 聊天机器人 / 本地运行AI（按 / 聚焦）" oninput="render();ensureAllView()">
+  <nav id="nav">
+    <!-- 一级导航用**真链接**（<a href="#/…">），不用 <span onclick>：
+         ① 可 Tab 聚焦、回车即开（设计 §5「全键盘可达」）；
+         ② 可右键「复制链接 / 在新标签打开」——这才叫可分享；
+         ③ 真机探针（tools\history-probe-cdp.js）按 href 找目标 → 改前是 span，它按定义找不到 ✗
+         点击后由 hashchange → route() 统一渲染，不需要额外的 onclick ✓ -->
+    <a class="navlink" id="nav-home" href="#/home">① 总览</a>
+    <a class="navlink" id="nav-picks" href="#/picks">② 发现</a>
+    <a class="navlink" id="nav-all" href="#/all">③ 全库</a>
+    <a class="navlink" id="nav-plans" href="#/plans">④ 方案与工作区</a>
+    <a class="navlink" id="nav-site" href="#/site">⑤ 档案站</a>
+    <a class="navlink" id="nav-legend" href="#/legend" title="档位 / 状态 / 风险 / 徽章是什么意思">📖 图例与标准</a>
+  </nav>
+  <div class="toolbar" id="toolbar">
+    <select id="sort" onchange="render();syncURL()">
+      <option value="stars">按体验评分</option>
+      <option value="gh">按星数</option>
+      <option value="recent">按最近提交</option>
+      <option value="name">按名称</option>
+    </select>
+    <select id="fs" onchange="render();syncURL()">
+      <option value="">全部状态</option>
+      
+      <option value="active">已收录</option>
+      <option value="using">正在用</option>
+      <option value="watching">继续观察</option>
+      <option value="researching">正在研究</option>
+      <option value="dropped">不再看</option>
+    </select>
+    <select id="fb" onchange="render();syncURL()">
+  <option value="">全部徽章</option>
+  <option value="org">🏢 官方</option><option value="new">🌱 新星</option><option value="gem">🧊 冷门</option>
+  <option value="ever">🧱 常青</option><option value="watch">🧪 待观察</option>
+  </select>  <select id="fr" onchange="render();syncURL()">
+      <option value="">全部风险</option><option>低</option><option>中</option><option>高</option>
+    </select>
+    <select id="ft" onchange="render();syncURL()">
+      <option value="">全部档位</option><option>S</option><option>A</option><option>B</option><option>C</option><option>D</option>
+    </select>
+    <select id="f5" onchange="render();syncURL()">
+      <option value="">全部评分</option>
+      <option value="5">五星</option><option value="4">四星以上</option><option value="3">三星以上</option>
+      <option value="0">仅待评估</option>
+    </select>
+    <select id="fa" onchange="render();syncURL()">
+      <option value="">全部活跃度</option>
+      <option value="30">30 天内有提交</option>
+      <option value="90">90 天内有提交</option>
+      <option value="365">一年内有提交</option>
+    </select>
+    <span class="chip" id="gapChip" style="display:none" onclick="copyGaps()"></span>
+    <span class="chip" id="grpBtn" onclick="toggleGroup()">按用途分组</span>
+    <span class="chip" id="clear" onclick="clearAll()">清空筛选</span>
+  </div>
+</header>
+<div class="wrap">
+  <div id="crumb"></div>
+
+  <!-- ① 总览：#/home -->
+  <section id="view-home" class="view">
+  <!-- § 封面（杂志刊头）：拉丁超大标题用内嵌 Anton，中文走系统栈，黄只做一条切割带 ✓ -->
+  <section id="hero" class="masthead">
+    <h2 class="mh-title"><span class="mh-lat">ARCHIVE</span><br><span class="mh-lat mh-hl">INDEX</span></h2>
+    <div class="mh-bar"><span class="mono">EST. 2026 · LOCAL ARCHIVE · 单文件离线 · 零依赖</span></div>
+    <p class="mh-cn">开源工具档案 · <em>15 个项目</em> · 11 个工作方案</p>
+    <p class="mh-lede">本地只读档案：15 条项目，其中 0 条是你自己推荐的。所有数字在构建期算好，双击即用、不联网。</p>
+    <div class="items mh-actions">
+      <span class="chip" onclick="searchFor('做视频')">试试搜「做视频」</span>
+      <span class="chip" onclick="searchFor('AI绘画')">搜「AI绘画」</span>
+      <span class="chip" onclick="searchFor('找文件')">搜「找文件」</span>
+      <span class="chip" onclick="go('plans')">按需求组方案</span>
+      <span class="chip" onclick="go('all')">浏览全部 15 条</span>
+      <span class="chip" onclick="go('picks')">今日新增</span>
+    </div>
+    <p class="mh-hint">不知道怎么用？<b>在搜索框里直接说你想干什么</b>（例如「我想做一个播客频道」），这里会从你自己的库里配一套工具给你。</p>
+  </section>
+
+  <!-- § 01 库总览（KPI） -->
+  <!-- § 00 中央几何导航（第一轮新增）：三个主入口 + 次级小入口。
+       用**真链接**（可 Tab 聚焦、可右键复制、可后退），路由不变：#/picks #/all #/plans ✓ -->
+  <nav id="hub" aria-label="主要入口">
+    <a class="hub-node hub-picks" href="#/picks">
+      <b class="hub-no">01</b>
+      <span class="hub-t">每日精选</span>
+      <span class="hub-d">日报与精选是同一件事：按天看新增，或按档位看主推荐。含来源说明与「适合谁」。</span>
+      <span class="hub-n mono">9 条已推荐 ｜ 0 条近 7 天有更新</span>
+    </a>
+    <a class="hub-node hub-all" href="#/all">
+      <b class="hub-no">02</b>
+      <span class="hub-t">完整项目库</span>
+      <span class="hub-d">全部 15 条档案：分类、标签、徽章、风险、成长记录都能筛，筛选条件写进链接可分享。</span>
+      <span class="hub-n mono">15 条 ｜ 其中你自己推荐 0 条</span>
+    </a>
+    <a class="hub-node hub-plans" href="#/plans">
+      <b class="hub-no">03</b>
+      <span class="hub-t">计划与工作区</span>
+      <span class="hub-d">按需求配好的工具组合与工作区：谁干什么、还缺什么，一屏看完。</span>
+      <span class="hub-n mono">11 个方案</span>
+    </a>
+    <div class="hub-meta">
+      <a class="hub-mini" href="#/legend" title="档位 / 状态 / 风险 / 徽章是什么意思">📖 图例与标准</a>
+      <a class="hub-mini" href="#/all?badge=gem">🧊 冷门优质</a>
+      <a class="hub-mini" href="#/all?badge=org">🏢 官方出品</a>
+      <a class="hub-mini" href="#/all?tier=S">S 档</a>
+      <span class="hub-mini" onclick="searchFor('本地运行AI')" style="cursor:pointer">试试搜「本地运行AI」</span>
+    </div>
+  </nav>
+  <section class="panel">
+    <h3 class="sec-h2"><span class="mono snum">§ 01</span> 库总览 <em>4 个数字说清这个库</em></h3>
+    <div class="kpis"><div class="kpi "><b class="mono">15</b><span>库内项目</span><em>全部本地 · 可全量重建</em></div><div class="kpi is-yellow"><b class="mono">5</b><span>推荐过</span><em>S 档 3 · A 档 6</em></div><div class="kpi "><b class="mono">0</b><span>近 7 天新增</span><em>首次收录进台账</em></div><div class="kpi "><b class="mono">14</b><span>在跟 + 在用</span><em>继续观察 8 · 已收录 6</em></div></div>
+    <p class="chart-note">库内 15 个项目：推荐过 5 个，继续观察 8、已收录 6、不再看 1；风险已评 2 个（低 0 / 中 2 / 高 0），其余 13 个待评估：待评估不等于安全。近 7 天共 0 条变化。</p>
+  </section>
+
+  <!-- § 02 结构分布（状态 / 档位 / 风险） -->
+  <section class="panel">
+    <h3 class="sec-h2"><span class="mono snum">§ 02</span> 结构分布 <em>状态 · 档位 · 风险</em></h3>
+    <div class="dist-grid">
+      <div class="dist">
+        <h4>状态</h4>
+        <div class="stack" role="img" aria-label="状态分布：继续观察 8 条、已收录 6 条、不再看 1 条"><span class="seg sg-gray" style="width:53.3%"></span><span class="seg sg-white" style="width:40.0%"></span><span class="seg sg-red" style="width:6.7%"></span></div>
+        <ul class="legend"><li><span class="rl">继续观察</span><span class="rn mono">8</span><span class="rp mono">53.3%</span></li><li><span class="rl">已收录</span><span class="rn mono">6</span><span class="rp mono">40.0%</span></li><li><span class="rl">正在用</span><span class="rn mono">0</span><span class="rp mono">0.0%</span></li><li><span class="rl">正在研究</span><span class="rn mono">0</span><span class="rp mono">0.0%</span></li><li><span class="rl">不再看</span><span class="rn mono">1</span><span class="rp mono">6.7%</span></li></ul>
+        <p class="chart-note">「正在用 / 正在研究」现在是 0：这两态还没启用（待 P1-3），不是"没有问题"。</p>
+      </div>
+      <div class="dist">
+        <h4>档位</h4>
+        <div class="stack" role="img" aria-label="档位分布：S 档 3 条、A 档 6 条、B 档 2 条、其他档位 0 条、不再看 0 条"><span class="seg sg-yellow" style="width:20.0%"></span><span class="seg sg-white" style="width:40.0%"></span><span class="seg sg-gray" style="width:13.3%"></span></div>
+        <ul class="legend"><li><span class="rl">S 档</span><span class="rn mono">3</span><span class="rp mono">20.0%</span></li><li><span class="rl">A 档</span><span class="rn mono">6</span><span class="rp mono">40.0%</span></li><li><span class="rl">B 档</span><span class="rn mono">2</span><span class="rp mono">13.3%</span></li><li><span class="rl">D 档</span><span class="rn mono">0</span><span class="rp mono">0.0%</span></li></ul>
+        <p class="chart-note">日报每天最多 8 条，所以 S + A 只有 9 条：档位是<b>稀缺</b>的；库内项目全部 SABCD。</p>
+      </div>
+      <div class="dist">
+        <h4>风险</h4>
+        <div class="stack" role="img" aria-label="风险分布：低 0 条、中 2 条、高 0 条、待评估 13 条"><span class="seg sg-gray" style="width:13.3%"></span><span class="seg sg-gray" style="width:86.7%"></span></div>
+        <ul class="legend"><li><span class="rl">低</span><span class="rn mono">0</span><span class="rp mono">0.0%</span></li><li><span class="rl">中</span><span class="rn mono">2</span><span class="rp mono">13.3%</span></li><li><span class="rl">高</span><span class="rn mono">0</span><span class="rp mono">0.0%</span></li><li><span class="rl">待评估</span><span class="rn mono">13</span><span class="rp mono">86.7%</span></li></ul>
+        <p class="chart-note">待评估 13 条（87%）：<b>待评估 ≠ 安全</b>，只表示还没评估过。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- § 03 类别分布 -->
+  <section class="panel">
+    <h3 class="sec-h2"><span class="mono snum">§ 03</span> 类别分布 <em>一级 6 类 · 二级 12 类在用</em></h3>
+    <div class="catrows"><button type="button" class="catrow" onclick="jumpL1('AI')"><span class="cl">AI</span><span class="cbar"><i style="width:100.0%"></i></span><span class="cn mono">6</span><span class="cp mono">40.0%</span></button><button type="button" class="catrow" onclick="jumpL1('设计')"><span class="cl">设计</span><span class="cbar"><i style="width:50.0%"></i></span><span class="cn mono">3</span><span class="cp mono">20.0%</span></button><button type="button" class="catrow" onclick="jumpL1('办公')"><span class="cl">办公</span><span class="cbar"><i style="width:33.3%"></i></span><span class="cn mono">2</span><span class="cp mono">13.3%</span></button><button type="button" class="catrow" onclick="jumpL1('其他')"><span class="cl">其他</span><span class="cbar"><i style="width:33.3%"></i></span><span class="cn mono">2</span><span class="cp mono">13.3%</span></button><button type="button" class="catrow" onclick="jumpL1('开发')"><span class="cl">开发</span><span class="cbar"><i style="width:16.7%"></i></span><span class="cn mono">1</span><span class="cp mono">6.7%</span></button><button type="button" class="catrow" onclick="jumpL1('效率')"><span class="cl">效率</span><span class="cbar"><i style="width:16.7%"></i></span><span class="cn mono">1</span><span class="cp mono">6.7%</span></button></div>
+    <p class="chart-note">点任一行 → 去全库按该大类筛选（筛选条件会写进链接，可分享、可后退）。</p>
+  </section>
+
+  <!-- § 04 探索缺口 -->
+  <section class="panel">
+    <h3 class="sec-h2"><span class="mono snum">§ 04</span> 探索缺口 <em>哪些地方还没被看过</em></h3>
+    <div class="gaps"><div class="gap"><h4>① 还没有任何项目的类目 <b class="mono">23</b></h4><span class="tagx">AI / AI聊天</span> <span class="tagx">AI / AI写作</span> <span class="tagx">AI / AI办公</span> <span class="tagx">设计 / 建模</span> <span class="tagx">效率 / 文件管理</span> <span class="tagx">效率 / 笔记</span> <span class="tagx">效率 / 系统工具</span> <span class="tagx">开发 / 编程助手</span> <span class="tagx">开发 / 代码分析</span> <span class="tagx">开发 / 框架库</span> <span class="tagx">学习 / 教程文档</span> <span class="tagx">学习 / 数据集资源</span> <span class="tagx">数据 / 数据库存储</span> <span class="tagx">数据 / 数据分析</span> <span class="tagx">安全 / 安全工具</span> <span class="tagx">安全 / 隐私工具</span> <span class="tagx">运维 / 部署托管</span> <span class="tagx">运维 / 监控日志</span> <span class="tagx">DSH 生态 / DSH 插件</span> <span class="tagx">DSH 生态 / DSH 技能</span> <span class="tagx">DSH 生态 / DSH 配置</span> <span class="tagx">办公 / 演示文稿</span> <span class="tagx">办公 / 表格工具</span></div><div class="gap"><h4>② 有项目但一条都没推荐过 <b class="mono">7</b></h4><span class="tagx">AI / AI绘画（1 条）</span> <span class="tagx">AI / AI视频（1 条）</span> <span class="tagx">AI / 模型训练（1 条）</span> <span class="tagx">设计 / UI设计（1 条）</span> <span class="tagx">开发 / 开发工具（1 条）</span> <span class="tagx">办公 / 文档处理（1 条）</span> <span class="tagx">办公 / PDF 与阅读（1 条）</span></div><div class="gap"><h4>③ 超过 30 天没有新增 <b class="mono">0</b></h4><p class="none">无 —— 库本身才 25 天历史，全部类目都还"新" ✓（等库老了这条才有意义）</p></div></div>
+  </section>
+
+  <!-- § 05 最近变化 -->
+  <section class="panel">
+    <h3 class="sec-h2"><span class="mono snum">§ 05</span> 最近变化 <em>近 7 天 0 条事件</em></h3>
+    <div class="spark" role="img" aria-label="近 7 天每日事件数（列下方数字即当日条数，合计 0 条）"><div class="spark-col" title="2026-10-30：0 条事件"><i style="height:0%"></i><b class="mono">0</b><span class="mono">10-30</span></div><div class="spark-col" title="2026-10-31：0 条事件"><i style="height:0%"></i><b class="mono">0</b><span class="mono">10-31</span></div><div class="spark-col" title="2026-11-01：0 条事件"><i style="height:0%"></i><b class="mono">0</b><span class="mono">11-01</span></div><div class="spark-col" title="2026-11-02：0 条事件"><i style="height:0%"></i><b class="mono">0</b><span class="mono">11-02</span></div><div class="spark-col" title="2026-11-03：0 条事件"><i style="height:0%"></i><b class="mono">0</b><span class="mono">11-03</span></div><div class="spark-col" title="2026-11-04：0 条事件"><i style="height:0%"></i><b class="mono">0</b><span class="mono">11-04</span></div><div class="spark-col" title="2026-11-05：0 条事件"><i style="height:0%"></i><b class="mono">0</b><span class="mono">11-05</span></div></div>
+    <div class="typelegend"></div>
+    <p class="chart-note">事件来自 data/events.jsonl（可全量重建）。每行都能在「发现」区按日展开。</p>
+  </section>
+  </section>
+
+  <!-- ② 发现：#/picks（可深链到某天 #/picks/YYYY-MM-DD） -->
+  <section id="view-picks" class="view">
+  <section class="panel">
+    <h2><span class="mono ix">FEATURE</span> 今日新增 <em>每天进货的入口（链接可直接分享到某一天：#/picks/2026-10-16）</em></h2>
+    <div id="todayLead"></div>
+    <div id="todayRow"></div>
+  </section>
+  <section class="panel">
+    <h2><span class="mono ix">BY TIER</span> 按档位分栏 <em>同一天里，S 档先看</em></h2>
+    <div class="tcols" id="todayTiers"></div>
+  </section>
+  <section class="panel">
+    <h2><span class="mono ix">OFFICIAL</span> 官方动态 <em>属于已验证组织账号的条目</em></h2>
+    <div id="todayOff"></div>
+  </section>
+  </section>
+<!-- ③ 全库：#/all（分类浏览 + 全部工具） -->
+  <section id="view-all" class="view">
+  <section>
+    <h2><span class="mono ix">INDEX</span> 分类索引 <em>点大类或小类即筛选（筛选条件会写进链接，可分享）</em></h2>
+    <div class="catgrid" id="catGrid"></div>
+  </section>
+
+  <section>
+    <h2><span class="mono ix">LIST</span> 全部条目 <em id="countHint"></em></h2>
+    <div id="list"></div>
+  </section>
+  </section>
+
+  <!-- ④ 方案与工作区：#/plans -->
+  <section id="view-plans" class="view">
+  <section>
+    <h2><span class="mono ix">PLANS</span> 按需求组方案 <em>点一行看这套怎么配（工具按用途自动匹配，不调 API）</em></h2>
+    <div id="planGrid"></div>
+  </section>
+
+  <section id="wsSection">
+    <h2>📌 我的工作区 <em>你正在做的事，和它用到的那套工具</em></h2>
+    <div class="catbox"><div class="items" id="wsGrid"></div></div>
+  </section>
+  </section>
+
+  <!-- ⑤ 档案站：#/site（2026-10-17 接入；iframe 嵌入新视觉站点） -->
+  <section id="view-site" class="view">
+    <div class="site-head">
+      <h2><span class="mono ix">SITE</span> 档案站 <em>新视觉五页 · 外壳 / 首页 / 每日精选 / 全库 / 计划与工作区</em></h2>
+      <p>下面嵌入的是新站点入口（底部导航坞、键盘 1–4、G 图例）。<b>用本地 http 服务打开时完整可用</b>；
+         直接双击时首屏可看，站内互跳可能被浏览器拦（file:// 不允许跨文档），可用下面的单页链接。</p>
+      <p class="site-links">单独打开：
+        <a href="data/_tmp/site-shell.generated.html" target="_blank">站点入口</a>
+        <a href="data/_tmp/home-brutal-token.generated.html" target="_blank">首页</a>
+        <a href="data/_tmp/daily-layout-c-finsara.generated.html" target="_blank">每日精选</a>
+        <a href="data/_tmp/library-notebook.generated.html" target="_blank">全库</a>
+        <a href="data/_tmp/plans-shelf.generated.html" target="_blank">计划与工作区</a>
+      </p>
+    </div>
+    <iframe src="data/_tmp/site-shell.generated.html#/home" title="档案站（新视觉）" loading="lazy"></iframe>
+  </section>
+</div>
+<div id="panel"></div>
+<div id="legend">
+  <span class="close" onclick="closeLegend()">×</span>
+  <h2>SPEC · 图例与标准</h2>
+  <p class="spec-note">本档案自己的技术规范：标记含义、数字口径、链接用法。随时可查（Esc 或点 × 关闭；关闭后回到你刚才看的区）。</p>
+
+  <div class="spec-h">§ 01 / 推荐档位（满分 100，口径来自 RUBRIC.md）</div>
+  <table class="spec-tbl">
+    <tr><th>档位</th><th>分数</th><th>含义</th><th>上限</th></tr>
+    <tr><td class="mono">S</td><td class="mono">≥ 80</td><td>今天最值得先看</td><td class="mono">≤ 3 / 天</td></tr>
+    <tr><td class="mono">A</td><td class="mono">65–79</td><td>值得看</td><td class="mono">S + A ≤ 8 / 天</td></tr>
+    <tr><td class="mono">B</td><td class="mono">55–64</td><td>可以留意，不推荐</td><td class="mono">不限</td></tr>
+    <tr><td class="mono">C</td><td class="mono">45–54</td><td>进档案，不推荐</td><td class="mono">不推荐</td></tr>
+    <tr><td class="mono">D</td><td class="mono">&lt; 45</td><td>质量上不推荐，仍在库</td><td class="mono">不推荐</td></tr>
+  </table>
+  <p class="spec-note">合规红线（注册机 / 破解 / 刷星迹象）命中即合规剔除，不是档位，不给链接。</p>
+
+  <div class="spec-h">§ 02 / 状态（台账五态白名单）</div>
+  <dl class="spec-dl">
+    <div class="spec-row"><dt>继续观察</dt><dd><code>watching</code> · 先放着，以后再看</dd></div>
+    <div class="spec-row"><dt>已收录</dt><dd><code>active</code> · 在库里，没特别处理（默认）</dd></div>
+    <div class="spec-row"><dt>正在用</dt><dd><code>using</code> · 我真的在用它</dd></div>
+    <div class="spec-row"><dt>正在研究</dt><dd><code>researching</code> · 我在研究它</dd></div>
+    <div class="spec-row"><dt>不再看</dt><dd><code>dropped</code> · 以后不继续关注；记录保留</dd></div>
+  </dl>
+
+  <div class="spec-h">§ 03 / 风险等级</div>
+  <dl class="spec-dl">
+    <div class="spec-row"><dt>低</dt><dd>本地工具、不联网、许可清楚</dd></div>
+    <div class="spec-row"><dt>中</dt><dd>会读写你的文件 / 需要密钥 / 许可待核</dd></div>
+    <div class="spec-row"><dt>高</dt><dd>涉及账号权限、隐私数据、来源不明的可执行文件</dd></div>
+    <div class="spec-row"><dt>待评估</dt><dd><b>待评估 ≠ 安全</b>：只表示还没评估过（本库多数条目属此列）</dd></div>
+  </dl>
+
+  <div class="spec-h">§ 04 / 分层徽章（P2-2；规则可在数据上复算，不是贴上去的标签）</div>
+  <dl class="spec-dl">
+    <div class="spec-row"><dt>🏢 官方</dt><dd>仓库 owner 命中白名单 <code>data/owner-whitelist.json</code>（30 个组织）→ 标记带厂名；<b>只降低核实成本、不加分</b>。当前 0 条</dd></div>
+    <div class="spec-row"><dt>🌱 新星</dt><dd>首次收录 ≤ <b>7</b> 天 <b>且</b>已评到 S/A 档（2026-10-17 收紧：原口径"≤14 天 + 质量信号"覆盖 74% 的条目，徽章失去区分度 ✗）。当前 <b>39</b> 条</dd></div>
+    <div class="spec-row"><dt>🧊 冷门</dt><dd>星数 &lt; 1000 <b>但</b>质量好（S/A 档或体验分 ≥ 4）：冷门优质；2026-10-16 按你的要求由 💎 改为 🧊。当前 65 条</dd></div>
+    <div class="spec-row"><dt>🧱 常青</dt><dd>库龄 &gt; 30 天 <b>且</b>近 7 天仍有提交。⚠️ 现在<b>恒为 0</b>：库本身只有 5 天历史，等库老了它才会出现（不假装有）</dd></div>
+    <div class="spec-row"><dt>🧪 待观察</dt><dd>档位待评估 <b>且</b>风险待评估：证据不足，既不判死也不推。当前 161 条</dd></div>
+    <div class="spec-row"><dt>👤 用户推荐</dt><dd>你主动提的项目：一律入库，但门禁未过会写明风险</dd></div>
+  </dl>
+  <p class="spec-note">🔥 与 💎 已停用（营销号观感；用户 2026-10-14 决定）：冷门一律 🧊，新星一律 🌱。徽章**排在其他标记第一位** ✓；徽章筛选已可用：筛选条里的「全部徽章」→ 会写进链接（例如 #/all?badge=gem，可分享、可后退）✓</p>
+  <div class="spec-h">§ 05 / 标签与来源（可信度不同）</div>
+  <dl class="spec-dl">
+    <div class="spec-row"><dt>技术标签</dt><dd>来自 GitHub topics 与语言：机器写入，只说"是什么技术"，不代表用途</dd></div>
+    <div class="spec-row"><dt>功能标签</dt><dd>人话层的"能干什么"：人工或 agent 撰写，搜索主要靠它</dd></div>
+    <div class="spec-row"><dt>用户搜索词</dt><dd>同义词表（人工维护）：你说"修图"也能搜到"图片编辑"</dd></div>
+  </dl>
+
+  <div class="spec-h">§ 06 / 数据与免责</div>
+  <dl class="spec-dl">
+    <div class="spec-row"><dt>分数</dt><dd>启发式打分，不是权威评测；档位稀缺（S + A 每天 ≤ 8）</dd></div>
+    <div class="spec-row"><dt>星数</dt><dd>采集时点的快照值，不是实时</dd></div>
+    <div class="spec-row"><dt>风险</dt><dd>待评估 ≠ 安全；高风险条目请先看它的 README 与许可</dd></div>
+    <div class="spec-row"><dt>页面</dt><dd>只读单文件：数据全部内嵌、运行期外部请求 0、不写磁盘</dd></div>
+    <div class="spec-row"><dt>版本</dt><dd>build 2026-11-05 11:27 ｜ 数据指纹 1897ED64EC78 ｜ 15 条</dd></div>
+    <div class="spec-row"><dt>更新</dt><dd>改完 data 后跑 sync-projects 再跑 build-overview（或双击根目录的刷新页面.cmd）</dd></div>
+  </dl>
+
+  <div class="spec-h">§ 07 / 链接与路由（可分享、可后退）</div>
+  <dl class="spec-dl">
+    <div class="spec-row"><dt>#/home</dt><dd>总览（封面 + § 01–§ 05 目录）</dd></div>
+    <div class="spec-row"><dt>#/picks</dt><dd>发现：可深链到某天，#/picks/2026-10-16</dd></div>
+    <div class="spec-row"><dt>#/all</dt><dd>全库：筛选写进链接，#/all?cat=AI/AI绘画&amp;tier=S（后退 = 撤销筛选）</dd></div>
+    <div class="spec-row"><dt>#/p/owner/repo</dt><dd>单个项目的详情</dd></div>
+    <div class="spec-row"><dt>#/plans</dt><dd>方案与工作区（也可 #/plans/id、#/ws/id）</dd></div>
+    <div class="spec-row"><dt>#/legend</dt><dd>本页（叠加层，不改变你当前所在的区）</dd></div>
+  </dl>
+</div>
+<div id="cmpBar"></div>
+<div class="foot">
+  数据来自 <code>data/projects.jsonl</code> + <code>data/events.jsonl</code>（由原始来源派生，可全量重建）。<b>本页是只读视图，数据已全部内嵌，双击即可用。</b><br>
+  改状态：编辑 <code>data/seen.jsonl</code> 的 <code>status</code>（白名单 active/using/watching/researching/dropped；saved 为遗留值）并在 <code>data/status-log.jsonl</code> 追加一行，然后跑 <code>sync-projects.ps1</code> 与 <code>build-overview.ps1</code>。<br>
+  改分类：只改 <code>data/taxonomy.json</code>（<b>分类不允许运行时自由创建</b>，新方向先写入 <code>taxonomy-suggestions.json</code>，由周报巡检按四道闸自动晋升；不达标停 under_review）。<br>
+  字体：拉丁刊头 <b>Anton</b> （已内嵌 18.2 KB WOFF2 子集 ｜ OFL 1.1 ｜ 版权见 THIRD-PARTY.md） —— 中文一律系统字体栈；页面<b>运行期外部请求 = 0</b>。
+</div>
+<script>
+const P = [{"id":"AbdelStark/awesome-typesafe-jev","desc":"Awesome Jev: a source-backed field guide to TypeSafe's System One model, with SDKs, live demos, agent tools, and independent evaluations.","lic":"MIT","lang":"HTML","stars":592,"d7":0,"dtot":0,"pushed":"2026-10-14T16:25:40Z","first":"2026-10-15","last":"2026-10-15","rec":false,"rc":0,"tier":"A","risk":null,"status":"dropped","dr":"资源列表（awesome-*），命中硬排除","origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"开发","l2":"开发工具","exp":4,"expSc":79,"part":{"易用性":18,"文档完整度":20,"功能成熟度":18,"维护活跃":13,"风险":10},"t":["学习","资源列表","提效","实验","轻配置","中"],"hs":"missing","one":"","aud":null,"prob":null,"ex":null,"fn":[],"ft":["agent-skills","ai-agents","awesome","awesome-jev","awesome-list","awesome-lists","curated-list","developer-tools","html","jev","llm","llm-routing","machine-learning","model-evaluation","semantic-routing","structured-output","system-one-models","typed-decisions","typesafe","typesafe-ai"],"evc":1,"note":"","un":[]},{"id":"browser-use/jev-ultrafast","desc":null,"lic":"MIT","lang":"Python","stars":22979,"d7":0,"dtot":377,"pushed":"2026-09-30T01:24:38Z","first":"2026-10-11","last":"2026-10-15","rec":true,"rc":1,"tier":"S","risk":null,"status":"active","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"效率","l2":"自动化","exp":3,"expSc":64,"part":{"易用性":18,"文档完整度":16,"功能成熟度":10,"维护活跃":10,"风险":10},"t":["其他","Web","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个给开发者用的网页自动化代理，可以帮你用最少的钱和时间让 AI 去操作网站。","aud":"要跑网页自动化的开发者；想省 token 和时间的 AI 用户","prob":"以前让 AI 去点网页，要么用大模型逐步截图推理（又慢又贵），要么写一堆脆弱的 CSS 选择器脚本。这个走的是更省 token 的路线。","ex":"比如你要每天从一个后台系统里导出报表，可以让它代替你登录、点菜单、下载文件，而不是自己写脚本盯着网页改版。","fn":["一个主打「最快最便宜」的网页 agent（Python）。","用 AI 驱动浏览器完成操作；针对速度与调用成本做优化；跟随 browser-use 生态","批量操作网页后台；把重复点击交给 AI；做网页数据采集","定期导出后台报表；自动填写表单；跨站点搬运信息","需要长期稳定、网页改版也不坏的生产脚本；对浏览器自动化完全不熟的人"],"ft":["网页自动化","浏览器代理","AI代理"],"evc":2,"note":"","un":[]},{"id":"HBAI-Ltd/Toonflow-app","desc":null,"lic":null,"lang":"TypeScript","stars":17338,"d7":0,"dtot":0,"pushed":null,"first":"2026-10-12","last":"2026-10-12","rec":false,"rc":0,"tier":"D","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"AI","l2":"AI视频","exp":1,"expSc":36,"part":{"易用性":8,"文档完整度":0,"功能成熟度":10,"维护活跃":8,"风险":10},"t":["其他","插件","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个做短剧和漫画的工具，可以帮你把剧本快速变成连载内容。","aud":null,"prob":"以前做短剧或条漫，从脚本到分镜到成片要好几套工具接力；这个把创作流程整合到一个应用里。","ex":"比如你想把一篇小说改编成短剧，可以用它来管理剧情、生成画面、串成成片，不用在多个软件之间来回导。","fn":["一个开源的短剧/漫剧创作应用。","剧本与分镜管理；生成画面内容；把素材串成完整剧集","做短视频连载；把小说改成短剧；批量产出漫画内容","小说改编短剧；日更条漫；做作品宣发素材","需要专业影视后期精度的制作；只想随手做一张图的人"],"ft":["短剧制作","漫画生成","内容创作"],"evc":1,"note":"","un":[]},{"id":"ImageMagick/ImageMagick","desc":null,"lic":null,"lang":"C","stars":17650,"d7":0,"dtot":0,"pushed":null,"first":"2026-10-12","last":"2026-10-12","rec":false,"rc":0,"tier":"D","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"AI","l2":"AI绘画","exp":1,"expSc":36,"part":{"易用性":8,"文档完整度":0,"功能成熟度":10,"维护活跃":8,"风险":10},"t":["其他","库","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个图像处理工具，可以帮你批量转换、裁剪、压缩图片，也能在命令行里一次处理成千上万张。","aud":null,"prob":"以前要批量改图片格式或尺寸，要么一张张手动点，要么装庞大的图形软件；这个用一行命令就能处理整个文件夹。","ex":"比如你要把一百张 PNG 压成体积更小的 JPG，一行命令就能全部搞定，不用打开任何界面。","fn":["一个老牌的命令行图像处理工具集，几乎支持所有常见图片格式。","格式转换、缩放、裁剪、旋转；批量处理整个文件夹；也能被其他程序当图像处理库调用","批量压缩图片；网站图片处理流水线；自动化脚本里处理图像","批量把 PNG 转 JPG；统一给图片加边框；压缩上传前的图片体积","想用鼠标点点就完成修图的人；需要精细图层编辑的设计工作"],"ft":["图片处理","批量转换","命令行工具","图片编辑"],"evc":1,"note":"","un":[]},{"id":"mudler/LocalAI","desc":null,"lic":null,"lang":"Go","stars":49485,"d7":0,"dtot":0,"pushed":null,"first":"2026-10-12","last":"2026-10-12","rec":false,"rc":0,"tier":"D","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"AI","l2":"本地模型","exp":1,"expSc":36,"part":{"易用性":8,"文档完整度":0,"功能成熟度":10,"维护活跃":8,"风险":10},"t":["其他","CLI","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个在自己电脑上跑 AI 模型的工具，可以帮你把大模型、图像生成、语音都放在本机运行，还兼容 OpenAI 接口。","aud":null,"prob":"以前想本地跑多种 AI 能力，得分别装好几套东西；这个把文本、图像、语音整合成一个服务，接口和 OpenAI 一样，现有代码改个地址就能用。","ex":"比如你写好的程序本来调 OpenAI，把地址换成本机这个服务，就能在断网和不上传数据的情况下继续跑。","fn":["一个本地 AI 推理服务，覆盖大语言模型、图像生成与语音。","提供与 OpenAI 兼容的接口；支持文本、图像、语音多类模型；本地运行，数据不出机器","自建私有 AI 服务；替换云端 API；隐私敏感场景使用 AI","把程序的 API 地址改成本机；断网环境跑模型；自建团队内部推理服务","不愿折腾部署的人；对延迟要求极高的生产场景"],"ft":["本地模型","OpenAI兼容","自建服务"],"evc":1,"note":"","un":[]},{"id":"NandhaKishorM/laya","desc":null,"lic":"Apache-2.0","lang":"Python","stars":33211,"d7":0,"dtot":943,"pushed":"2026-10-17T04:28:40Z","first":"2026-10-19","last":"2026-10-17","rec":false,"rc":0,"tier":"B","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"其他","l2":"其他工具","exp":4,"expSc":79,"part":{"易用性":18,"文档完整度":20,"功能成熟度":18,"维护活跃":13,"风险":10},"t":["其他","框架","提效","实验","轻配置","中"],"hs":"complete","one":"一个专门用来「做选择题」的小模型，一次计算就给答案，33 毫秒出结果，支持一百多种语言。","aud":null,"prob":"没有它的时候，想让 AI 判断「这封邮件该给哪个部门」「这条评论有多生气」，得调一个大模型生成一段文字再解析，慢、贵，还可能瞎编。它直接给出选项和概率，不生成文字，也就没有胡说这一说。","ex":"比如客服系统收到一条投诉，它能同时判断出该分给计费组、紧急程度是「快炸了」、以及这个人有退订风险，一次调用全给出来。","fn":["一个做结构化判断的模型，装上就能用，也能作为服务提供给 AI 助手调用。","三种题型：选项题（该归哪一类）、打分题（有多严重）、是否题（给出 0 到 1 的概率）；能读文本、邮件、工单或结构化数据；批量一次算很多条，比一条条问快；自动识别语言并切换到对应版本；可以在自己的数据上再训练，准确率提升很明显","客服工单自动分流、判定紧急程度；垃圾内容、钓鱼、越狱提示词识别；给 AI 工作流做快速路由和安全护栏","自动把工单分派给对应部门；判断一条评论是好评还是差评；在 AI 流程入口挡住提示词注入攻击","需要写文章、聊天、回答开放问题的场景（它只做判断，不生成文字）；选项特别多的分类任务（超过二十个选项时，官方承认明显弱于同类对手）；期望开箱即用就很准的人——官方自己说基础模型在选择题上接近瞎猜，要靠微调"],"ft":["非自回归决策引擎","需自取权重","上手成本高"],"evc":1,"note":"","un":[]},{"id":"Niko1221/Strata","desc":null,"lic":"MIT","lang":"C++","stars":27068,"d7":0,"dtot":5817,"pushed":"2026-10-17T06:50:46Z","first":"2026-10-11","last":"2026-10-18","rec":true,"rc":1,"tier":"S","risk":null,"status":"active","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"AI","l2":"本地模型","exp":5,"expSc":83,"part":{"易用性":30,"文档完整度":20,"功能成熟度":10,"维护活跃":13,"风险":10},"t":["AI","框架","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个让你在自己电脑上跑大模型的工具，可以帮你一键装好，并在本机提供一个兼容 OpenAI 接口的服务。","aud":"想在自己电脑上跑大模型、又不想折腾环境的人","prob":"以前想在本地跑大模型，要自己配环境、下权重、写接口，很容易在依赖上卡住；这个做到一键安装，装完就能像调用云端 API 一样调用本机模型。","ex":"比如你写了一个用 OpenAI 接口的程序，把接口地址改成它给的本地地址，就能在断网情况下继续跑，数据也不出机器。","fn":["一个面向消费级硬件的本地大模型推理引擎，提供 OpenAI / Anthropic 兼容接口。","一键安装（Windows / Linux）；在本地暴露兼容 OpenAI 的接口；支持可选的图像输入","本机跑私有模型；给已有程序换上本地模型；断网/隐私场景使用 AI","把现有代码里的 API 地址换成 localhost；离线做文本处理；自建不给外人用的模型服务","机器显存不足跑不动目标模型的硬件；不想下载几十 GB 权重的人"],"ft":["本地大模型","推理引擎","OpenAI 兼容"],"evc":2,"note":"","un":[]},{"id":"robbietilton/Compositor","desc":null,"lic":"MIT","lang":"Swift","stars":17017,"d7":0,"dtot":1194,"pushed":"2026-10-15T00:41:19Z","first":"2026-10-12","last":"2026-10-15","rec":true,"rc":1,"tier":"A","risk":"中","status":"active","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"设计","l2":"图片处理","exp":3,"expSc":67,"part":{"易用性":18,"文档完整度":16,"功能成熟度":10,"维护活跃":13,"风险":10},"t":["其他","桌面","替代","实验","轻配置","中"],"hs":"complete","one":"这是一个给 Mac 用户用的修图软件，可以帮你处理照片，而不用按月付 Adobe 的订阅费。","aud":"Mac 用户；要修图但不想付 Adobe 订阅的人","prob":"以前在 Mac 上做基本的照片处理，要么忍受 Adobe 的订阅，要么用功能残缺的免费软件；现在有一个原生的、买断式的替代品。","ex":"比如你要把一张照片调色、去掉多余的路人、再导出成网页用的格式，可以直接用它完成，不需要为偶尔用几次而续费一年订阅。","fn":["一个用 Swift 写的 macOS 原生图像编辑软件，定位是 Photoshop 的免费替代。","图层与常用修图工具；原生性能，启动和响应接近系统应用；常见的图片格式读写","日常照片修整；简单合成与抠图；替代订阅制修图软件","修掉照片里的杂物；给图片加文字和边框；批量调整尺寸","需要专业印刷级色彩管理的人；Windows 或 Linux 用户；重度依赖 Adobe 生态插件的工作流"],"ft":["图片编辑","修图","照片处理"],"evc":2,"note":"","un":[]},{"id":"storytold/filmcraft","desc":null,"lic":"Apache-2.0","lang":"Rust","stars":14654,"d7":0,"dtot":5225,"pushed":"2026-10-16T16:08:51Z","first":"2026-10-11","last":"2026-10-18","rec":false,"rc":0,"tier":"A","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"其他","l2":"其他工具","exp":4,"expSc":76,"part":{"易用性":18,"文档完整度":20,"功能成熟度":15,"维护活跃":13,"风险":10},"t":["其他","CLI","创作","实验","要编程","中"],"hs":"complete","one":"这是一个视频剪辑软件，可以帮你剪片段、拼画面，是免费开源的。","aud":null,"prob":"以前做视频剪辑要么用付费软件，要么用带水印的免费工具；这个是本地运行的免费替代。","ex":"比如你要把几段手机拍的视频剪掉多余部分、拼成一条短片，用它就能完成。","fn":["一个开源视频剪辑软件，用 Rust 编写（与 Photocraft / Wordcraft 同系列）。","视频片段剪辑与拼接；基础特效与转场；本地处理，素材不外传","剪日常视频；做短片；素材粗剪","剪旅行 vlog；拼接多段录制；去头去尾","需要专业调色与多轨合成的制作；要求与 Premiere 工程互通的团队"],"ft":["视频剪辑","剪辑软件","替代Premiere"],"evc":1,"note":"","un":[]},{"id":"storytold/pdfcraft","desc":null,"lic":"Apache-2.0","lang":"Rust","stars":15620,"d7":0,"dtot":6627,"pushed":"2026-10-16T22:05:39Z","first":"2026-10-19","last":"2026-10-18","rec":false,"rc":0,"tier":"B","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"办公","l2":"PDF 与阅读","exp":4,"expSc":79,"part":{"易用性":18,"文档完整度":20,"功能成熟度":18,"维护活跃":13,"风险":10},"t":["其他","CLI","提效","实验","要编程","中"],"hs":"complete","one":"这是一个 PDF 阅读编辑工具，可以帮你看 PDF、也能改里面的内容，是免费开源的。","aud":null,"prob":"以前改 PDF 基本都得买付费软件，免费工具通常只能看不能改；这个把阅读和编辑都做在本地。","ex":"比如你要把一份 PDF 里几页删掉、再合并另一份进去，用它就能完成，不用上传到网页工具。","fn":["一个开源的 PDF 阅读与编辑软件，用 Rust 编写。","阅读 PDF；编辑与生成 PDF；处理页面（增删、合并）","看资料与合同；合并拆分 PDF；给 PDF 做简单修改","合并几份 PDF；删掉不需要的页；导出新的 PDF","需要复杂表单填写与签章的场景；要求与 Adobe 生态完全兼容的工作流"],"ft":["PDF工具","阅读编辑","文档处理"],"evc":1,"note":"","un":[]},{"id":"storytold/photocraft","desc":null,"lic":"Apache-2.0","lang":"Rust","stars":66738,"d7":0,"dtot":21442,"pushed":"2026-10-17T14:39:16Z","first":"2026-10-11","last":"2026-10-18","rec":true,"rc":1,"tier":"A","risk":null,"status":"active","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"设计","l2":"图片处理","exp":4,"expSc":76,"part":{"易用性":18,"文档完整度":20,"功能成熟度":15,"维护活跃":13,"风险":10},"t":["其他","CLI","创作","实验","要编程","中"],"hs":"complete","one":"这是一个免费的修图软件，可以帮你处理照片，而且是用 Rust 从零重写的、不依赖 Adobe。","aud":"要免费修图、不依赖 Adobe 的人","prob":"以前想不花钱修图，要么用功能缩水的免费软件，要么继续交订阅费；这是一个从零重写、架构现代的替代品。","ex":"比如你要给一批活动照片统一调色、裁剪、导出，可以用它处理，而不用为一次性需求续费。","fn":["用纯 Rust 从零重写的开源照片编辑器。","图片编辑与调整；原生性能、启动快；开源可自行编译","替代订阅制修图软件；批量处理照片；学习 Rust 写的 GUI 应用","活动照片批量调色；简单修图与导出；自托管图像处理流程","需要专业印刷色彩管理的场景；想马上稳定使用、不能容忍早期版本问题的人"],"ft":["图片编辑","修图","照片处理"],"evc":2,"note":"","un":[]},{"id":"storytold/wordcraft","desc":null,"lic":"Apache-2.0","lang":"Rust","stars":14155,"d7":0,"dtot":9796,"pushed":"2026-10-16T03:24:56Z","first":"2026-10-11","last":"2026-10-18","rec":false,"rc":0,"tier":"A","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"办公","l2":"文档处理","exp":4,"expSc":71,"part":{"易用性":18,"文档完整度":20,"功能成熟度":10,"维护活跃":13,"风险":10},"t":["其他","CLI","提效","实验","要编程","中"],"hs":"complete","one":"这是一个文字处理软件，可以帮你写文档、写报告，是 Microsoft Word 的免费开源替代品。","aud":null,"prob":"以前写正式文档基本只能用 Word 或在线文档，要么付费要么把内容放在别人服务器上；这个是本地运行的免费替代，文档不出本机。","ex":"比如你要写一份合同或周报，可以用它排版、加标题层级、插入表格，然后导出成通用格式发给别人。","fn":["Microsoft Word 的开源重写版本，用 Rust 编写。","文档撰写与排版；标题/列表/表格等常见格式；导出通用文档格式","写报告与合同；整理长文档；离线办公","写周报并导出；排版一份说明书；起草合同","需要与 Word 宏、复杂域代码完全兼容的场景；要求极致稳定、不能容忍早期版本问题的办公环境"],"ft":["文档编辑","办公软件","替代Word"],"evc":1,"note":"","un":[]},{"id":"unslothai/unsloth","desc":null,"lic":null,"lang":"Python","stars":77838,"d7":0,"dtot":0,"pushed":null,"first":"2026-10-12","last":"2026-10-12","rec":false,"rc":0,"tier":"D","risk":null,"status":"watching","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"AI","l2":"模型训练","exp":1,"expSc":36,"part":{"易用性":8,"文档完整度":0,"功能成熟度":10,"维护活跃":8,"风险":10},"t":["其他","库","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个加速大模型微调的工具，可以帮你用更少的显卡显存、更快地训练自己的模型。","aud":null,"prob":"以前自己微调一个大模型，动不动就需要多张高端显卡，显存不够直接跑不起来；这个通过优化训练实现，把门槛降到单张消费级显卡。","ex":"比如你想拿自己的行业数据微调一个 7B 模型，原本要 A100，用它在一张 24G 显存的卡上就能跑完。","fn":["一个大模型微调加速库，兼容主流开源模型。","显著降低显存占用；加快训练速度；支持多种开源模型与常见微调方式","本地微调大模型；做行业专用模型；教学与实验","用自有数据微调 7B 模型；在单卡上做 LoRA 微调；低成本试验不同训练参数","完全不写代码的人；只想直接调用现成模型 API 的场景"],"ft":["模型微调","训练加速","本地训练"],"evc":1,"note":"","un":[]},{"id":"wheresryan22/anatomy","desc":null,"lic":"MIT","lang":"JavaScript","stars":15454,"d7":0,"dtot":13413,"pushed":"2026-10-15T14:14:32Z","first":"2026-10-12","last":"2026-10-18","rec":false,"rc":0,"tier":"A","risk":null,"status":"active","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"设计","l2":"UI设计","exp":4,"expSc":76,"part":{"易用性":18,"文档完整度":20,"功能成熟度":15,"维护活跃":13,"风险":10},"t":["AI","插件","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个给 Claude Code 用户用的绘图技能，可以帮你把抽象的技术概念画成能拆开、会动的立体机械图。","aud":"用 Claude Code 的人；要把技术概念画成可拆解示意图的人","prob":"以前要给别人讲清楚「限流器怎么工作」，要么画很糙的方框图，要么花几小时找插画师；现在说一句话就能得到一张有零件感、能交互的立体图，拿来放文档或博客。","ex":"比如你想解释「令牌桶限流」，输入一句话，它会画出一个带漏斗和刻度的机械装置，鼠标移上去还能拆成十来个零件看到内部结构。","fn":["一个 Claude Code 技能包，专门生成等距（isometric）视角的机械插画。","生成多零件、有明暗层次的等距 SVG 图；需要时叠加 WebGL 效果画火焰、水流、灯光；自带几何自检，保证零件不互相穿插、线条不悬空","给技术文档配图；写博客要首图；给非技术同事讲清架构","解释缓存命中流程；讲解连接池怎么复用；画一个 CDN 请求链路","要标准折线图、饼图这类数据图表；不用 Claude Code 的人；需要精确定位的技术图纸"],"ft":["AI绘画","图示生成","SVG 生成","文档配图"],"evc":1,"note":"","un":[]},{"id":"yetone/magpie","desc":null,"lic":"MIT","lang":"TypeScript","stars":15397,"d7":0,"dtot":4681,"pushed":"2026-10-17T17:14:31Z","first":"2026-10-13","last":"2026-10-18","rec":true,"rc":1,"tier":"S","risk":"中","status":"active","dr":null,"origin":"auto","oder":"自动发现","oc":"community","ol":null,"l1":"AI","l2":"AI Agent","exp":4,"expSc":76,"part":{"易用性":18,"文档完整度":20,"功能成熟度":15,"维护活跃":13,"风险":10},"t":["AI","CLI","提效","实验","轻配置","中"],"hs":"complete","one":"这是一个给开发者用的模型接入层，可以帮你把各家 AI 编程助手接到同一个地方，比如让 Codex 用上 DeepSeek。","aud":"同时用多家 AI 编程助手的人；想统一接入层和计费的开发者","prob":"以前每个 AI 编程工具都认自己合作的模型厂商，想换一家就得改一堆配置；这个把\"工具\"和\"模型\"解耦，一处配置就能混用。","ex":"比如你习惯用 Codex 但想用 DeepSeek 的模型，配置一次之后，Codex 那边就像什么都没变一样跑在 DeepSeek 上。","fn":["一个本地运行的模型路由层（TypeScript），把不同 agent 接到不同模型。","一处配置多家模型；让不同 AI 工具混用模型；本地服务，中转在你机器上","让 Codex 接 DeepSeek；多个工具共用一套 Key；快速换模型做对比","Codex 换模型；给 Claude Code 接别的供应商；对比同一问题在不同模型上的效果","完全不用命令行的新手；只需要一家模型、不做切换的人"],"ft":["模型路由","Agent 工具","开发辅助"],"evc":2,"note":"","un":[]}];
+const E = {"wheresryan22/anatomy":[{"d":"2026-10-12","t":"discovered","x":"首次收录，来源 未知"}],"storytold/pdfcraft":[{"d":"2026-10-19","t":"discovered","x":"首次收录，来源 demo"}],"unslothai/unsloth":[{"d":"2026-10-12","t":"discovered","x":"首次收录，来源 demo"}],"HBAI-Ltd/Toonflow-app":[{"d":"2026-10-12","t":"discovered","x":"首次收录，来源 未知"}],"storytold/photocraft":[{"d":"2026-10-19","t":"recommended","x":"A 档 · 行动：收藏"},{"d":"2026-10-11","t":"discovered","x":"首次收录，来源 图片处理"}],"storytold/wordcraft":[{"d":"2026-10-11","t":"discovered","x":"首次收录，来源 未知"}],"browser-use/jev-ultrafast":[{"d":"2026-10-19","t":"recommended","x":"S 档 · 行动：收藏"},{"d":"2026-10-11","t":"discovered","x":"首次收录，来源 自动化"}],"mudler/LocalAI":[{"d":"2026-10-12","t":"discovered","x":"首次收录，来源 未知"}],"robbietilton/Compositor":[{"d":"2026-10-19","t":"recommended","x":"A 档 · 65 分 · 行动：收藏"},{"d":"2026-10-12","t":"discovered","x":"首次收录，来源 图片处理"}],"AbdelStark/awesome-typesafe-jev":[{"d":"2026-10-15","t":"discovered","x":"首次收录，来源 未知"}],"ImageMagick/ImageMagick":[{"d":"2026-10-12","t":"discovered","x":"首次收录，来源 demo"}],"Niko1221/Strata":[{"d":"2026-10-19","t":"recommended","x":"S 档 · 行动：收藏"},{"d":"2026-10-11","t":"discovered","x":"首次收录，来源 本地模型"}],"storytold/filmcraft":[{"d":"2026-10-11","t":"discovered","x":"首次收录，来源 未知"}],"yetone/magpie":[{"d":"2026-10-19","t":"recommended","x":"S 档 · 80 分 · 行动：试玩"},{"d":"2026-10-13","t":"discovered","x":"首次收录，来源 AI Agent"}],"NandhaKishorM/laya":[{"d":"2026-10-19","t":"discovered","x":"首次收录，来源 demo"}]};
+const PLANS = [{"id":"ai-video","name":"做 AI 视频","triggers":["做视频","短视频","ai视频","视频生成","ai 视频","漫剧","短剧"],"intro":"一条 AI 视频通常要过这几步：先有画面，再剪成片，最后配声音。下面是每一步该看哪类工具。","roles":[{"role":"画面生成","why":"视频的画面素材从这里来（文生图 / 文生视频 / 动画）","l2":["AI视频","AI绘画"],"ft":["视频制作","文生图","动画生成","动态插画"]},{"role":"成片剪辑与后期","why":"把素材拼成片子：剪辑、转场、增强画质","l2":["图片处理"],"ft":["视频剪辑","视频增强","画质增强"]},{"role":"配音与音频","why":"旁白、配音、口播都在这步解决","l2":[],"ft":["语音处理","语音合成","文字转语音","音频编辑"]},{"role":"素材管理","why":"素材一多就要能找得到、理得清","l2":["文件管理"],"ft":["文件搜索","素材"]}]},{"id":"ai-image","name":"AI 绘画 / 出图工作流","triggers":["画图","ai绘画","出图","文生图","生成图片","绘画","ai画图","修图"],"intro":"出图不只是「输入一句话」：模型怎么跑、图怎么改、批量怎么管，各是一步。","roles":[{"role":"出图主体","why":"真正把文字变成图的工具","l2":["AI绘画"],"ft":["文生图","AI绘画","图像生成"]},{"role":"本地运行 / 模型管理","why":"不想付费或用云端，就在本机跑","l2":["本地模型","模型训练"],"ft":["本地模型","模型管理"]},{"role":"改图与后期","why":"生成的图多半要修：抠图、去背景、局部重绘","l2":["图片处理","图片处理"],"ft":["修图","抠图","去背景","局部重绘"]}]},{"id":"product-design","name":"产品设计 / UI","triggers":["产品设计","ui设计","做界面","原型","设计稿","ui"],"intro":"从想法到可看的稿子：灵感与生成、界面素材、结构梳理、文档沉淀。","roles":[{"role":"界面与视觉生成","why":"把想法快速变成可看的界面或配图","l2":["UI设计","AI绘画"],"ft":["UI设计","设计稿","图示生成"]},{"role":"建模 / 三维","why":"涉及实体产品或场景时需要","l2":["建模"],"ft":["建模","CAD"]},{"role":"思路与文档","why":"需求、竞品、说明总得记下来","l2":["笔记","AI办公"],"ft":["笔记","文档编辑"]}]},{"id":"local-ai","name":"本地跑 AI（离线 / 私有）","triggers":["本地运行ai","离线ai","本地跑模型","私有部署","自己电脑跑ai","本地ai"],"intro":"数据不出机器：模型怎么跑、怎么接进现有程序、怎么微调。","roles":[{"role":"推理引擎","why":"在本机把模型跑起来","l2":["本地模型"],"ft":["本地大模型","推理引擎","OpenAI兼容"]},{"role":"训练 / 微调","why":"要用自己的数据调模型","l2":["模型训练"],"ft":["模型微调","训练加速"]},{"role":"服务与部署","why":"让别的程序/别的设备也能用上","l2":["部署托管","自动化"],"ft":["自建服务","自托管"]}]},{"id":"coding","name":"写代码 / 编程助手","triggers":["写代码","编程助手","ai编程","代码助手","coding","重构","看代码"],"intro":"从「帮我写」到「帮我查」：助手、代码理解、工具链。","roles":[{"role":"编程助手","why":"直接在编辑器/终端里帮你写与改","l2":["编程助手"],"ft":["编程助手","代码助手","coding agent"]},{"role":"代码理解与分析","why":"改之前先搞清影响面、依赖、坏味道","l2":["代码分析"],"ft":["代码分析","索引","依赖分析"]},{"role":"开发工具","why":"日常脚手架与效率工具","l2":["开发工具"],"ft":["开发工具","命令行工具"]}]},{"id":"find-files","name":"找文件 / 整理素材","triggers":["找文件","搜文件","文件太多","整理文件","素材管理","搜索文件"],"intro":"东西一多就找不到：先能搜到，再能理清，最后能自动化。","roles":[{"role":"搜索与索引","why":"记得内容却忘了文件名时靠它","l2":["文件管理"],"ft":["文件搜索","语义搜索","本地索引"]},{"role":"系统级效率","why":"剪贴板、启动器、快捷操作","l2":["系统工具"],"ft":["系统工具","快捷"]},{"role":"自动化","why":"重复的整理动作交给脚本","l2":["自动化"],"ft":["自动化","定时任务"]}]},{"id":"office-docs","name":"做 PPT / 写文档","triggers":["做ppt","写文档","汇报","幻灯片","演示文稿","写报告"],"intro":"别只找「生成 PPT 的 AI」——排版、素材、成稿各是一步。","roles":[{"role":"演示与文档成稿","why":"真正产出 ppt / 文档文件","l2":["AI办公"],"ft":["幻灯片","做PPT","文档编辑"]},{"role":"配图与视觉","why":"图文并茂比纯文字好读","l2":["AI绘画","图片处理"],"ft":["配图","插图","图示生成"]},{"role":"素材与知识沉淀","why":"长期写东西要有自己的资料库","l2":["笔记"],"ft":["笔记","知识管理"]}]},{"id":"voice-audio","name":"配音 / 语音处理","triggers":["配音","语音转文字","字幕","音频","转录","朗读"],"intro":"声音这条线：把话说出来（合成）、把话记下来（识别）、把音修好（编辑）。","roles":[{"role":"语音合成 / 朗读","why":"给视频或播客生成旁白","l2":[],"ft":["语音合成","文字转语音","配音"]},{"role":"语音识别 / 字幕","why":"把录音变成可编辑的文字","l2":[],"ft":["语音识别","字幕","转写"]},{"role":"音频编辑","why":"剪掉口误、降噪、调音量","l2":[],"ft":["音频编辑","录音剪辑"]}]},{"id":"dsh-boost","name":"给 DSH 加装能力","triggers":["dsh插件","插件","dsh","扩展dsh","给dsh加"],"intro":"DSH 本体之外的能力都靠插件/技能补：装什么、怎么管、怎么配。","roles":[{"role":"插件与技能","why":"新能力以插件/技能形式加进来","l2":["DSH 插件","DSH 技能"],"ft":["DSH 插件","agent-skills"]},{"role":"配置与观测","why":"装多了要能看清状态、额度、上下文","l2":["DSH 配置"],"ft":["配额管理","配置","上下文"]}]},{"id":"research","name":"查资料 / 学术研究","triggers":["查资料","找论文","学术","research","调研","收集资料"],"intro":"检索、读、整理三段：先找到，再读懂，最后沉淀成自己的。","roles":[{"role":"检索与抓取","why":"把散落的信息拉回来","l2":[],"ft":["网页搜索","检索","抓取","爬取"]},{"role":"理解与整理","why":"长文/论文要能快速读进去","l2":["AI聊天","AI写作"],"ft":["翻译","总结","写作"]},{"role":"知识沉淀","why":"形成可检索的长期资料库","l2":["笔记"],"ft":["笔记","知识管理"]}]},{"id":"ai-agent","name":"用 AI Agent 干活","triggers":["ai agent","智能体","agent","自动化助手","个人助手"],"intro":"让 AI 自己动手：先有个能编排任务的助手，再接上工具与浏览器，最后把过程管起来。","roles":[{"role":"Agent 主程序 / 编排","why":"负责拆任务、调工具、循环推进","l2":["AI Agent"],"ft":["AI代理","AI Agent","个人助手"]},{"role":"浏览器与设备操作","why":"让它真的能点网页、操作设备，而不只是聊天","l2":["自动化"],"ft":["浏览器代理","网页自动化","手机自动化"]},{"role":"运行环境与沙箱","why":"给 agent 一个受限空间跑，避免它乱动你的系统","l2":[],"ft":["沙箱","权限控制","隔离","sandbox"]}]}];
+const SYN = [{"group":"图像生成","terms":["画图","绘画","作图","图片生成","文生图","AI画图","AI画画","绘图","出图","图片制作","text-to-image","t2i","image generation"]},{"group":"图片编辑","terms":["修图","改图","P图","照片处理","图像编辑","抠图","去背景","局部重绘","inpainting","photo editing","背景替换"]},{"group":"本地大模型","terms":["本地跑模型","离线AI","本地AI","本地运行AI","私有模型","自己电脑跑AI","local llm","本地推理","Ollama","GGUF"]},{"group":"编程助手","terms":["写代码","AI写代码","编程助手","代码补全","coding agent","代码助手","自动改代码","AI编程"]},{"group":"网页自动化","terms":["自动点网页","网页操作","爬数据","自动填表","浏览器自动化","RPA","web agent","采集"]},{"group":"文件搜索","terms":["找文件","管理文件","整理文件","搜文件","文件搜索","搜内容","全盘搜索","快速查找","file search","everything"]},{"group":"个人助手","terms":["助手","AI助手","个人助理","私人助手","自建助手","agent","自动化助理","提醒"]},{"group":"数据分析","terms":["分析数据","数据处理","关联表格","数据工作台","BI","数据探索","本地分析"]},{"group":"代码分析","terms":["看代码","代码关系","依赖分析","影响面","重构","代码图谱","静态分析","老项目"]},{"group":"文档配图","terms":["画示意图","做插画","配图","解释图","流程图","插图","diagram"]},{"group":"手机自动化","terms":["自动操作手机","手机签到","真机操作","设备自动化","手机脚本"]},{"group":"车载工具","terms":["车机","投屏","CarPlay","车上导航","车载系统"]},{"group":"语音处理","terms":["语音转文字","文字转语音","语音识别","TTS","ASR","转写"]},{"group":"网页生成","terms":["生成网页","HTML生成","排版回答","做网页","explainer"]},{"group":"办公文档","terms":["做PPT","PPT","幻灯片","演示文稿","做表格","写文档","汇报"],"source":"手工","written_at":"2026-10-14"},{"group":"图片编辑","terms":["替代PS","PS","photoshop","修图","改图","抠图","去背景"],"source":"手工","written_at":"2026-10-14"},{"group":"AI聊天","terms":["聊天机器人","chatbot","对话","问答","AI助手"],"source":"手工","written_at":"2026-10-14"}];   // 同义词组：搜索时按「组内任一命中」算命中
+const WS = [];
+const DIMS = ['领域','形态','用途','成熟度','上手难度','风险等级'];
+const STA = {active:'已收录',using:'正在用',watching:'继续观察',researching:'正在研究',dropped:'不再看'};   // B14：saved 已废弃，不留死映射
+const f = {q:'', sort:'stars', status:'', risk:'', tier:'', five:'', active:'', l1:'', l2:'', tag:'', badge:''};
+let cmpSel = [];   // 对比选择（最多 2 个，页内纯前端）
+let groupByUse = false;   // 按用途分组（把结果按二级分类聚合，便于按流程挑组合）
+
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function repoUrl(p){ return 'https://github.com/' + p.id; }
+function when(s){ return s ? String(s).slice(0,10) : '—'; }
+function daysAgo(s){ if(!s) return null; const d=new Date(String(s)); if(isNaN(d)) return null; return Math.floor((Date.now()-d)/86400000); }
+function stars5(n){ if(n===null||n===undefined) return '<span class="stars5" style="color:var(--dim)">待评估</span>'; return '<span class="stars5">'+'★'.repeat(n)+'☆'.repeat(5-n)+'</span>'; }
+function oneText(p){ return p.one || (p.desc ? p.desc : null); }function evCount(p){ const e=E[p.id]; return e? e.length : 0; }
+function hay(p){
+  return [p.id,p.desc||'',p.note||'',p.one||'',p.prob||'',p.ex||'',
+    (p.fn||[]).join(' '),(p.ft||[]).join(' '),(p.un||[]).map(x=>x&&x.note?x.note:'').join(' '),
+    p.t.join(' '),p.l1||'',p.l2||''].join(' ').toLowerCase();
+}
+// —— 搜索词处理：分词 + 错字容错（v3.1 第五节）——
+let CURTOK = [];
+let VOCAB = null;
+function buildVocab(){
+  if(VOCAB) return VOCAB;
+  const set=new Set();
+  P.forEach(p=>{
+    (p.ft||[]).forEach(x=>{ if(x) set.add(String(x).toLowerCase()); });
+    [p.l1,p.l2].forEach(x=>{ if(x) set.add(String(x).toLowerCase()); });
+    String(p.id||'').toLowerCase().split(/[\/\-_.]+/).forEach(x=>{ if(x.length>2) set.add(x); });
+  });
+  VOCAB=Array.from(set);
+  return VOCAB;
+}
+function lev(a,b){
+  const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+  let prev=[]; for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++){
+      const cost=(a[i-1]===b[j-1])?0:1;
+      cur[j]=Math.min(cur[j-1]+1, prev[j]+1, prev[j-1]+cost);
+    }
+    prev=cur;
+  }
+  return prev[n];
+}
+function fuzzyFix(tok){
+  if(!tok || tok.length<3) return null;
+  const v=buildVocab().concat((SYN||[]).reduce(function(a,g){ return a.concat((g.terms||[]).map(function(x){ return String(x).toLowerCase(); })); },[]));   // 1a：把同义词表的词并进容错词表（原来库里没有 photoshop 这类词，photshop 修不到）
+  for(let i=0;i<v.length;i++){
+    const w=v[i];
+    if(Math.abs(w.length-tok.length)<=1 && lev(tok,w)<=1) return w;
+  }
+  return null;
+}
+// 同义词扩展（B2）：命中组内任一词 → 返回整组，搜索按「组内任一命中」判定
+function expandToken(t){
+  const tl=String(t).toLowerCase();
+  for(const g of (SYN||[])){
+    const terms=(g.terms||[]).map(x=>String(x).toLowerCase());
+    if(terms.indexOf(tl)>=0) return terms;
+  }
+  return [tl];
+}function parseQuery(q){
+  if(!q) return [];
+  let toks=q.split(/[\s,，、;；|]+/).filter(x=>x);
+  if(!toks.length) toks=[q];
+  // §2 修复（v5.1.0 测试发现）：中文整句没有空格 → 整句被当成**一个词**去匹配，必然 0 命中
+  // （实测「我想做PPT / 我要画图 / 我要写代码 / 我要找AI助手 / 我要管理文件」= 0/5）。
+  // 策略：剥掉意图前缀，对剩下的短词做同义词扩展；整句也保留（避免误伤正常搜索）。
+  const INTENT = /^(我想|我要|帮我|给我|想要|需要一个|需要|寻找|找找|有没有|求|想|要|找|做个|做)/;
+  return toks.map(function(t){
+    const tl0 = String(t).toLowerCase();
+    if (expandToken(tl0).length > 1) return expandToken(tl0);   // ① 精确命中同义词组 → 不要再容错改写（ppt 被 fuzzyFix 改写就是这个 bug）
+    const f = fuzzyFix(t) || t;   // ② 没命中才容错
+    let s = f; for (let k = 0; k < 2; k++) { s = s.replace(INTENT, ''); }   // 剥两层：「我要找AI助手」→ 我要 → 找 → ai助手
+    let parts = [];
+    if (s && s !== f) { parts = parts.concat(expandToken(s)); }
+    const full = expandToken(f);
+    for (const x of full) { if (parts.indexOf(x) < 0) parts.push(x); }
+    return parts;
+  });
+}
+
+function pass(p){
+  if(f.l1 && p.l1!==f.l1) return false;
+  if(f.l2 && p.l2!==f.l2) return false;
+  if(f.badge && badgeOf(p).indexOf(f.badge)<0) return false;   // P2-2：按分层徽章过滤 ✓
+  if(f.q){
+    // 分词 + 容错后，要求**所有词都命中**（多词查询更精确）；单词查询等价于原来的子串匹配
+    if(CURTOK.length){
+      const h=hay(p);
+      if(!CURTOK.every(set=>set.some(t=>h.indexOf(t)>=0))) return false;   // 词集：组内任一命中即可（B2）
+    }
+  }
+  if(f.tag && (p.ft||[]).indexOf(f.tag)<0) return false;
+  if(f.status && p.status!==f.status) return false;
+  if(f.risk && p.risk!==f.risk) return false;
+  if(f.tier){ if(p.tier!==f.tier) return false; }
+  if(f.five){ if(+f.five===0){ if(p.exp!==null) return false; } else { if(p.exp===null || p.exp < +f.five) return false; } }
+  if(f.active){ const d=daysAgo(p.pushed); if(d===null || d> +f.active) return false; }
+  return true;
+}
+// 搜索优先级（v3.1 验收）：项目全名 > 简称 > 前缀 > GitHub ID > 功能标签 > 一句话 > 分类
+function matchScore(p,q){
+  if(!q) return 0;
+  const qq=q.toLowerCase();
+  const id=(p.id||'').toLowerCase();
+  const name=id.split('/')[1]||'';
+  if(id===qq) return 100;
+  if(name===qq) return 95;
+  if(name.indexOf(qq)===0) return 85;
+  if(id.indexOf(qq)>=0) return 80;
+  if((p.ft||[]).some(x=>String(x).toLowerCase().indexOf(qq)>=0)) return 65;
+  if((p.one||'').toLowerCase().indexOf(qq)>=0) return 50;
+  if((p.l1||'').toLowerCase()===qq||(p.l2||'').toLowerCase()===qq) return 45;
+  return 25;
+}
+function sorted(arr){
+  const r=arr.slice();
+  const bySort=(a,b)=>{
+    if(f.sort==='stars'){ const x=a.exp===null?-1:a.exp, y=b.exp===null?-1:b.exp; return y-x || (b.expSc||0)-(a.expSc||0) || b.stars-a.stars; }
+    if(f.sort==='gh') return b.stars-a.stars;
+    if(f.sort==='recent') return String(b.pushed||'').localeCompare(String(a.pushed||''));
+    return a.id.localeCompare(b.id);
+  };
+  r.sort((a,b)=>{
+    if(f.q){ const d=matchScore(b,f.q)-matchScore(a,f.q); if(d!==0) return d; }
+    return bySort(a,b);
+  });
+  return r;
+}
+function hasNote(p){ return !!(p.note || (p.un && p.un.filter(x=>x&&x.note).length)); }
+function cardHtml(p, idx){
+  const flags=[];
+  if(p.tier==='S'||p.tier==='A') flags.push('<span class="pill tier-'+p.tier+'">'+p.tier+' 档</span>');
+  else if(p.tier==='dropped') flags.push('<span class="pill s-dropped">D 档</span>');
+  else flags.push('<span class="pill tier-unrated">D 档</span>');
+  if(p.risk) flags.push('<span class="pill r-'+(p.risk==='低'?'low':p.risk==='高'?'high':'mid')+'">风险 '+p.risk+'</span>');
+  if(p.status!=='active') flags.push('<span class="pill s-'+p.status+'">'+(STA[p.status]||p.status)+'</span>');
+  if(p.origin==='user') flags.push('<span class="pill" style="border-color:var(--violet-line);color:var(--violet)">用户推荐</span>');
+  // P1-2：官方/大厂徽章**排第一**（白名单命中才有；只降验证成本、不加分 ✓）
+  flags.unshift(badgeHtml(p));   // P2-2：徽章排在最前（官方/新星/冷门/常青/待观察）✓
+  const fts=(p.ft||[]).slice(0,2).map(x=>'<span class="pill pill-fn">'+esc(x)+'</span>').join('');
+  const one = oneText(p);
+  // 待补全条目**不隐藏、但降低视觉权重**（GPT 建议）：明确标出来，而不是让用户以为"就这么点东西"
+  const thin = (p.hs!=='complete');
+  // 卡片上没有任何"收藏"元素：收藏功能已整体撤销（用户 2026-10-13 决定：用起来太麻烦繁琐）
+  // 📝 备注标记（2026-10-15 用户要求，方案 A）：该条有台账备注或用户备注时，在标题旁给一个记号 ——
+  // 不用点进详情就知道"这条有备注"。备注**只在详情面板里显示**（页面是只读单文件，不能在页面里编辑）。
+  const noteMark = hasNote(p) ? '<span title="这条有备注（台账备注 / 用户备注）—— 点开卡片看详情" style="margin-left:6px;font-size:var(--fs-xs);color:var(--gold);cursor:help">📝</span>' : '';
+  // 批次 6 · #/all：**行式密集排版**（设计 §10.5「列表用行式密集排版，非卡片墙」）——
+  // 三段：编号（等宽）｜正文（标题 / 一句话 / 标签 / 标记）｜元数据列（星数·语言·许可·最近提交，等宽右对齐）
+  // ⚠️ 根元素类名必须保持 class="card"（check-page 用 /class="card/ 计数，改名等于自己拆网 ✗）
+  const rk = (typeof idx === 'number') ? String(idx+1).padStart(2,'0') : '';
+  return '<div class="card'+(thin?' thin':'')+'" onclick="detail(\''+p.id+'\')">'
+    +'<span class="rk mono" aria-hidden="true">'+rk+'</span>'
+    +'<div class="main">'
+    +'<h3><a href="'+repoUrl(p)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+esc(p.id)+'</a>'+noteMark
+      +'<span class="cmp'+(cmpSel.indexOf(p.id)>=0?' on':'')+'" onclick="toggleCmp(event,\''+p.id+'\')">'+(cmpSel.indexOf(p.id)>=0?'✓ 已选对比':'对比')+'</span></h3>'
+    +'<div class="stars">'+stars5(p.exp)+' <span class="pill">'+esc(p.l2)+'</span></div>'
+    +'<p class="one'+(one?'':' none')+'">'+esc(one||'（暂无中文介绍，仅有英文描述或台账备注）')+'</p>'
+    +(thin?'<div class="soon">详细介绍待补全：这个库在长，它还没轮到</div>':'')
+    +'<div class="row tags">'+fts+flags.join('')+'</div>'
+    +'</div>'
+    +'<div class="meta"><span>★ '+p.stars.toLocaleString()+'</span>'
+    +'<span>'+esc(p.lang||'')+' ｜ '+esc(p.lic||'许可未知')+'</span>'
+    +'<span title="最近提交">'+when(p.pushed)+'</span></div>'
+    +'</div>';
+}
+// ---------- 项目对比（页内，纯前端；数据已内嵌，不调 API） ----------
+function toggleCmp(ev, id){
+  if(ev && ev.stopPropagation) ev.stopPropagation();
+  const i=cmpSel.indexOf(id);
+  if(i>=0) cmpSel.splice(i,1);
+  else { if(cmpSel.length>=2) cmpSel.shift(); cmpSel.push(id); }
+  render(); renderCmpBar();
+}
+function clearCmp(){ cmpSel=[]; render(); renderCmpBar(); }
+function renderCmpBar(){
+  const bar=document.getElementById('cmpBar');
+  if(!cmpSel.length){ bar.className=''; bar.innerHTML=''; return; }
+  bar.className='on';
+  bar.innerHTML='<span>已选 <b>'+cmpSel.length+'/2</b>：'+cmpSel.map(esc).join('　vs　')+'</span>'
+    +(cmpSel.length===2?'<span class="chip on" onclick="showCompare()">查看对比</span>':'<span style="color:var(--dim)">再选一个</span>')
+    +'<span class="chip" onclick="clearCmp()">清空</span>';
+}
+function cmpCell(p, kind){
+  if(!p) return '';
+  if(kind==='one')   return oneText(p)||'';
+  if(kind==='what')  return (p.fn&&p.fn[0])||'';
+  if(kind==='core')  return (p.fn&&p.fn[1])||'';
+  if(kind==='use')   return (p.fn&&p.fn[2])||'';
+  if(kind==='case')  return (p.fn&&p.fn[3])||'';
+  if(kind==='no')    return (p.fn&&p.fn[4])||'';
+  if(kind==='ease')  return (p.t&&p.t[4])||'';
+  if(kind==='env')   return p.lang||'';
+  if(kind==='exp')   return (p.exp===null||p.exp===undefined)?'':('★'.repeat(p.exp)+'☆'.repeat(5-p.exp)+'（'+p.expSc+'/100）');
+  if(kind==='stars') return p.stars.toLocaleString();
+  if(kind==='pushed')return when(p.pushed);
+  if(kind==='lic')   return p.lic||'';
+  if(kind==='risk')  return p.risk||(p.t&&p.t[5])||'';
+  if(kind==='tier')  return (p.tier==='S'||p.tier==='A')?(p.tier+' 档'):(p.tier==='dropped'?'D 档':'D 档');
+  return '';
+}
+function cmpRow(A,B,label,kind){
+  const a=cmpCell(A,kind), b=cmpCell(B,kind);
+  const t=v=>v?esc(v):'<span style="color:var(--dim)">（待补全）</span>';
+  return '<tr><td>'+label+'</td><td>'+t(a)+'</td><td>'+t(b)+'</td></tr>';
+}
+function cmpSuggest(A,B){
+  const s=[];
+  if(A.exp!==null&&B.exp!==null&&A.exp!==undefined&&B.exp!==undefined&&A.exp!==B.exp)
+    s.push('体验评分更高：<b>'+(A.exp>B.exp?esc(A.id):esc(B.id))+'</b>（'+A.exp+'★ vs '+B.exp+'★）');
+  const ra=A.risk||(A.t&&A.t[5]), rb=B.risk||(B.t&&B.t[5]);
+  const rank={'低':1,'中':2,'高':3};
+  if(ra&&rb&&ra!==rb&&rank[ra]&&rank[rb]) s.push('风险更低：<b>'+(rank[ra]<rank[rb]?esc(A.id):esc(B.id))+'</b>（'+ra+' vs '+rb+'）');
+  const da=A.t&&A.t[4], db=B.t&&B.t[4];
+  const rank2={'开箱即用':1,'轻配置':2,'要编程':3,'要部署':4};
+  if(da&&db&&da!==db&&rank2[da]&&rank2[db]) s.push('更易上手：<b>'+(rank2[da]<rank2[db]?esc(A.id):esc(B.id))+'</b>（'+da+' vs '+db+'）');
+  if(!s.length) s.push('两者在评分 / 风险 / 上手难度上没拉开差距，建议按使用场景选（见上面「常见用途」行）');
+  return s;
+}
+function showCompare(){
+  if(cmpSel.length<2) return;
+  const A=P.find(x=>x.id===cmpSel[0]), B=P.find(x=>x.id===cmpSel[1]);
+  if(!A||!B) return;
+  const h='<span class="close" onclick="closePanel()">×</span>'
+    +'<h2>对比：'+esc(A.id)+' vs '+esc(B.id)+'</h2>'
+    +'<div style="color:var(--dim);font-size:var(--fs-sm)">数据来自本地知识库（页面已内嵌）｜ 未调用任何 API ｜ 缺失标「（待补全）」</div>'
+    +'<table class="cmpt"><tr><th>维度</th><th>'+esc(A.id)+'</th><th>'+esc(B.id)+'</th></tr>'
+    +cmpRow(A,B,'一句话定位','one')
+    +cmpRow(A,B,'是什么','what')
+    +cmpRow(A,B,'核心功能','core')
+    +cmpRow(A,B,'常见用途（适合谁）','use')
+    +cmpRow(A,B,'使用案例','case')
+    +cmpRow(A,B,'不适合','no')
+    +cmpRow(A,B,'学习成本（上手难度）','ease')
+    +cmpRow(A,B,'运行环境（语言）','env')
+    +cmpRow(A,B,'体验评分（不看 star）','exp')
+    +cmpRow(A,B,'星数','stars')
+    +cmpRow(A,B,'最近提交','pushed')
+    +cmpRow(A,B,'License','lic')
+    +cmpRow(A,B,'风险','risk')
+    +cmpRow(A,B,'档位','tier')
+    +'</table>'
+    +'<div class="sec-h">怎么选（自动判断，仅供参考）</div>'
+    +'<ul style="margin:4px 0 0;padding-left:20px;font-size:var(--fs-sm);line-height:1.8">'+cmpSuggest(A,B).map(x=>'<li>'+x+'</li>').join('')+'</ul>'
+    +'<div class="cmpnote">判断只基于本地数据（体验评分 / 风险 / 上手难度），不构成使用担保；用前请看各自仓库的 License 与最近维护状态。</div>'
+    +'<div class="kv"><a href="'+repoUrl(A)+'" target="_blank" rel="noopener">打开 '+esc(A.id)+' ↗</a>　'
+    +'<a href="'+repoUrl(B)+'" target="_blank" rel="noopener">打开 '+esc(B.id)+' ↗</a></div>';
+  document.getElementById('panel').innerHTML=h;
+  document.getElementById('panel').classList.add('open');
+}
+// ---------- 方案（v3.1 第八节）：需求 → 工具组合 + 为什么 ----------
+function planFor(q){
+  if(!q) return null;
+  const qq=q.toLowerCase();
+  return PLANS.find(function(pl){
+    return (pl.triggers||[]).some(function(t){
+      const tl=String(t).toLowerCase();
+      return qq.indexOf(tl)>=0 || tl.indexOf(qq)>=0;
+    });
+  }) || null;
+}
+function planRoleTools(role, max){
+  const out=[];
+  P.forEach(function(p){
+    if(p.status==='dropped') return;
+    let sc=0;
+    let ftHit=0;   // A 方案第三刀：分类命中必须搭配功能标签命中
+    if(role.l2 && role.l2.length && p.l2 && role.l2.indexOf(p.l2)>=0) sc+=3;
+    // 去掉后阈值 >=3 等价于「必须二级分类命中，或 >=2 个功能标签命中」。
+    if(role.ft && role.ft.length){
+      (p.ft||[]).forEach(function(f){
+        const fl=String(f).toLowerCase();
+        role.ft.forEach(function(x){
+          const xl=String(x).toLowerCase();
+          if(fl.indexOf(xl)>=0 || (fl.length>=3 && xl.indexOf(fl)>=0)) sc+=2;   // A 方案：短标签不再反向命中一切
+          ftHit++;
+        });
+      });
+    }
+    // A 方案（用户 2026-10-14 决定：宁缺毋滥）——原来 sc>0 就进候选，导致「仅一级分类命中」(1 分)
+// 的工具被塞进不相关场景（如 WeChatBridge 出现在「做 PPT」「查资料」「产品设计」三个场景）。
+// 现在要求 ≥3 分：二级分类命中(3) / 两个功能标签(2+2) / 一个标签+一级分类(2+1)。
+// 分数不够就**不显示**——让页面那句「🔍 这一步现在没有合适的选择」说真话。
+      if(sc>=3 && ftHit>=1) out.push({p:p, sc:sc});
+  });
+  out.sort(function(a,b){
+    if(b.sc!==a.sc) return b.sc-a.sc;
+    const x=(a.p.exp===null||a.p.exp===undefined)?-1:a.p.exp, y=(b.p.exp===null||b.p.exp===undefined)?-1:b.p.exp;
+    return y-x || b.p.stars-a.p.stars;
+  });
+  return out.slice(0, max||2);
+}
+function planWhyPick(p){
+  // **把数据库字段翻成人话**（GPT 评审：不要出现「体验4★｜风险中｜7天提交｜GPL」这种后台串）
+  const good=[], bad=[];
+  const pt=p.part||{};
+  const d=daysAgo(p.pushed);
+  if(pt['易用性']>=24) good.push('装上就能用'); else if(pt['易用性']!==undefined && pt['易用性']<15) bad.push('上手要花点功夫');
+  if(pt['文档完整度']>=16) good.push('文档比较全'); else if(pt['文档完整度']!==undefined && pt['文档完整度']<10) bad.push('文档较少，可能要自己摸索');
+  if(d!==null){ if(d<=30) good.push('最近仍在维护'); else if(d>365) bad.push('很久没更新了'); }
+  if(pt['功能成熟度']>=15) good.push('功能比较成熟'); else if(pt['功能成熟度']!==undefined && pt['功能成熟度']<10) bad.push('还比较早期');
+  if(pt['风险']>=12) good.push('风险低'); else if(pt['风险']!==undefined && pt['风险']<8) bad.push('有风险，先看清楚再用');
+  if(p.lic){ if(/MIT|Apache/i.test(p.lic)) good.push(p.lic+'（可商用）'); else good.push(p.lic); }
+  else bad.push('没有 License，商用要谨慎');
+  if(p.stars>=10000) good.push('社区成熟（'+(p.stars/10000).toFixed(1)+' 万 star）');
+  else if(p.stars<50) bad.push('用的人还少');
+  let out='';
+  if(good.length) out+='<span style="color:var(--ok)">✅ '+good.map(esc).join(' ｜ ')+'</span>';
+  if(bad.length) out+=(out?'<br>':'')+'<span style="color:var(--warn)">⚠️ '+bad.map(esc).join(' ｜ ')+'</span>';
+  return out || '<span style="color:var(--dim)">资料不足，暂无法判断</span>';
+}
+function planRoleAll(role){
+  // 该角色一共能匹配到多少个（用于「查看全部 N 个同类工具 →」）
+  return planRoleTools(role, 999).length;
+}
+function showL2(l2){
+  f.l2=l2; f.l1=''; f.q='';
+  const qEl=document.getElementById('q'); if(qEl) qEl.value='';
+  // 从「方案」面板点进来 → 需要切到全库区（原来靠滚到页面底部，路由化后靠切区）
+  const pn=document.getElementById('panel'); if(pn) pn.classList.remove('open');
+  ensureAllView();
+  buildCat(); render();
+  const v=document.getElementById('view-all');
+  try{ if(v && v.scrollIntoView) v.scrollIntoView({block:'start'}); }catch(e){}
+}
+function buildPlans(){
+  const box=document.getElementById('planGrid');
+  if(!box) return;
+  if(!PLANS.length){ box.innerHTML='<p class="none">没有方案模板（data/plans.json）</p>'; return; }
+  // 批次 6 · #/plans = **工作台/工单**（设计 §10.5：角色-工具用表格线呈现，黄块标"已配齐/缺件"）✓
+  const stat=function(pl){
+    let ok=0, miss=0;
+    (pl.roles||[]).forEach(function(r){ (planRoleAll(r)>0) ? ok++ : miss++; });
+    return { n:(pl.roles||[]).length, ok:ok, miss:miss };
+  };
+  box.innerHTML='<div class="wotable">'
+    + '<div class="worow wohead"><span class="mono">#</span><span>方案</span><span class="mono">步骤</span>'
+      + '<span class="mono">已配齐</span><span class="mono">缺件</span><span>触发词</span></div>'
+    + PLANS.map(function(pl,i){
+        const s=stat(pl);
+        const trig=(pl.triggers||pl.trigger||[]).slice(0,4).map(function(x){ return '<span class="tagx">'+esc(x)+'</span>'; }).join('');
+        return '<button type="button" class="worow" onclick="showPlan(\''+pl.id+'\')">'
+          + '<span class="mono wo-no">'+String(i+1).padStart(2,'0')+'</span>'
+          + '<span class="wo-name">'+esc(pl.name)+'</span>'
+          + '<span class="mono">'+s.n+'</span>'
+          + '<span class="mono wo-ok">'+s.ok+'</span>'
+          + '<span class="mono wo-miss'+(s.miss?' on':'')+'">'+s.miss+'</span>'
+          + '<span class="wo-trig">'+(trig||'<span class="none">—</span>')+'</span>'
+          + '</button>';
+      }).join('')
+    + '</div>';
+}
+function showPlan(id){
+  const pl=PLANS.filter(function(x){ return x.id===id; })[0];
+  if(!pl) return;
+  // 工单口径：每个角色"库里有没有候选工具" → 已配齐 / 缺件（黄块标已配齐 ✓）
+    // ⚠️ planRoleAll 返回的是**数字**（不是数组）——写 .length 会恒为 falsy，把有工具的角色也标成「缺件」✗
+  const woStat=(pl.roles||[]).map(function(r){ return (planRoleAll(r)>0)?1:0; });
+  const woOk=woStat.filter(function(x){return x;}).length, woMiss=woStat.length-woOk;
+  let h='<span class="close" onclick="closePanel()">×</span>'
+    +'<h2>'+esc(pl.name)+'</h2>'
+    +'<div class="wosum"><span class="wo-st ok">已配齐 '+woOk+' / '+woStat.length+' 步</span>'
+      +(woMiss?'<span class="wo-st miss">缺件 '+woMiss+' 步</span>':'')
+      +'<span class="mono">工具来自你的本地库，按用途自动匹配 ｜ 未调用 API ｜ 步骤顺序由你决定</span></div>';
+  // 摘要先行（商城版：一次给全，但先给能一眼看完的）
+  const roleN=(pl.roles||[]).length;
+  const easeMap={'开箱即用':5,'轻配置':4,'要编程':2,'要部署':1};
+  const eases=[];
+  (pl.roles||[]).forEach(function(r){
+    planRoleTools(r,1).forEach(function(t){
+      const e=easeMap[(t.p.t&&t.p.t[4])||''];
+      if(e) eases.push(e);
+    });
+  });
+  let diff='';
+  if(eases.length){
+    const avg=eases.reduce(function(a,b){return a+b;},0)/eases.length;
+    const lvl=Math.max(1,Math.min(5,Math.round(6-avg)));
+    diff=' ｜ 难度 '+'★'.repeat(lvl)+'☆'.repeat(5-lvl);
+  }
+  h+='<div class="hbody" style="margin-top:10px">'+esc(pl.intro)+'</div>';
+  h+='<div style="color:var(--dim);font-size:var(--fs-sm);margin-top:8px">这套要 <b>'+roleN+'</b> 步'
+    +(pl.roles||[]).map(function(r,i){return '　'+(i+1)+'. '+esc(r.role);}).join('')+diff+'</div>';
+  (pl.roles||[]).forEach(function(r,i){
+    const tools=planRoleTools(r,2);
+    const allN=planRoleAll(r);
+    h+='<div class="wo-role"><span class="mono wo-no">'+String(i+1).padStart(2,'0')+'</span><b>'+esc(r.role)+'</b>'+((woStat[i])?'<span class="wo-st ok">已配齐</span>':'<span class="wo-st miss">缺件</span>')+'</div>';
+    h+='<div style="color:var(--dim);font-size:var(--fs-sm);margin-bottom:6px">为什么需要这一步：'+esc(r.why)+'</div>';
+    if(!tools.length){
+      // 不要像失败（GPT 评审）：给两条可走的路
+      h+='<div class="todo-box">🔍 「'+esc(r.role)+'」这一步，你的工具库现在没有合适的选择。<br>'
+        +'可以：① 我去 GitHub 搜 2–3 个候选给你过目（要花一点 API 额度）　② 先放着，等以后自动收录 —— 这一步不挡着你先做前面的</div>';
+      return;
+    }
+    h+='<table class="cmpt"><tr><th>工具</th><th>适合谁 / 为什么选它 / 要注意</th></tr>';
+    tools.forEach(function(t,ti){
+      const p=t.p;
+      const medal=ti===0?'🥇':'🥈';
+      const label=ti===0?'首选':'备选（觉得太重可以用这个）';
+      h+='<tr><td style="white-space:normal;min-width:150px">'
+        +medal+' <a href="'+repoUrl(p)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+esc(p.id)+'</a>'
+        +'<br><span style="color:var(--dim);font-size:var(--fs-xs)">'+stars5(p.exp)+' ｜ '+label+'</span>'
+        +'<br><span class="cmp" style="margin-left:0" onclick="detail(\''+p.id+'\')">看详情</span></td>'
+        +'<td style="white-space:normal"><div>'+esc(oneText(p)||'（待补全）')+'</div>'
+        +'<div style="font-size:var(--fs-xs);margin-top:5px;line-height:1.7">'+planWhyPick(p)+'</div></td></tr>';
+    });
+    h+='</table>';
+    if(allN>tools.length && r.l2 && r.l2[0]){
+      h+='<div style="margin-top:4px"><span class="chip" onclick="showL2(\''+String(r.l2[0])+'\')">查看全部 '+allN+' 个同类工具 →</span></div>';
+    }
+  });
+  h+='<div class="cmpnote">这是「按用途归类」的建议，不构成使用担保；每个工具用前请看它的 License 与最近维护状态。想看两个的差别：在卡片上点「对比」。</div>';
+  document.getElementById('panel').innerHTML=h;
+  document.getElementById('panel').classList.add('open');
+  setHash('#/plans/'+encodeURIComponent(id));   // 深链：单个方案的链接可分享
+}
+
+// —— 搜索缺口：搜不到就记下来（页面是本地静态文件，写不了工作区，所以「记下 + 复制」交给用户转给我）——
+let gapList = [];
+function loadGaps(){
+  try{ const s=localStorage.getItem('dsh-lib-gaps'); if(s) gapList=JSON.parse(s)||[]; }catch(e){ gapList=[]; }
+  renderGapChip();
+}
+function saveGaps(){ try{ localStorage.setItem('dsh-lib-gaps', JSON.stringify(gapList)); }catch(e){} }
+function addGap(term){
+  const t=(term||'').trim(); if(!t) return;
+  if(gapList.indexOf(t)<0) gapList.push(t);
+  saveGaps(); renderGapChip();
+  try{ navigator.clipboard.writeText(t); }catch(e){}
+  const el=document.getElementById('gapHint');
+  if(el) el.innerHTML='已记下「'+esc(t)+'」（同时复制到剪贴板）。攒几个后点右上角「⚠ 搜索缺口」一次性复制给我，我补进同义词表。';
+}
+function copyGaps(){
+  if(!gapList.length) return;
+  const txt=gapList.join('\n');
+  try{ navigator.clipboard.writeText(txt); }catch(e){}
+  const el=document.getElementById('gapHint');
+  if(el) el.innerHTML='已复制 '+gapList.length+' 个缺口词：'+esc(txt.replace(/\n/g,' / '))+'　→ 发给我即可补词表。';
+  else alert('已复制 '+gapList.length+' 个缺口词：\n'+txt+'\n\n发给我即可补进同义词表。');
+}
+function clearGaps(){ gapList=[]; saveGaps(); renderGapChip(); }
+function renderGapChip(){
+  const c=document.getElementById('gapChip');
+  if(!c) return;
+  if(!gapList.length){ c.style.display='none'; return; }
+  c.style.display='inline-block';
+  c.textContent='⚠ 搜索缺口 '+gapList.length+'（点我复制）';
+}
+function render(){
+  f.q=document.getElementById('q').value.trim().toLowerCase();
+  CURTOK=parseQuery(f.q);
+  f.status=document.getElementById('fs').value;
+  f.risk=document.getElementById('fr').value;
+  f.tier=document.getElementById('ft').value;
+  f.five=document.getElementById('f5').value;
+  f.active=document.getElementById('fa').value;
+  f.sort=document.getElementById('sort').value;
+  f.badge=document.getElementById('fb').value;
+  const r=sorted(P.filter(pass));
+  const hint=document.getElementById('countHint');
+  const scope = f.l1 ? ('　分类：'+f.l1+(f.l2?(' → '+f.l2):'')) : '';
+  const sortedNote = f.q ? '　（已按匹配度排序：项目名 > 简称 > 标签 > 描述）' : '';
+  hint.textContent='命中 '+r.length+' / '+P.length+' 个工具'+scope+sortedNote;
+  const list=document.getElementById('list');
+  if(!r.length){
+    const qt=document.getElementById('q').value.trim();
+    list.innerHTML=planHintHtml() + '<div class="empty">没有匹配的工具。<br>'
+      +(qt?('<span class="chip" onclick="addGap(document.getElementById(\'q\').value.trim())">记下这个词</span> '):'')
+      +'<span class="chip" onclick="clearAll()">清空筛选</span>'
+      +'<div id="gapHint" style="margin-top:12px;color:var(--dim);font-size:var(--fs-sm);line-height:1.8">搜不到？点「记下这个词」存起来，'
+      +'攒几个后点顶部「⚠ 搜索缺口」一次性复制给我 —— 我把它补进同义词表，<b>词表就这样随库增长</b>，而不是一成不变。</div></div>';
+    return;
+  }
+  if(groupByUse){
+    // 按用途分组：把命中的工具按其二级分类聚在一起，便于按流程挑组合（组合是否合适由用户判断）
+    const byL2={};
+    r.forEach(p=>{ const k=p.l2||'其他工具'; if(!byL2[k]) byL2[k]=[]; byL2[k].push(p); });
+    const keys=Object.keys(byL2).sort((a,b)=>byL2[b].length-byL2[a].length);
+    list.innerHTML=planHintHtml()+ '<div class="grpNote">按用途分组：同组工具通常可以配合使用（是否真的合适由你判断，这里只做归类，不替你决定流程）</div>'
+      + keys.map(k=>'<div class="grpHead">'+esc(k)+'<em>'+byL2[k].length+' 个</em></div>'+byL2[k].map(cardHtml).join('')).join('');
+    return;
+  }
+  list.innerHTML = planHintHtml() + r.map(function(p,i){return cardHtml(p,i)}).join('');
+}
+// 搜到的词像一个「场景」时，主动提示可以看成套方案
+function planHintHtml(){
+  if(!f.q) return '';
+  const pl=planFor(f.q);
+  if(!pl) return '';
+  return '<div class="grpNote">💡 这像是一个场景，不只是单个工具 —— '
+    +'<span class="chip on" onclick="showPlan(\''+pl.id+'\')">看「'+esc(pl.name)+'」该怎么配</span></div>';
+}
+function toggleGroup(){
+  groupByUse=!groupByUse;
+  const b=document.getElementById('grpBtn');
+  b.className='chip'+(groupByUse?' on':'');
+  b.textContent=groupByUse?'分组中（点此取消）':'按用途分组';
+  render();
+}
+function quickStatus(s){
+  f.status=s; const sEl=document.getElementById('fs'); if(sEl) sEl.value=s;
+  buildCat(); render();
+  ensureAllView();     // 从别处改状态 → 切到全库，否则用户看不到结果
+  const v=document.getElementById('view-all');
+  try{ if(v && v.scrollIntoView) v.scrollIntoView({block:'start'}); }catch(e){}
+}
+function setL1(g){ f.l1=(f.l1===g?'':g); f.l2=''; buildCat(); render(); syncURL(); }
+function setL2(g){ f.l2=(f.l2===g?'':g); buildCat(); render(); syncURL(); }
+function setTag(t){ f.tag=(f.tag===t?'':t); buildCat(); render(); syncURL(); }
+// 批次 6：从 #/home 的图表**一步跳进「全库 + 该筛选」**。
+// 为什么不能写成 go('all') + setL1(v)：route() 处理 '#/all' 时会 applyQuery('') 把筛选清掉 ✗
+// → 正确做法是**先设 f，再把筛选写进 hash**，由 route() 按 hash 复原（applyQuery 会回填控件 ✓）
+function jumpL1(v){ f.l1=v; f.l2=''; f.q=''; f.tag=''; const q=document.getElementById('q'); if(q) q.value=''; const qs=filterQuery(); setHash('#/all'+(qs?('?'+qs):'')); }
+function jumpL2(v){ f.l2=v; f.l1=''; f.q=''; f.tag=''; const q=document.getElementById('q'); if(q) q.value=''; const qs=filterQuery(); setHash('#/all'+(qs?('?'+qs):'')); }
+function clearAll(){
+  f.q='';f.status='';f.risk='';f.tier='';f.five='';f.active='';f.l1='';f.l2='';f.tag='';f.badge='';
+  document.getElementById('q').value='';['fs','fr','ft','f5','fa','fb'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  buildCat(); render(); syncURL();
+}
+function miniHtml(p){
+  return '<div class="mini" onclick="detail(\''+p.id+'\')">'
+    +'<div class="n">'+esc(p.id)+(hasNote(p)?' <span title="这条有备注" style="color:var(--gold);cursor:help">📝</span>':'')+'</div>'
+    +'<div style="margin:2px 0">'+stars5(p.exp)+'</div>'
+    +'<div class="d">'+esc(oneText(p)||'（暂无中文介绍）')+'</div>'
+    +'<div class="m"><span>★ '+p.stars.toLocaleString()+'</span><span>'+when(p.pushed)+'</span></div></div>';
+}
+function latestPickDay(){
+  let d='';
+  P.forEach(function(p){ if(p.first && String(p.first)>d) d=String(p.first); });
+  return d;
+}
+// 批次 6 · #/picks = **专题报道**（设计 §10.5）：首条做大做封面稿、其余**按档位分栏**、官方动态做侧栏小字条 ✓
+// 批次 6 / P2-2：**分层徽章**（唯一真源 —— 渲染与筛选共用；规则同步写在 #/legend §04）
+// 语义：🏢 官方=白名单命中 ｜ 🌱 新星=首见≤14天且有质量信号 ｜ 🧊 冷门=低星但优质（用户 2026-10-16 指定冰块）
+//       🧱 常青=库龄>30天且近7天仍有提交 ｜ 🧪 待观察=档位待评估且风险待评估（证据不足）
+function badgeOf(p){
+  const out=[];
+  const day=function(s){ return s ? new Date(String(s)+'T00:00:00').getTime() : null; };
+  const now=Date.now();
+  const ageD=(day(p.first)!==null) ? Math.floor((now-day(p.first))/86400000) : null;
+  const pushD=(p.pushed && day(p.pushed)!==null) ? (now-day(p.pushed))/86400000 : null;
+  const good=(p.tier==='S' || p.tier==='A' || (p.exp!==null && p.exp!==undefined && p.exp>=4));
+  if(p.oc==='official') out.push('org');
+  if(ageD!==null && ageD<=7 && (p.tier==='S' || p.tier==='A')) out.push('new');   // 收紧（2026-10-17）：原来 14 天+质量信号 ⇒ 覆盖 74%，徽章失去区分度 ✗
+  if(p.stars<1000 && good) out.push('gem');
+  if(ageD!==null && ageD>30 && pushD!==null && pushD<=7) out.push('ever');
+  if(!p.tier && !p.risk) out.push('watch');
+  return out;
+}
+function badgeHtml(p){
+  const B={org:'🏢',new:'🌱',gem:'🧊',ever:'🧱',watch:'🧪'};
+  const T={org:'官方/大厂（白名单）',new:'新星：首见≤14天且有质量信号',gem:'冷门优质：星数<1000 但质量好',ever:'常青：库龄>30天且近7天仍活跃',watch:'待观察：档位与风险都待评估'};
+  return badgeOf(p).map(function(k){
+    const lab=(k==='org' && p.ol) ? esc(p.ol) : ({org:'官方',new:'新星',gem:'冷门',ever:'常青',watch:'待观察'})[k];
+    return '<span class="pill b-'+k+'" title="'+T[k]+'">'+B[k]+' '+lab+'</span>';
+  }).join('');
+}function tierRank(p){ return p.tier==='S'?0 : p.tier==='A'?1 : p.tier==='B'?2 : 3; }
+function leadHtml(p, day, fallback){
+  if(!p) return '';
+  const one=oneText(p);
+  const risk = p.risk ? '<span class="pill r-'+(p.risk==='低'?'low':p.risk==='高'?'high':'mid')+'">风险 '+p.risk+'</span>'
+                      : '<span class="pill tier-unrated">风险待评估</span>';
+  return '<article class="lead" onclick="detail(\''+p.id+'\')">'
+    + '<div class="lead-k mono">'+(fallback?'库里最值得看的':'当天头条')+' · '+esc(String(day||''))+'</div>'
+    + '<h3><a href="'+repoUrl(p)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'+esc(p.id)+'</a></h3>'
+    + '<p class="lead-lede">'+esc(one||'（暂无中文介绍，仅有英文描述或台账备注）')+'</p>'
+    + (p.aud?'<p class="lead-aud"><b>适合谁</b>：'+esc(p.aud)+'</p>':'')
+    + '<div class="lead-meta">'+badgeHtml(p)+'<span class="pill">'+esc(p.l2||'')+'</span>'+stars5(p.exp)
+      + (p.tier==='S'?'<span class="pill tier-s">S 档</span>':p.tier==='A'?'<span class="pill tier-a">A 档</span>':'')
+      + risk + '<span class="mono">★ '+p.stars.toLocaleString()+' ｜ '+esc(p.lang||'')+' ｜ '+esc(p.lic||'许可未知')+' ｜ '+when(p.pushed)+'</span></div>'
+    + '<div class="lead-cta">点开看详情与「选它因为」→</div>'
+    + '</article>';
+}
+function buildToday(date){
+  const today=new Date().toISOString().slice(0,10);
+  const day=date||latestPickDay()||today;
+  let r=P.filter(function(p){ return String(p.first)===String(day); });
+  let notice='', fallback=false;
+  if(!r.length){
+    r=sorted(P).slice(0,10); fallback=true;
+    notice='<div class="picknote">'+(date?('<b>'+esc(date)+'</b> 这天没有新增记录'):'库里还没有任何「新增」记录')
+      +'：下面是库里最值得看的 10 个。</div>';
+  } else if(!date && day!==today){
+    notice='<div class="picknote">最新一天有新增的是 <b>'+esc(day)+'</b>（今天还没有新增）。</div>';
+  }
+  // 排序：**档位优先**（S→A→B→待评估），再体验分、再 star（"专题报道"的第一条必须是最值得看的 ✓）
+  r=r.slice().sort(function(a,b){ return tierRank(a)-tierRank(b) || (b.exp||0)-(a.exp||0) || (b.stars||0)-(a.stars||0); });
+  const leadEl=document.getElementById('todayLead');
+  if(leadEl) leadEl.innerHTML = leadHtml(r[0], day, fallback);
+  const colsEl=document.getElementById('todayTiers');
+  if(colsEl){
+    const groups={S:[],A:[],B:[],other:[]};
+    r.slice(1).forEach(function(p){ const k=(p.tier==='S'||p.tier==='A'||p.tier==='B')?p.tier:'other'; groups[k].push(p); });
+    const label={S:'S 档 · 最值得看',A:'A 档 · 值得收藏',B:'B 档 · 合格',other:'待评估 / 其他'};
+    colsEl.innerHTML=['S','A','B','other'].map(function(k){
+      const g=groups[k];
+      return '<div class="tcol"><h4>'+label[k]+' <b class="mono">'+g.length+'</b></h4>'
+        + (g.length ? g.map(miniHtml).join('') : '<p class="none">这天没有这一档</p>') + '</div>';
+    }).join('');
+  }
+  // 官方动态：owner_class 校订（P1-2）**还没做** → 库里若确实没有官方条目，就**明说还没校订**，不画假侧栏 ✓
+  const offEl=document.getElementById('todayOff');
+  if(offEl){
+    // ⚠️ 投影里 owner_class 的值是 'official'（不是 'official-bigtech'）——写错会**在页面上谎称"没有官方条目"** ✗（2026-10-16 我自己踩过：库里实际有 8 条 official）
+    const off=P.filter(function(p){ return p.oc==='official'; });
+    offEl.innerHTML = off.length
+      ? '<ul class="offlist">'+off.slice(0,14).map(function(p){
+          return '<li><a href="'+repoUrl(p)+'" target="_blank" rel="noopener">'+esc(p.id)+'</a>'
+            + (p.ol?'<span class="mono">'+esc(p.ol)+'</span>':'')+'</li>'; }).join('')+'</ul>'
+      : '<p class="none">还没有校订过的官方 / 大厂条目 —— 白名单（<code>data/owner-whitelist.json</code>）里命中 0 条（不画假的 ✓）。</p>';
+  }
+  const noteEl=document.getElementById('todayRow');
+  if(noteEl) noteEl.innerHTML = notice;
+}// ---------- 我的工作区（用户实例，非官方模板）----------
+function buildWorkspaces(){
+  const box=document.getElementById('wsGrid');
+  if(!box) return;
+  if(!WS.length){
+    box.innerHTML='<span style="color:var(--dim);font-size:var(--fs-sm)">还没有工作区。工作区 = 「我正在做的一件事 + 它用到的那套工具」。'
+      +'让助手建一个（例如「给我建个工作区：B站视频制作」），或跑 tools\\workspace.ps1。也可以先点上面的「按需求组方案」找个模板试试。</span>';
+    return;
+  }
+  box.innerHTML=WS.map(function(w){
+    const n=(w.tools||[]).length;
+    const done=Array.isArray(w.done)?w.done.length:0;   // 加固：手写 JSONL 把 done 写成对象/字符串时不再崩
+    return '<span class="chip" onclick="showWorkspace(\''+esc(String(w.id).replace(/'/g,''))+'\')">'
+      +'📌 '+esc(w.name)+' <b style="color:var(--dim);font-weight:400">'+(w.status||'')+(n?(' · '+done+'/'+n):'')+'</b></span>';
+  }).join('');
+}
+function showWorkspace(id){
+  const w=WS.filter(function(x){ return String(x.id)===String(id); })[0];
+  if(!w) return;
+  const done=Array.isArray(w.done)?w.done:[];   // 加固（同上）
+  let h='<span class="close" onclick="closePanel()">×</span>'
+    +'<h2>📌 '+esc(w.name)+'</h2>'
+    +'<div style="color:var(--dim);font-size:var(--fs-sm)">状态：'+esc(w.status||'进行中')+'　｜　建于 '+esc(w.created||'')+'</div>';
+  if(w.goal) h+='<div class="hbody" style="margin-top:10px">目标：'+esc(w.goal)+'</div>';
+  if(w.note) h+='<div style="color:var(--dim);font-size:var(--fs-sm);margin-top:6px">我的备注：'+esc(w.note)+'</div>';
+  const wanted=(w.tools||[]);
+  const tools=wanted.map(function(t){ return P.filter(function(p){ return p.id===t; })[0]; }).filter(Boolean);
+  const missing=wanted.filter(function(t){ return !P.some(function(p){ return p.id===t; }); });   // B15：不静默丢弃
+  h+='<div class="sec-h">这个工作区用到的工具（'+tools.length+' 个）</div>'
+    +(missing.length? ('<div class="soon">⚠ 有 '+missing.length+' 个工具在库里找不到（可能已删或名字写错）：'+esc(missing.join('、'))+'</div>') : '');
+  if(!tools.length) h+='<div class="todo-box">还没往里加工具。可以在「🧩 按需求组方案」里找一套，然后让助手加进来。</div>';
+  else {
+    h+='<table class="cmpt"><tr><th>工具</th><th>用它做什么</th></tr>';
+    tools.forEach(function(p){
+      const isDone=done.indexOf(p.id)>=0;
+      h+='<tr><td style="white-space:normal">'+(isDone?'✅ ':'⬜ ')+'<a href="'+repoUrl(p)+'" target="_blank" rel="noopener">'+esc(p.id)+'</a>'
+        +'<br><span style="color:var(--dim);font-size:var(--fs-xs)">'+stars5(p.exp)+' ｜ '+esc(p.l2)+'</span></td>'
+        +'<td style="white-space:normal">'+esc(oneText(p)||'（待补全）')+'</td></tr>';
+    });
+    h+='</table>';
+  }
+  h+='<div class="cmpnote">工作区是你自己的记录，不是官方模板；勾选进度请让助手更新（页面写不了文件）。</div>';
+  document.getElementById('panel').innerHTML=h;
+  document.getElementById('panel').classList.add('open');
+  setHash('#/ws/'+encodeURIComponent(w.id));   // 深链：单个工作区的链接可分享
+}
+function buildCat(){
+  const grid=document.getElementById('catGrid'); let h='';
+  // 一级 / 二级 两级分类（二级只在此一级下展示）
+  const byL1={};
+  P.forEach(p=>{ const k1=p.l1||'未分类', k2=p.l2||'未分类'; if(!byL1[k1]) byL1[k1]={n:0,l2:{}}; byL1[k1].n++; byL1[k1].l2[k2]=(byL1[k1].l2[k2]||0)+1; });   // B9：空分类不再变成字面量 null
+  const l1s=Object.keys(byL1).sort((a,b)=>byL1[b].n-byL1[a].n);
+  h+='<div class="catbox"><h3>全部</h3><div class="items"><span class="chip '+(f.l1===''?'on':'')+'" onclick="clearAll()">全部工具 <b style="color:var(--dim);font-weight:400">'+P.length+'</b></span></div></div>';
+  l1s.forEach(l1=>{
+    h+='<div class="catbox"><h3>'+esc(l1)+' <b style="color:var(--dim);font-weight:400">'+byL1[l1].n+'</b></h3><div class="items">';
+    h+='<span class="chip '+(f.l1===l1&&!f.l2?'on':'')+'" onclick="setL1(\''+esc(l1)+'\')">全部</span>';
+    Object.keys(byL1[l1].l2).sort((a,b)=>byL1[l1].l2[b]-byL1[l1].l2[a]).forEach(l2=>{
+      const on = (f.l2===l2) ? 'on' : '';
+      h+='<span class="chip '+on+'" onclick="setL2(\''+esc(l2)+'\')">'+esc(l2)+' <b style="color:var(--dim);font-weight:400">'+byL1[l1].l2[l2]+'</b></span>';
+    });
+    h+='</div></div>';
+  });
+  // 功能标签云
+  const tagCount={};
+  P.forEach(p=>(p.ft||[]).forEach(x=>tagCount[x]=(tagCount[x]||0)+1));
+  const topTags=Object.keys(tagCount).sort((a,b)=>tagCount[b]-tagCount[a]).slice(0,16);
+  if(topTags.length){
+    h+='<div class="catbox"><h3>功能标签</h3><div class="items">';
+    topTags.forEach(t=>{ h+='<span class="chip '+(f.tag===t?'on':'')+'" onclick="setTag(\''+esc(t)+'\')">'+esc(t)+' <b style="color:var(--dim);font-weight:400">'+tagCount[t]+'</b></span>'; });
+    h+='</div></div>';
+  }
+  grid.innerHTML=h;
+}
+function detail(id){
+  const p=P.find(x=>x.id===id); if(!p) return;
+  const evs=(E[id]||[]);
+  let human='';
+  if(p.one) human+='<div class="sec-h">一句话理解（它是什么）</div><div class="hbody">'+esc(p.one)+'</div>';
+  if(p.prob) human+='<div class="sec-h">它解决什么问题</div><div class="hbody">'+esc(p.prob)+'</div>';
+  if(p.ex) human+='<div class="sec-h">举个例子</div><div class="hbody">'+esc(p.ex)+'</div>';
+  if(p.aud) human+='<div class="sec-h">适合谁</div><div class="hbody">'+esc(p.aud)+'</div>';
+  if(p.note) human+='<div class="sec-h">为什么值得留意</div><div class="hbody">'+esc(p.note)+'</div>';
+  if(p.hs==='partial') human+='<div class="todo-box">该工具的更多说明<b>待补全</b>：它在 2026-10-13 之前收录，当时没有落盘英文描述。<br>上面两段来自当日台账，是<b>唯一可用素材</b>，未做任何推断。</div>';
+  if(p.hs==='missing') human+='<div class="todo-box">该工具<b>暂无介绍素材</b>，仅有仓库名与自动推断的分类。</div>';
+  const fnLabels=['是什么','核心功能','常见用途','使用案例','不适合什么场景'];
+  let fnHtml=''; (p.fn||[]).forEach((v,i)=>{ if(v) fnHtml+='<div class="fnrow"><b>'+fnLabels[i]+'</b><span>'+esc(v)+'</span></div>'; });
+  const fnBlock = fnHtml ? ('<div class="sec-h">📘 功能说明</div>'+fnHtml) : '';
+  // 功能备注：多维星级（v3.1 验收要求；**与 star 数无关**）
+  let expBlock='';
+  if(p.exp!==null && p.part){
+    const to5=(v,m)=>((typeof v==='number'&&isFinite(v))?Math.max(1,Math.min(5,Math.round(v/m*5))):null);
+    const num=(v,u)=>((typeof v==='number'&&isFinite(v))?(v+u):'暂无数据');   // B4：缺键不再显示 undefined
+    const easeMap={'开箱即用':5,'轻配置':4,'要编程':2,'要部署':1};
+    const easeTag=(p.t&&p.t[4])||'';
+    const dims=[
+      ['上手难度', easeMap[easeTag]||null, easeTag?('按分类标签「'+easeTag+'」折算'):'分类标签未定'],
+      ['本地运行难度', to5(p.part['易用性'],30), num(p.part['易用性'],'/30')],
+      ['文档质量', to5(p.part['文档完整度'],20), num(p.part['文档完整度'],'/20')],
+      ['功能成熟度', to5(p.part['功能成熟度'],20), num(p.part['功能成熟度'],'/20')],
+      ['活跃程度', to5(p.part['维护活跃'],15), num(p.part['维护活跃'],'/15')],
+      ['推荐程度', p.exp, p.expSc+'/100 综合']
+    ];
+    expBlock='<div class="sec-h">📊 功能备注（多维评分）</div>';
+    dims.forEach(d=>{
+      if(d[1]===null||d[1]===undefined) return;
+      expBlock+='<div class="fnrow"><b>'+d[0]+'</b><span>'+stars5(d[1])+' <span style="color:var(--dim);font-size:var(--fs-xs)">'+d[2]+'</span></span></div>';
+    });
+    expBlock+='<div class="todo-box" style="background:var(--surface-3);border-color:var(--line);color:var(--dim)">评分构成：易用性 30 ｜ 文档完整 20 ｜ 功能成熟 20 ｜ 维护活跃 15 ｜ 风险 15（满分 100）。<b>不看 star 数</b>——500 star 但装上就能用的工具可以五星，5 万 star 但要配半天环境的只能三星。</div>';
+  } else {
+    expBlock='<div class="sec-h">📊 功能备注（多维评分）</div><div class="todo-box">信息不足，<b>暂不评分</b>。资料完整后会补上。</div>';
+  }
+  const tags=(p.ft||[]).map(x=>'<span class="pill pill-fn">'+esc(x)+'</span>').join('');
+  const rows=DIMS.map((d,i)=>'<div><b>'+d+'</b>'+esc(p.t[i])+'</div>').join('');
+  const evHtml=evs.length? evs.map(e=>'<div class="ev"><time>'+e.d+'</time><span><b>'+esc(e.t)+'</b> '+esc(e.x)+'</span></div>').join('') : '<div class="ev">暂无事件记录</div>';
+  document.getElementById('panel').innerHTML='<span class="close" onclick="closePanel()">×</span>'
+    +'<h2>'+esc(p.id)+'</h2>'
+    +'<div style="margin:6px 0 2px">'+stars5(p.exp)+'　<span class="pill pill-fn">'+esc(p.l1)+' / '+esc(p.l2)+'</span>'
+      +((p.tier==='S'||p.tier==='A')?('　<span class="pill tier-'+p.tier+'">'+p.tier+' 档推荐</span>'):(p.tier==='dropped'?'　<span class="pill s-dropped">D 档</span>':'　<span class="pill tier-unrated">D 档</span>'))
+      +'</div>'
+    +human
+    +fnBlock
+    +expBlock
+    +(tags?('<div class="sec-h">🏷 功能与搜索词</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+tags+'</div>'):'')
+    +'<div class="sec-h">📈 成长记录</div>'+evHtml
+    +'<div class="sec-h">🔧 详细信息</div><div class="kv">'
+    +'<div><b>英文描述</b>'+esc(p.desc||'（未落盘）')+'</div>'
+    +'<div><b>星数</b>'+p.stars.toLocaleString()+'　<b>语言</b>'+esc(p.lang||'—')+'</div>'
+    +'<div><b>许可</b>'+esc(p.lic||'未知（历史数据缺失）')+'</div>'
+    +'<div><b>最近提交</b>'+when(p.pushed)+'　<b>首次收录</b>'+p.first+'</div>'
+    +'<div><b>来源</b>'+esc(p.oder||'自动发现')+'　<b>推荐</b>'+(p.rec?(p.tier+' 档 ｜ '+p.rc+' 次'):((p.rc>0)?('历史推荐 '+p.rc+' 次'):'未推荐'))+'</div>'
+    +((p.dr)?('<div><b>D 档原因</b><span style="color:var(--danger)">'+esc(p.dr)+'</span></div>'):'')
+    +'<div><b>台账备注</b>'+esc(p.note||'—')+'</div>'
+    +((p.un&&p.un.filter(x=>x).length)?('<div><b>用户备注</b>'+p.un.filter(x=>x).map(x=>'【'+(x.date||'')+'】'+esc(x.note||'')).join('；')+'</div>'):'')
+    +'<div><b>事件数</b>'+evCount(p)+' 条</div>'
+    +rows+'</div>'
+    +'<div class="kv"><a href="'+repoUrl(p)+'" target="_blank" rel="noopener">在 GitHub 打开 ↗</a></div>';
+  document.getElementById('panel').classList.add('open');
+  setHash(detailLink(p.id));   // 深链：地址栏变成 #/p/owner/repo（复制即分享；后退 = 回上一个集合）
+}
+// ================= hash 路由（P2-9）=================
+// 为什么是 hash：`#/xxx` 在 file:// 下前进/后退/刷新/收藏都可靠，且**不依赖 pushState 的版本差异**。
+// ⚠️ 旧注释「history.pushState 在 file:// 会抛 SecurityError」已被**真机实测推翻**：
+//    2026-10-16 Edge 155 headless：只改 hash 的 pushState({},'','#/x') **不抛**（换路径未实测）。
+//    hash 路由的收益与本条无关，所以维持只用 hash，但注释不能再写错的前提 ✓
+// 设计约束：**不删功能，只搬家** —— detail/showCompare/toggleGroup/addGap/showPlan/
+// buildWorkspaces/showWorkspace 全部保留原名原行为（check-page.js 的安全网）✓
+const VIEWS=['home','picks','all','plans','site'];
+const VIEW_LABEL={home:'① 总览',picks:'② 发现',all:'③ 全库',plans:'④ 方案与工作区',site:'⑤ 档案站'};
+let curView='';          // 当前一级区（图例抽屉打开时**不改变**它）
+let legendReturn='';     // 打开图例前的 hash，关闭时回退
+let lastAllQuery='';     // 离开全库时记住筛选，从详情返回时还原
+
+function getHash(){
+  // 非浏览器环境（check-page.js 的极简 DOM 桩）没有 location → 返回空，页面照常初始化 ✓
+  try{ return (typeof location!=='undefined' && location.hash) ? String(location.hash) : ''; }catch(e){ return ''; }
+}
+function setHash(h){
+  const nx=(String(h||'').charAt(0)==='#')?String(h):('#'+String(h||''));
+  if(getHash()===nx) return false;
+  try{ if(typeof location!=='undefined'){ location.hash=nx; return true; } }catch(e){}
+  return false;
+}
+function parseHash(){
+  let raw=getHash().replace(/^#\/?/,'');
+  let qs='';
+  const qi=raw.indexOf('?');
+  if(qi>=0){ qs=raw.slice(qi+1); raw=raw.slice(0,qi); }
+  const seg=raw.split('/').filter(function(x){ return x!==''; });
+  const out={name:'home', seg:seg, query:qs};
+  if(!seg.length) return out;
+  if(seg[0]==='p' && seg.length>=2){ out.name='p'; out.id=seg.slice(1).join('/'); return out; }
+  if(VIEWS.indexOf(seg[0])>=0){ out.name=seg[0]; return out; }
+  if(seg[0]==='legend'){ out.name='legend'; return out; }
+  if(seg[0]==='ws' && seg.length>=2){ out.name='ws'; out.id=seg[1]; return out; }
+  return out;   // 认不出的路由 → 回总览（不白屏、不抛错）
+}
+function dec(s){ try{ return decodeURIComponent(String(s||'')); }catch(e){ return String(s||''); } }
+function qsMap(qs){
+  const g={};
+  String(qs||'').split('&').forEach(function(kv){
+    if(!kv) return;
+    const i=kv.indexOf('=');
+    const k=i<0?kv:kv.slice(0,i);
+    g[k]=i<0?'':dec(kv.slice(i+1));
+  });
+  return g;
+}
+// 筛选状态 → 查询串（写进 hash 才能分享、才能用后退撤销）
+function filterQuery(){
+  const p=[];
+  const add=function(k,v){ if(v!=='' && v!==null && v!==undefined) p.push(k+'='+encodeURIComponent(v)); };
+  if(f.l1) add('cat', f.l1+(f.l2?('/'+f.l2):''));
+  else if(f.l2) add('sub', f.l2);
+  add('tier',f.tier); add('status',f.status); add('risk',f.risk); add('tag',f.tag);
+  add('five',f.five); add('active',f.active); add('q',f.q); add('badge',f.badge);
+  if(f.sort && f.sort!=='stars') add('sort',f.sort);
+  return p.join('&');
+}
+// 查询串 → 筛选状态。**必须回填控件**：render() 是从控件读 f 的，不回填就被清掉 ✗
+function applyQuery(qs){
+  const g=qsMap(qs);
+  f.l1=''; f.l2=''; f.tag=''; f.tier=''; f.status=''; f.risk=''; f.five=''; f.active=''; f.q=''; f.sort='stars'; f.badge='';
+  if(g.cat){ const a=String(g.cat).split('/'); f.l1=a[0]||''; f.l2=a[1]||''; }
+  if(g.sub) f.l2=g.sub;
+  f.tier=g.tier||''; f.status=g.status||''; f.risk=g.risk||''; f.tag=g.tag||'';
+  f.five=g.five||''; f.active=g.active||''; f.q=g.q||''; f.sort=g.sort||'stars'; f.badge=g.badge||'';
+  const setV=function(id,v){ const el=document.getElementById(id); if(el) el.value=v; };
+  setV('q',f.q); setV('fs',f.status); setV('fr',f.risk); setV('ft',f.tier);
+  setV('f5',f.five); setV('fa',f.active); setV('sort',f.sort); setV('fb',f.badge);
+}
+// 用户显式改筛选后调用：把当前筛选写进地址栏（不做历史去重就会刷屏，setHash 内部已比对）
+function syncURL(){
+  if(curView!=='all') return;
+  const q=filterQuery();
+  lastAllQuery=q;
+  setHash('#/all'+(q?('?'+q):''));
+}
+function ensureAllView(){
+  if(curView==='all') return;
+  const q=filterQuery();
+  setHash('#/all'+(q?('?'+q):''));
+}
+function searchFor(term){
+  const el=document.getElementById('q');
+  if(el) el.value=term;
+  f.q=String(term||'').toLowerCase();
+  ensureAllView();     // 在总览区点搜索示例 → 切到全库，否则用户看不到结果
+  render();
+}
+function showView(name){
+  curView=name;
+  VIEWS.forEach(function(v){
+    const el=document.getElementById('view-'+v);
+    if(el){ if(v===name) el.classList.add('on'); else el.classList.remove('on'); }
+    const nb=document.getElementById('nav-'+v);
+    if(nb){ if(v===name) nb.classList.add('on'); else nb.classList.remove('on'); }
+  });
+  // 排序/状态/风险/档位/评分/活跃度只对「全库」有意义 → 其它区收起（搜索框常驻，设计 §5）
+  const tb=document.getElementById('toolbar');
+  if(tb){ if(name==='all') tb.classList.remove('off'); else tb.classList.add('off'); }
+}
+function crumb(parts, note){
+  const el=document.getElementById('crumb');
+  if(!el) return;
+  if((!parts||!parts.length) && !note){ el.classList.remove('on'); el.innerHTML=''; return; }
+  el.classList.add('on');
+  let h=(parts||[]).map(function(p){
+    if(p.href) return '<a onclick="setHash(\''+p.href+'\')">'+esc(p.t)+'</a>';
+    return '<b>'+esc(p.t)+'</b>';
+  }).join(' <span style="color:var(--dim)">›</span> ');
+  if(note) h+='<span style="margin-left:10px">'+esc(note)+'</span> <span class="chip" onclick="clearAll()">清空筛选</span>';
+  el.innerHTML=h;
+}
+function go(name){
+  const h='#/'+name;
+  if(getHash()===h){ route(); return; }
+  if(!setHash(h)) route();     // 极端环境（拿不到 location）也要能用
+}
+// 关掉图例后该回到哪：[ 优先用打开前的真实 URL（含筛选）→ 否则按当前区兜底 ]
+// 兜底是必需的：直接打开 `#/legend`（分享链接 / 刷新）时没有"打开前"的 URL，
+// 而 route() 处理 legend 时**不改变** curView，所以 curView 仍是要回去的那一区 ✓
+function legendBackHash(){
+  if(curView==='all') return '#/all'+(lastAllQuery?('?'+lastAllQuery):'');
+  return curView?('#/'+curView):'#/home';
+}
+function openLegend(){
+  const h=getHash();
+  if(!legendReturn) legendReturn=(h && h!=='#/legend')?h:legendBackHash();
+  const el=document.getElementById('legend'); if(el) el.classList.add('open');
+  const nb=document.getElementById('nav-legend'); if(nb) nb.classList.add('on');
+  setHash('#/legend');
+}
+// E-2（2026-10-17）：**不新增历史记录**地改 hash —— 关抽屉专用。
+// 为什么：抽屉是叠加层（设计 §1「不改变所在区」），原来关闭走 pushState ⇒ 历史里多一条，
+// 按一次「后退」抽屉又弹回来 ✗。file:// 下 hash-only 的 replaceState 实测可用；不可用则回落到 setHash ✓
+function replaceHash(h){
+  const nx=(String(h||'').charAt(0)==='#')?String(h):('#'+String(h||''));
+  if(getHash()===nx) return false;
+  try{ if(typeof history!=='undefined' && history.replaceState){ history.replaceState(null,'',nx); return true; } }catch(e){}
+  return setHash(nx);
+}function closeLegend(){
+  const el=document.getElementById('legend'); if(el) el.classList.remove('open');
+  const nb=document.getElementById('nav-legend'); if(nb) nb.classList.remove('on');
+  if(getHash()==='#/legend'){
+    const back=legendReturn||'#/home';
+    legendReturn='';
+    replaceHash(back);   // E-2：关抽屉不新增历史记录 ✓             // 回到打开图例前的那一区（叠加层，不改变区）
+  }
+}
+// 深链：由 detail/showPlan/showWorkspace **自身**写 hash。
+// 为什么不另起 openDetail/openPlan 包装：check-page.js 的安全网是按 `detail('…')` /
+// `showPlan('…')` 字面抓的（⑦⑨ 两项），改名等于自己拆网（设计 §7：优先保留原名原行为）。
+function detailLink(id){ return '#/p/'+String(id).split('/').map(encodeURIComponent).join('/'); }
+function closePanel(){
+  const p=document.getElementById('panel'); if(p) p.classList.remove('open');
+  const h=getHash();
+  if(h.indexOf('#/p/')===0) setHash('#/all'+(lastAllQuery?('?'+lastAllQuery):''));
+  else if(h.indexOf('#/plans/')===0 || h.indexOf('#/ws/')===0) setHash('#/plans');
+}
+function route(){
+  const r=parseHash();
+  if(r.name==='legend'){
+    // 真实浏览器实测（2026-10-17，Edge headless）：直接打开 `#/legend` 时 curView 还是空，
+    // 四个 `.view` 全部 display:none → **抽屉背后白屏**。所以先垫一个区，再开抽屉 ✓
+    // 已经有区时不动它 —— 设计 §2 要求「打开图例不改变当前区」✓
+    if(!curView) showView('home');
+    openLegend();
+    return;
+  }
+  const le=document.getElementById('legend'); if(le) le.classList.remove('open');
+  const nlg=document.getElementById('nav-legend'); if(nlg) nlg.classList.remove('on');
+  let v='home';
+  if(r.name==='p'||r.name==='all') v='all';
+  else if(r.name==='picks') v='picks';
+  else if(r.name==='plans'||r.name==='ws') v='plans';
+  else if(r.name==='site') v='site';
+  showView(v);
+  if(r.name==='all'){
+    applyQuery(r.query);
+    lastAllQuery=r.query||'';
+    const cp=[{t:'全库',href:'#/all'}];
+    if(f.l1) cp.push(f.l2?{t:f.l1,href:'#/all?cat='+encodeURIComponent(f.l1)}:{t:f.l1});
+    if(f.l2) cp.push({t:f.l2});
+    const sel=[f.tier&&('档位 '+f.tier), f.status&&('状态 '+f.status), f.risk&&('风险 '+f.risk),
+      f.tag&&('标签 '+f.tag), f.five&&('评分筛选'), f.active&&('活跃 '+f.active+' 天'), f.q&&('搜索「'+f.q+'」')].filter(Boolean);
+    crumb(cp, sel.length?('已选：'+sel.join(' × ')):'');
+    buildCat(); render();
+  } else if(r.name==='picks'){
+    crumb([]);
+    buildToday(dec(r.seg[1]||''));
+  } else if(r.name==='p'){
+    // 详情深链：**保留**内存里的筛选（返回时用 lastAllQuery 还原）
+    buildCat(); render();
+    crumb([{t:'全库',href:'#/all'+(lastAllQuery?('?'+lastAllQuery):'')},{t:r.id}]);
+    detail(dec(r.id));
+  } else if(r.name==='plans'){
+    crumb([]);
+    if(r.seg[1]) showPlan(dec(r.seg[1]));
+  } else if(r.name==='ws'){
+    crumb([{t:'方案与工作区',href:'#/plans'},{t:'我的工作区'}]);
+    showWorkspace(dec(r.id));
+  } else {
+    crumb([]);
+  }
+  try{ document.title='我的开源工具库 · '+VIEW_LABEL[v]+(r.name==='p'?(' · '+r.id):''); }catch(e){}
+}
+try{ if(typeof window!=='undefined' && window.addEventListener) window.addEventListener('hashchange', route); }catch(e){}
+document.addEventListener('keydown',e=>{
+  if(e.key==='/' && document.activeElement!==document.getElementById('q')){ e.preventDefault(); document.getElementById('q').focus(); }
+  if(e.key==='Escape'){
+    // 先关叠加层（图例），再关详情面板 —— 与「Esc 回到上一个集合」一致
+    const lg=document.getElementById('legend');
+    if(lg && lg.classList.contains('open')){ closeLegend(); return; }
+    closePanel(); clearCmp();
+  }
+});
+buildToday(); buildPlans(); buildWorkspaces(); buildCat(); loadGaps(); render(); renderCmpBar();
+// 批次 6（2026-10-16 用户实测报障）：封面 `#hero` 已从"可关闭的引导横幅"升级为**首页主体**
+//（刊头 ARCHIVE INDEX + 入口 chips），**不再允许收起** ✗。历史遗留的 `dsh-lib-hero=off` 必须**清掉** ——
+// 否则点过"收起"的用户会**永久看不到封面**（localStorage 在 file:// 下按源持久保存，这就是"总览上方少一块"的真因）。
+try{ if(localStorage.getItem('dsh-lib-hero')==='off'){ localStorage.removeItem('dsh-lib-hero'); } }catch(e){}
+// 路由必须在首次 render 之后：route() 会按 hash 覆盖筛选状态并重渲染（刷新保持当前视图 ✓）
+try{ route(); }catch(err){ if(typeof console!=='undefined' && console.error) console.error('路由初始化失败（页面其余功能不受影响）', err); }
+</script>
+</body>
+<!-- BUILD-STAMP: build 2026-11-05 11:27 ｜ 数据指纹 1897ED64EC78 ｜ 15 条 -->
+</html>

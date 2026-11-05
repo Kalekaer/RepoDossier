@@ -1,4 +1,4 @@
-﻿# 字体来源与授权（assets/fonts/）
+# 字体来源与授权（assets/fonts/）
 
 > 两款均为 **SIL Open Font License 1.1（OFL）**：可商用、可嵌入网页、可再分发；不得单独售卖字体本身。起诉风险极低（OFL 是目前最通用的开源字体许可）。
 

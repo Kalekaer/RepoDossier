@@ -1,3 +1,9 @@
+<!-- distribution-v1.2.2 -->
+> v1.2.2：本包是15条demo数据。网页可直接打开；兼容入口需PowerShell 7和Python 3.9+。
+> 下载后运行 `pwsh -NoProfile -File tools/check-all.ps1`，其中回归测试无需Pester。
+> `-Publish -Date YYYY-MM-DD` 只用于真实日报，缺少检索或审阅范围会阻塞。
+> 公共文件清单与指纹在 `distribution.json`；发布复现方法见 `docs/releasing.md`。
+
 # DSH Skill 合集：把 GitHub 变成你自己的工具库
 # DSH Skill Collection: Turn GitHub into your own tool library
 
@@ -40,7 +46,7 @@ Local-first, zero dependencies, double-click to open; all data lives in plain-te
 
 | 内容 / Item | 说明 / Description |
 |---|---|
-| **`github-daily-picks`** | 主角：本地开源工具库 + 每日 GitHub 精品日报（`.dsh/skills/github-daily-picks/`）/ Main skill: a local open-source tool library plus a daily curated GitHub brief |
+| **`github-daily-picks`** | 主角：本地开源工具库 + 每日 GitHub 每日精选（`.dsh/skills/github-daily-picks/`）/ Main skill: a local open-source tool library plus a daily curated GitHub brief |
 | **`tool-stack`** | 配套：说一句「我要做 X」，从你自己的库里配出一套工具（`.dsh/skills/tool-stack/`）/ Companion skill: say "I want to do X" and it assembles a stack from your library |
 | **`index.html`** | 站点入口：首页 / 每日精选 / 全库 / 计划与工作区 5 页，**下载后双击即可体验**（离线、无需服务器）/ Site entry: 5 pages, **runs by double-click after download** (offline, no server) |
 | **`data/`** | 只有 demo + 规则文件 + 空数据桩；你的真实数据从空文件长出来 / Demo data, rule files, and empty stubs only; your real data grows from empty files |
@@ -95,7 +101,7 @@ Local-first, zero dependencies, double-click to open; all data lives in plain-te
 |---|---|
 | **静态站点，无 fetch** / Static site, no fetch | 双击即用、零依赖（字体与图都在本地 `assets/`）。代价：页面**写不了数据**，所以「加项目 / 改状态 / 建工作区」都在对话里完成——**宁可少一个按钮，也不放一个点了没用的按钮** / Works offline with zero dependencies. Cost: pages cannot write data, so edits happen in chat — **no fake buttons** |
 | **原始层 → 投影层 → 视图** / Raw → projection → view | `seen.jsonl` 等原始文件是唯一可写的；`projects.jsonl` / `events.jsonl` 是**可全量重建**的投影；`index.html` + `data/site/*.generated.html` 是视图。绝不手工改投影 / Only raw files are writable; projections are fully rebuildable; never edit projections by hand |
-| **机器发现、人批准** / Machine proposes, human approves | 同义词 / 分类 / 方案 / 搜索缺口，都由脚本挖候选，**人工点头才生效**——避免 AI 自由造分类 / Candidates are mined by scripts and take effect only after human approval |
+| **机器发现、人批准** / Machine proposes, human approves | 同义词 / 分类 / 方案 / 搜索缺口，都由脚本挖检索项目，**人工点头才生效**——避免 AI 自由造分类 / Candidates are mined by scripts and take effect only after human approval |
 | **本地规则优先（0 token）** / Local rules first | 搜索、匹配、分类、方案、工作区**全是本地规则**；只有「抓 README / 临时检索」花 API 额度，且**先说清再动** / Search, matching, classification, plans, workspaces are local rules; only README fetches and ad-hoc searches spend API quota |
 | **只做归类，不编造** / Classify, never invent | 方案只按用途归类，不规定流程顺序；字段缺失一律标「未验证 / 待补全」/ Plans group by purpose, not order; missing fields are marked "unverified / to fill" |
 | **检索式单一真源** / Single source of truth for queries | 检索式集中在 `data/queries.json`，文档由脚本生成（`gen-query-docs.ps1`）；当天覆盖由 `check-queries.ps1` 把关，缺必跑项会让清单变红 / Queries live in one JSON file; docs are generated; daily coverage is gated |
@@ -127,7 +133,7 @@ But "run the daily report / I want to do ___ / add a project / create a workspac
 > **Opening the site in DSH**: after producing output, the agent attaches an `index.html` file card; click it → Open with → Edge. Otherwise, double-click `index.html`.
 
 装好后在对话里说任意一句 / Once installed, say any of these:
-- 「**跑今天的日报**」「今日 GitHub 精品」「最近热门项目」「有什么值得关注的开源项目」→ 走 `PROMPT-daily.md` 的完整流程 / Full daily flow
+- 「**跑今天的日报**」「今日 GitHub 每日精选」「最近热门项目」「有什么值得关注的开源项目」→ 走 `PROMPT-daily.md` 的完整流程 / Full daily flow
 - 「**我要做 ___ **」→ 走 `/tool-stack`，从你自己的库里配一套工具 / Build a stack from your library
 
 > 怎么确认装好了：直接说触发口令，看它是否照 `PROMPT-daily.md` 的步骤走（读台账 → 搜索 → 打分 → 写日报）。
@@ -141,7 +147,7 @@ But "run the daily report / I want to do ___ / add a project / create a workspac
 **Prerequisite**: skills installed into DSH or Codex (section 0).
 
 在 DSH 对话里说任意一句 / Say any of these in chat:
-- 「**跑今天的日报**」「今日 GitHub 精品」「最近热门项目」「有什么值得关注的开源项目」
+- 「**跑今天的日报**」「今日 GitHub 每日精选」「最近热门项目」「有什么值得关注的开源项目」
 
 Agent 会读 `PROMPT-daily.md` 执行完整流程。
 The agent reads `PROMPT-daily.md` and runs the full flow.
@@ -158,8 +164,8 @@ The agent reads `PROMPT-daily.md` and runs the full flow.
 | 步骤 / Step | 动作 / Action | 产出 / Output | 谁来做 / Who |
 |---|---|---|---|
 | 1 | 读取去重台账 `data/seen.jsonl` 与最近快照 / Read the ledger and recent snapshots | 已知仓库集合 + 星数基线 / Known repos + star baselines | 脚本/Agent |
-| 2 | 跑 `fetch-daily -PlanOnly` 生成当天计划，按计划用 `web_fetch` 逐条取数，再用 `-Import` 登记 / Build the day's plan, fetch each URL with `web_fetch`, register results with `-Import` | 5–8 次 Search 调用、**60–100 条**原始候选 / 5–8 Search calls, **60–100** raw candidates | `web_fetch` |
-| 3 | 与台账比对：新面孔 / 老朋友 / 已淘汰 / Compare with the ledger | 分类后的候选 / Classified candidates | Agent |
+| 2 | 跑 `fetch-daily -PlanOnly` 生成当天计划，按计划用 `web_fetch` 逐条取数，再用 `-Import` 登记 / Build the day's plan, fetch each URL with `web_fetch`, register results with `-Import` | 5–8 次 Search 调用、**60–100 条**原始检索项目 / 5–8 Search calls, **60–100** raw candidates | `web_fetch` |
+| 3 | 与台账比对：新面孔 / 老朋友 / 已不再看 / Compare with the ledger | 分类后的检索项目 / Classified candidates | Agent |
 | 4 | 按 `RUBRIC.md` 打分、排除、排序 / Score, exclude, rank | **S/A/B/C/D 五档**，S ≤ 3、S+A ≤ 8 / Five tiers, S ≤ 3, S+A ≤ 8 | Agent |
 | 5 | 按 `TEMPLATES/daily.md` 写日报 / Write the brief | `reports/YYYY-MM-DD.md` | Agent |
 | 6 | 回写台账、快照、picks、索引、CSV、累积表格 / Write back ledger, snapshots, picks, index, CSV, table | `data/seen.jsonl`、`data/snapshots/`、`data/picks/`、`reports/index.md`、`data/recommend-log.csv`、`GitHub推荐记录.univer` | Agent |
@@ -211,7 +217,7 @@ github-daily-picks/                 ← 解压出来的仓库根目录 / repo ro
 │  ├─ meta/2026-10-19.jsonl         ← demo 抓取元数据 / demo metadata
 │  ├─ recommend-log.csv             ← demo 推荐记录（5 行）/ 5 demo rows
 │  ├─ raw/                          ← 运行时的检索计划与原始响应（不入库）/ runtime scratch
-│  ├─ taxonomy-suggestions.jsonl    ← 分类候选（空桩）/ empty stub
+│  ├─ taxonomy-suggestions.jsonl    ← 分类检索项目（空桩）/ empty stub
 │  ├─ status-log.jsonl              ← 状态变更日志（空桩）/ empty stub
 │  ├─ user-notes.jsonl              ← 用户备注层（空桩）/ empty stub
 │  └─ workspaces.jsonl              ← 工作区层（空桩）/ empty stub
@@ -232,7 +238,7 @@ github-daily-picks/                 ← 解压出来的仓库根目录 / repo ro
 | `data/snapshots/*.jsonl` | 每日星数快照 / daily star snapshots |
 | `data/picks/YYYY-MM-DD.jsonl` | 机器可读推荐档案 / machine-readable picks |
 | `data/runs/` `data/push/` | 运行日志 / 短版推送文案 / run logs / push copy |
-| `reports/` `精品项目/` | 中文日报与推荐卡片 / reports and cards |
+| `reports/` `reports/` | 中文日报与推荐卡片 / reports and cards |
 | `GitHub推荐记录.univer` | 累积表格本体 / cumulative table |
 
 ---
@@ -249,7 +255,7 @@ github-daily-picks/                 ← 解压出来的仓库根目录 / repo ro
 | **站点总览** / Site overview | `index.html` |
 | **今天的日报页** / Today's page | `data/site/daily-layout-c-finsara.generated.html` |
 | 全库 / 计划页 / Library, plans | `data/site/library-notebook.generated.html`、`data/site/plans-shelf.generated.html` |
-| 项目详细卡片 / Project card | `精品项目/YYYY-MM-DD/` |
+| 项目详细卡片 / Project card | `reports/YYYY-MM-DD/` |
 | 运行日志 / Run log | `data/runs/YYYY-MM-DD.md` |
 | 机器可读数据 / Machine data | `data/picks/YYYY-MM-DD.jsonl` |
 | 推送文案 / Push copy | `data/push/YYYY-MM-DD.txt` |
@@ -293,7 +299,7 @@ Status lives in the **raw ledger**; `status` must be one of these five values:
 | `using` | **我正在使用**（唯一的个人状态标记）/ I am using it |
 | `watching` | 我关注它的发展 / watching its development |
 | `researching` | 你在研究 / researching |
-| `dropped` | 已放弃（**软删除**，90 天冷却）/ dropped (soft delete, 90-day cooldown) |
+| `dropped` | 已放弃（**状态标记保留记录**，90 天冷却）/ dropped (soft delete, 90-day cooldown) |
 
 > **不要再加"收藏 / 喜欢 / 待测试 / 关注"**——试过，会重新变成垃圾。曾经的「收藏」功能（`data/user-library.jsonl` + `tools/favorite.ps1`）**已整体删除**。
 > **Do not add "favorite / like / test-later / follow"** — tried before, it turned into junk. The old favorite feature was removed entirely.
@@ -316,7 +322,7 @@ Status lives in the **raw ledger**; `status` must be one of these five values:
 | 症状 / Symptom | 先看 / Check first | 常见原因 / Common cause |
 |---|---|---|
 | 今天没出日报 / No report today | `data/runs/YYYY-MM-DD.md` | 数据源失败 / 网络不通 / 幂等跳过 / source or network failure |
-| 日报条目明显变少 / Fewer entries | 日报头部「候选 N 条」 | 检索式返回骤降，或当天候选确实少（**不降标准凑数**）/ fewer candidates; never lower the bar |
+| 日报条目明显变少 / Fewer entries | 日报头部「检索项目 N 条」 | 检索式返回骤降，或当天检索项目确实少（**不降标准凑数**）/ fewer candidates; never lower the bar |
 | 星数看起来不对 / Stars look wrong | 日报头部「抓取时间」 | 数据是快照时点，不是实时 / snapshot time, not live |
 | 定时没触发 / Schedule missed | 第 1 节限制 | **DSH 必须开着** / DSH must be running |
 | 配置改了没效果 / Config ignored | 跑 `check-config.ps1` | 字段名写错，或改到了不生效的 `schedule` / wrong field |

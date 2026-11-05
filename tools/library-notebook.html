@@ -532,6 +532,21 @@ body{background:#0a0a0a;background-image:
 .wscroll i:hover{background:var(--bm)}
 .wall-rail .rail-stat{color:#7a7a70}
 .wall-rail .rail-stat b{color:var(--bf)}
+@media (max-width:980px){
+  .wall-board{margin-left:180px;padding:56px 20px 90px}
+}
+@media (max-width:760px){
+  body.wall-view .viewswitch{position:fixed;top:12px;left:18px;right:auto;margin:0}
+  .wall-rail{position:relative;inset:auto;width:auto;padding:66px 18px 14px;border-right:0;border-bottom:3px solid var(--bp);overflow:visible}
+  .rail-search input{min-width:0}
+  .rail-tags{flex-direction:row;flex-wrap:wrap;gap:6px}
+  .rail-tags button{flex:0 0 auto;font-size:12px}
+  .rail-stat{margin-top:10px}
+  .wall-board{margin-left:0;padding:24px 18px 80px;min-height:0}
+  .wpins{column-count:2}
+  .wpins>.wcard:nth-child(n){margin:0 0 20px;transform:none}
+}
+@media (max-width:480px){.wpins{column-count:1}}
 /* 底部快捷键提示 */
 .keyhint{max-width:1320px;margin:6px auto 18px;padding:0 20px;font:700 9px/1.6 var(--mono);letter-spacing:.16em;color:#6a6a60;text-transform:uppercase}
 .keyhint b{color:var(--bf);border:1.5px solid #3a3a36;padding:2px 5px;margin-right:4px}
@@ -1021,6 +1036,7 @@ document.getElementById('next').onclick = function () {
   /* 视图切换：手账 <-> 线索墙（记住选择，URL ?view=wall 可直达） */
   function showView(v) {
     var wall = document.getElementById('wall');
+    document.body.classList.toggle('wall-view', v === 'wall');
     document.getElementById('viewNB').style.display = v === 'nb' ? '' : 'none';
     wall.classList.toggle('on', v === 'wall');
     [].forEach.call(document.querySelectorAll('#vswitch button'), function (b) {

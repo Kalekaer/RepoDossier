@@ -1,4 +1,4 @@
-﻿# 背景素材来源与授权（assets/bg/）
+# 背景素材来源与授权（assets/bg/）
 
 > 全部来自 **NASA Image and Video Library**（images-api.nasa.gov），2026-10-17 下载到本地。
 > 依据 [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/)：NASA 自有素材**一般不受版权保护**（可商用）；若画面含第三方版权会在原页面标注。本页三张均为 NASA 自摄，摄影师署名如下。

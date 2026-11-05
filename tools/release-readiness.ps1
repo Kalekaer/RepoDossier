@@ -2,6 +2,15 @@
 param([string]$Date='', [string]$Root=(Split-Path -Parent $PSScriptRoot))
 $ErrorActionPreference='Stop'
 if(-not $Date){$Date=[datetime]::UtcNow.AddHours(8).ToString('yyyy-MM-dd')}
+$scope=Join-Path $Root "data/audit/editorial/$Date.json"
+$policyPath=Join-Path $Root 'data/search-policy.json'
+if(Test-Path $policyPath){
+ $policy=Get-Content $policyPath -Raw|ConvertFrom-Json
+ if($policy.publication_mode -eq 'declared-editorial-batch' -and -not(Test-Path $scope)){
+  Write-Host '发布就绪：BLOCKED（缺少当期审阅范围，不能跳过发布门禁）'
+  exit 1
+ }
+}
 $results=@{}
 $reviewGate=@{name='dispositions';script='candidate-ledger.ps1';args=@{Date=$Date;Root=$Root;Action='check';Publish=$true}}
 $policyPath=Join-Path $Root 'data/search-policy.json'

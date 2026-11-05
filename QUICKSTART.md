@@ -1,3 +1,9 @@
+<!-- distribution-v1.2.2 -->
+> v1.2.2：本包是15条demo数据。网页可直接打开；兼容入口需PowerShell 7和Python 3.9+。
+> 下载后运行 `pwsh -NoProfile -File tools/check-all.ps1`，其中回归测试无需Pester。
+> `-Publish -Date YYYY-MM-DD` 只用于真实日报，缺少检索或审阅范围会阻塞。
+> 公共文件清单与指纹在 `distribution.json`；发布复现方法见 `docs/releasing.md`。
+
 <!-- DSH + Codex adapter -->
 在 DSH 中，从本仓库根目录使用 `.dsh/skills/` 下的 `github-daily-picks` 和 `tool-stack`；在 Codex 中使用 `.agents/skills/` 下的同名技能。本机入口为 `index.html`。网络优先使用当前宿主的原生 HTTP 工具；Codex 没有 `web_fetch` 时用 `gh api` 或经授权的 `curl.exe`。验收统一执行 `tools/check-all.ps1`。
 
@@ -103,7 +109,7 @@
 不用。页面和所有数据都在本地。只有两种情况要联网：① 每天自动发现新项目 ② 你让我去 GitHub 搜新工具。
 
 **Q：数据会上传吗？**
-不会。全部在 `E:\工作区\GitHub日报\data\` 里，纯文本 JSON 文件，你用记事本都能打开。
+不会。全部在 `<工作区>` 里，纯文本 JSON 文件，你用记事本都能打开。
 
 **Q：我可以直接改数据吗？**
 可以，但**只改 `data/` 下的原始文件**（如 `data/seen.jsonl` 的 `status`、`data/user-notes.jsonl` 的备注），然后跑一次同步。**不要手工改 `projects.jsonl` / `events.jsonl`**——那是自动生成的，下次同步会覆盖。

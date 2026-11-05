@@ -24,12 +24,22 @@ function Run-Gate([string]$Name, [string]$Script, [hashtable]$GateArgs = @{}) {
   Write-Host ("[{0}] {1}" -f $(if ($code -eq 0) { 'PASS' } else { 'FAIL' }), $Name) -ForegroundColor $(if ($code -eq 0) { 'Green' } else { 'Red' })
 }
 
-function Skip-Gate([string]$Name, [string]$Why) {
-  $script:results += [pscustomobject]@{ name = $Name; code = 0; tail = "SKIP: $Why" }
-  Write-Host ("[SKIP] {0} — {1}" -f $Name, $Why) -ForegroundColor Yellow
-}
-
 Run-Gate 'validate-lib' 'tools\validate-lib.ps1'
+if(Test-Path (P 'distribution.json')) {
+  # A distribution has its own portable checks, never inferred from missing files.
+  Run-Gate 'distribution-integrity' 'tools\check-distribution.ps1'
+  Run-Gate 'check-config' 'tools\check-config.ps1'
+  Run-Gate 'audit' '.dsh\skills\github-daily-picks\audit.ps1'
+  Run-Gate 'portable-tests' 'tests\distribution-tests.ps1'
+  Run-Gate 'check-page' 'tools\check-page.ps1'
+  Run-Gate 'check-queries-static' 'tools\check-queries.ps1' @{Static=$true}
+  Run-Gate 'term-check' 'tools\term-check.ps1'
+  if($Publish){Run-Gate 'release-readiness' 'tools\release-readiness.ps1' @{Date=$Date;Root=$Root}}
+  $bad=@($script:results|Where-Object code -ne 0)
+  Write-Host ("== distribution check-all: {0} passed / {1} failed / 0 skipped ==" -f ($script:results.Count-$bad.Count),$bad.Count)
+  if(-not $Publish){Write-Host 'Distribution checks do not certify a daily report. Use -Publish -Date YYYY-MM-DD for a real daily publication.'}
+  if($bad.Count){exit 1};exit 0
+}
 Run-Gate 'verify-handoff' 'tools\verify-handoff.ps1'
 Run-Gate 'audit' '.dsh\skills\github-daily-picks\audit.ps1'
 Run-Gate 'run-tests' 'tests\run-tests.ps1'
@@ -38,18 +48,12 @@ Run-Gate 'check-queries-static' 'tools\check-queries.ps1' @{ Static = $true }
 Run-Gate 'check-queries-2026-10-24' 'tools\check-queries.ps1' @{ Date = '2026-10-24' }
 $latestRaw = Get-ChildItem (P 'data\raw') -Directory -ErrorAction SilentlyContinue |
   Where-Object { $_.Name -match '^\d{4}-\d{2}-\d{2}$' } | Sort-Object Name | Select-Object -Last 1
-$hasCandidates = Test-Path (P 'data\candidates.jsonl')
-$hasEvidence = Test-Path (P 'data\evidence\state.json')
 if ($latestRaw) { Run-Gate 'discovery-refresh' 'tools\discovery-refresh.ps1' @{ Date = $latestRaw.Name; Root = $Root } }
-if ($latestRaw -and $hasCandidates) { Run-Gate 'candidate-accounting' 'tools\candidate-ledger.ps1' @{ Action = 'check'; Date = $latestRaw.Name; Root = $Root } } else { Skip-Gate 'candidate-accounting' 'candidate ledger not initialized (DSH legacy mode)' }
-if ($latestRaw -and $hasCandidates) { Run-Gate 'review-health' 'tools\review-health.ps1' @{ Date = $latestRaw.Name; Root = $Root } } else { Skip-Gate 'review-health' 'candidate ledger not initialized (DSH legacy mode)' }
+if ($latestRaw) { Run-Gate 'candidate-accounting' 'tools\candidate-ledger.ps1' @{ Action = 'check'; Date = $latestRaw.Name; Root = $Root } }
+if ($latestRaw) { Run-Gate 'review-health' 'tools\review-health.ps1' @{ Date = $latestRaw.Name; Root = $Root } }
 Run-Gate 'term-check' 'tools\term-check.ps1'
-if ($hasEvidence) { Run-Gate 'evidence-integrity' 'tools\evidence-queue.ps1' @{Action='check';Root=$Root} } else { Skip-Gate 'evidence-integrity' 'evidence store not initialized (DSH legacy mode)' }
-if($Publish){
-  $hasEditorialScope = $Date -and (Test-Path (P "data\audit\editorial\$Date.json"))
-  if($hasCandidates -and $hasEditorialScope){ Run-Gate 'release-readiness' 'tools\release-readiness.ps1' @{Date=$Date;Root=$Root} }
-  else { Skip-Gate 'release-readiness' 'editorial scope not initialized; use legacy DSH publish flow' }
-}
+Run-Gate 'evidence-integrity' 'tools\evidence-queue.ps1' @{Action='check';Root=$Root}
+if($Publish){Run-Gate 'release-readiness' 'tools\release-readiness.ps1' @{Date=$Date;Root=$Root}}
 
 $bad = @($script:results | Where-Object { $_.code -ne 0 })
 Write-Host ""

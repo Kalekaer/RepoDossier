@@ -1,3 +1,9 @@
+<!-- distribution-v1.2.2 -->
+> v1.2.2：本包是15条demo数据。网页可直接打开；兼容入口需PowerShell 7和Python 3.9+。
+> 下载后运行 `pwsh -NoProfile -File tools/check-all.ps1`，其中回归测试无需Pester。
+> `-Publish -Date YYYY-MM-DD` 只用于真实日报，缺少检索或审阅范围会阻塞。
+> 公共文件清单与指纹在 `distribution.json`；发布复现方法见 `docs/releasing.md`。
+
 # AGENTS.md — DSH + Codex 双宿主发布包
 
 本目录是 **demo 发布包**，同时支持 DSH 与 Codex。  
@@ -27,7 +33,7 @@
 
 ## 数据边界
 
-- 本包只有 **15 条 demo 数据**，不含作者真实库、picks、报告、候选积压。
+- 本包只有 **15 条 demo 数据**，不含作者真实库、picks、报告、检索项目积压。
 - 不要手工改 `data/projects.jsonl` / `data/events.jsonl` / 生成页面。
 - 原始层 → `sync-projects` → `rebuild-page`。
 - 评分、术语、日报配额以 `GLOSSARY.md` 和 `RUBRIC.md` 为准。
