@@ -27,6 +27,10 @@
 
 ## 步骤
 
+2026-11-07 起，任何宿主不得因迟到、会话长或已选够推荐自行漏跑 Q。查询由 `data/queries.json` 生成并由程序重新核对；上下文读数拿不到就写未知，不估算“还能跑几条”。大响应完整落盘，模型只看下一步与进度摘要。原生 curl 不可用但宿主 HTTP 可用时，使用 `collect-daily -NextRequest` → 按指令完整落盘 → `fetch-daily -Import`，沿用同一日期/轮次/分页，不缩小 per_page、不新拼 URL。只有下一步 kind=request 且退出0才请求；paused/blocked 只保留断点。每次汇报填程序产生的计划数、成功数、缺失 Q、停止原因与证据路径；缺查询不能靠“不完整”标签发布。完整约束见 `docs/network-and-query-reliability.md`。
+
+联网前先运行 `tools/daily-network.ps1 -Action Status`。当前工作区要求认证；凭据由统一函数读取，缺少登录时不静默退回匿名扫完整日报。已知宿主网络拒绝直接申请正式网络执行，不逐项目重复试连，不删冷却状态绕过。常规 README 补证用 `daily-network -Action Readmes -Batch <既有包>`，在 30 分钟累计等待上限内按真实冷却自动续采，不让用户每次说“继续”。认证/网络/预算阻塞须说明具体原因。详见 `docs/network-and-query-reliability.md`。
+
 1. **开工备份 + 读台账**：先跑 `tools/daily-backup.ps1`（把台账 / CSV / 当日 picks·快照·元数据 / 投影备份到 `data/_backup/<date>/pre-daily/`，不覆盖已有备份），再跑 `tools/run-manifest.ps1 -Init`；然后读 `data/seen.jsonl`（不存在则视为空）、`data/snapshots/` 最近一份快照。
 2. **取检索结果**：统一运行 `tools/collect-daily.ps1 -Date <日期>`。该队列复用最新轮次计划，首次自动调用 `fetch-daily -PlanOnly`；校验并跳过成功 raw、串行取数、限流按响应头等待后续采、通过现有 Import 登记。默认等待总预算 900 秒，退出 2 时断点保留，再次运行同命令继续；不要另起手写批量 curl 绕开队列。明确要求新增一轮时才指定 `-Round <新轮次>`。实验 probe 仍由原有实验工具执行。
    <!-- QGEN:ORDER:START -->

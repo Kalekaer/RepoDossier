@@ -2,11 +2,13 @@
 # Exit 0=coverage complete; 2=incomplete/paused; 1=configuration/transport error.
 param([string]$Date='', [int]$Round=0, [ValidateRange(0,3600)][int]$MaxWaitSeconds=900,
   [string]$Proxy='', [switch]$NoProxy, [switch]$RequireAuth, [switch]$DryRun,
+  [switch]$NextRequest,
   [string[]]$QueryIds=@(), [ValidateRange(1,40)][int]$MaxRequests=40)
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'github-transport.ps1')
 . (Join-Path $PSScriptRoot 'search-scheduler.ps1')
+. (Join-Path $PSScriptRoot 'query-contract.ps1')
 $searchPolicy=@{max_requests_per_invocation=40;cohort_ttl_days=7}
 $searchPolicyPath=Join-Path $root 'data/search-policy.json'
 if(Test-Path $searchPolicyPath){$searchPolicy=Get-Content $searchPolicyPath -Raw|ConvertFrom-Json}
@@ -31,16 +33,12 @@ try {
     if($LASTEXITCODE) { throw 'Could not create plan.' }
   }
   $plan=Get-Content $planPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  $planIssues=@(Get-QueryPlanIssues $root $Date $plan $Round)
+  if($planIssues.Count){throw ('Query plan rejected: '+($planIssues -join ', '))}
   $done=Get-GitHubSuccessfulImports $dir
-  $token=$env:GITHUB_TOKEN
-  if(-not $token) { $token=$env:DSH_GITHUB_TOKEN }
-  if(-not $token) { $token=$env:GH_TOKEN }
-  if(-not $token -and (Get-Command gh -ErrorAction SilentlyContinue)) {
-    $credential=& gh auth token --hostname github.com 2>$null
-    if($LASTEXITCODE -eq 0) { $token=([string]$credential).Trim() }
-  }
+  $token=if($NextRequest){''}else{Get-GitHubReadCredential -Root $root}
   if($RequireAuth -and -not $token) { throw 'Authentication required. Configure GITHUB_TOKEN or sign in using gh auth login.' }
-  Write-Host ("采集 {0} r{1} · {2} · 已校验成功 {3}" -f $Date,$Round,$(if($token){'已认证'}else{'匿名，建议配置 GITHUB_TOKEN'}),$done.Count)
+  Write-Host ("采集 {0} r{1} · {2} · 已校验成功 {3}" -f $Date,$Round,$(if($NextRequest){'宿主文件取数，认证未知，预算保守'}elseif($token){'已认证'}else{'匿名，建议配置 GITHUB_TOKEN'}),$done.Count)
   $Proxy=Get-GitHubProxy -Proxy $Proxy -NoProxy:$NoProxy
   $statePath=Join-Path $root 'data/raw/.collector-state.json'
   $next=[datetimeoffset]::UtcNow; $waited=0
@@ -53,6 +51,12 @@ try {
     Move-Item -LiteralPath $tmp -Destination $statePath -Force
   }
   $queue=@($plan.items | Where-Object { $_.kind -ne 'conditional' })+@($plan.items | Where-Object { $_.kind -eq 'conditional' })
+  $roundImports=@();$metaFile=Join-Path $dir 'meta.json'
+  if(Test-Path $metaFile){$roundImports=@((Get-Content $metaFile -Raw|ConvertFrom-Json).imports)}
+  if($NextRequest){
+    # Visit every scheduled Q before additional pages of already-observed Qs.
+    $queue=@($queue|Where-Object{-not $done.ContainsKey([string]$_.id)})+@($queue|Where-Object{$done.ContainsKey([string]$_.id)})
+  }
   foreach($id in $QueryIds){if($id -notin @($plan.items.id)){throw 'Requested query is absent from the existing plan'}}
   if($QueryIds.Count){$queue=@($queue|Where-Object{$_.id -in $QueryIds})}
   function Save-SearchProgress {
@@ -90,6 +94,7 @@ try {
         $schedule=New-SearchSchedule -Item $it -Date $Date -TtlDays ([int]$searchPolicy.cohort_ttl_days)
       }
       $queryBudget=[int]$it.acquisition.max_requests
+      if($NextRequest){$queryCalls=@($roundImports|Where-Object id -eq $it.id).Count}
       Save-SearchProgress
     }
     while($queryCalls -lt $queryBudget){
@@ -103,6 +108,27 @@ try {
     }
     $rateAttempt=0; $transientAttempt=0
     while($true) {
+      if($NextRequest){
+        $nextFile=Join-Path $dir 'next-request.json'
+        if($roundImports.Count -ge [int]$searchPolicy.max_requests_per_invocation){@{kind='blocked';reason='round-request-budget';attempts=$roundImports.Count;limit=[int]$searchPolicy.max_requests_per_invocation}|ConvertTo-Json|Set-Content $nextFile;Write-Host '宿主取数已达本轮预算；缺项仍为未完成。';exit 2}
+        $attempt=@($roundImports|Where-Object id -eq $it.id).Count+1
+        $previous=if(Test-Path $nextFile){Get-Content $nextFile -Raw|ConvertFrom-Json}else{$null}
+        if(-not($previous.kind -eq 'request' -and $previous.query -eq $it.id -and $previous.url -eq $requestUrl -and [int]$previous.attempt -eq $attempt -and $previous.plan_sha256 -eq (Get-FileHash $planPath).Hash)){
+          $delay=[int][math]::Ceiling([math]::Max(0,($script:next-[datetimeoffset]::UtcNow).TotalSeconds))
+          if($delay -gt [math]::Min(60,$MaxWaitSeconds)){
+            @{kind='paused';date=$Date;round=$Round;query=$it.id;next_allowed=$script:next.ToString('o');reason='provider-cooldown'}|ConvertTo-Json|Set-Content $nextFile -Encoding UTF8
+            Write-Host '宿主通道仍在冷却；未发请求，断点保留。';exit 2
+          }
+          while($delay -gt 0){$chunk=[math]::Min(30,$delay);Start-Sleep -Seconds $chunk;$delay-=$chunk}
+          # Host authentication/transport headers are unknown: reserve conservatively.
+          $reservation=Reserve-GitHubRequest $root 'host-search'
+          if(-not $reservation){@{kind='blocked';reason='daily-request-budget'}|ConvertTo-Json|Set-Content $nextFile;Write-Host '达到共享日预算，宿主请求未发出。';exit 2}
+          $previous=[ordered]@{kind='request';date=$Date;round=$Round;query=$it.id;attempt=$attempt;url=$requestUrl;query_task=$task;plan_sha256=(Get-FileHash $planPath).Hash;reservation=$reservation;response_file="data/_tmp/host-$Date-r$Round-$($it.id)-$attempt.json";instruction='Save the complete response to response_file; import with the exact URL and query_task. Do not print the response in chat or reduce per_page.'}
+          [IO.File]::WriteAllText($nextFile,($previous|ConvertTo-Json -Depth 5),[Text.UTF8Encoding]::new($false))
+        }
+        Write-Host "宿主下一步：$($it.id)；只读 $nextFile，完整响应写文件后登记。准备请求不代表已完成查询。"
+        exit 0
+      }
       if($requestCount -ge [int]$searchPolicy.max_requests_per_invocation){Write-Host '达到本轮请求预算，进度已保存。';exit 2}
       $delay=[int][math]::Ceiling([math]::Max(0,($script:next-[datetimeoffset]::UtcNow).TotalSeconds))
       if($waited+$delay -gt $MaxWaitSeconds) { Write-Host '达到等待预算；恢复点已保存，重跑本命令继续。'; exit 2 }
@@ -113,10 +139,12 @@ try {
       $bodyPath=Join-Path $tmpDir 'response.json'; $headerPath=Join-Path $tmpDir 'headers.txt'
       $r=Invoke-GitHubCurl -Root $root -Url $requestUrl -BodyPath $bodyPath -HeaderPath $headerPath -Token $token -Proxy $Proxy
       if($r.BudgetExhausted){Write-Host '达到工作区当日API总预算，断点已保留。';exit 2}
+      if($r.Paused){Write-Host "联网暂停：$($r.Reason)；下次允许时间 $($r.NextAllowed)，未发送请求。";exit 2}
       $requestCount++
       $body=if(Test-Path $bodyPath){[IO.File]::ReadAllText($bodyPath)}else{''}
       $headers=if(Test-Path $headerPath){Get-GitHubResponseHeaders ([IO.File]::ReadAllText($headerPath))}else{@{}}
       $policy=Get-GitHubRetryPolicy -Status $r.Status -Headers $headers -Body $body -RateAttempt $rateAttempt
+      if($policy.Limited){Set-GitHubTransportGate $root search $Proxy $token $r.Status $r.ExitCode $headers $body $rateAttempt}
       $assessment=Get-GitHubSearchPageAssessment -Body $body -Url $requestUrl
       $bodyDigest=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($body))).Replace('-','')
       $receipt=@{id=$it.id;at=[datetimeoffset]::UtcNow.ToString('o');http_status=$r.Status;curl_exit=$r.ExitCode;authenticated=[bool]$token;resource=$headers['x-ratelimit-resource'];remaining=$headers['x-ratelimit-remaining'];reset=$headers['x-ratelimit-reset'];retry_after=$headers['retry-after'];delay=$policy.Delay;validation=$assessment.Reason;actual_items=$assessment.Actual;expected_items=$assessment.Expected;body_sha256=$bodyDigest;body_bytes=[Text.Encoding]::UTF8.GetByteCount($body);query_task=$task}
@@ -134,6 +162,7 @@ try {
       }
       [IO.File]::WriteAllText($bodyPath,('{"collector_error":true,"http_status":'+$r.Status+',"curl_exit":'+$r.ExitCode+'}'))
       & (Join-Path $PSScriptRoot 'fetch-daily.ps1') -Date $Date -Round $Round -Import $it.id -File $bodyPath -RequestUrl $requestUrl -QueryTask $task | Out-Host
+      if($r.NetworkFailure){Write-Host '连接未建立，已停止整条队列；检查网络许可或代理后恢复，成功数据不重抓。';exit 2}
       if($policy.Limited) {
         Save-QueueDelay -Seconds $policy.Delay -Reason 'rate-limit'
         $rateAttempt++
@@ -151,6 +180,10 @@ try {
   if($DryRun) { exit 0 }
   & (Join-Path $PSScriptRoot 'check-queries.ps1') -Date $Date | Out-Host
   $coverageCode=$LASTEXITCODE
+  if($NextRequest){
+    @{kind=$(if($coverageCode -eq 0){'complete'}else{'blocked'});date=$Date;round=$Round;coverage_exit=$coverageCode;reason=$(if($coverageCode -eq 0){'All scheduled queries satisfied; coverage remains budgeted sampling'}else{'Required queries remain incomplete; see coverage.json'})}|ConvertTo-Json|Set-Content (Join-Path $dir 'next-request.json') -Encoding UTF8
+    exit $coverageCode
+  }
   if($coverageCode -eq 0 -and (Test-Path (Join-Path $PSScriptRoot 'discovery-refresh.ps1'))){
     & (Join-Path $PSScriptRoot 'discovery-refresh.ps1') -Date $Date -Root $root | Out-Host
     if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}

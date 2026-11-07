@@ -121,7 +121,7 @@ def main():
     command(stage, output, 'check-all', ['tools/check-all.ps1'])
     command(stage, output, 'publish-must-block', ['tools/check-all.ps1', '-Publish', '-Date', '2026-10-19'], False)
     # Only manifest-declared inputs and generated views enter the ZIP; build/test output stays out.
-    package = output / ('github-daily-picks-v' + args.version + '.zip')
+    package = output / ('repodossier-v' + args.version + '.zip')
     with zipfile.ZipFile(package, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for rel in sorted(paths + ['distribution.json']):
             archive.write(stage / rel, rel)

@@ -4,6 +4,7 @@ try {
  $manifest=Get-Content (Join-Path $Root 'distribution.json') -Raw|ConvertFrom-Json
  if($manifest.schema_version -ne 1 -or $manifest.profile -ne 'demo' -or $manifest.version -notmatch '^\d+\.\d+\.\d+$'){throw 'Invalid distribution manifest'}
  $required=@('GLOSSARY.md','日报结构.md','AGENTS.md','README.md','PROMPT-daily.md','RUBRIC.md','SOURCES.md','tools/check-all.ps1','tools/release-readiness.ps1','tests/distribution-tests.ps1','tools/glossary-lock.json','.agents/skills/github-daily-picks/SKILL.md','.dsh/skills/github-daily-picks/SKILL.md','index.html','tools/serve-site.py','tools/start-site.ps1')
+ if([version]$manifest.version -ge [version]'1.3.0'){$required+=@('tools/query-contract.ps1','tools/check-daily-network.ps1','tools/daily-network.ps1','tools/fetch-daily.ps1','tools/collect-daily.ps1','tools/check-site-assets.ps1','tools/check-site-assets.py','tests/test_site_assets.py','docs/network-and-query-reliability.md')}
  $names=@{};$prefix=[IO.Path]::GetFullPath($Root)+[IO.Path]::DirectorySeparatorChar
  foreach($entry in $manifest.files){
   $rel=[string]$entry.path

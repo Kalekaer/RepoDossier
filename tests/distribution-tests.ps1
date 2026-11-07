@@ -40,6 +40,9 @@ try {
  } finally {$s.guard.Dispose()}
  $out=& pwsh -NoProfile -NonInteractive -File (Join-Path $root 'tools/release-readiness.ps1') -Root $fixture -Date 2026-10-19 2>&1
  Assert ($LASTEXITCODE -ne 0 -and ($out -join ' ') -match 'BLOCKED') 'missing review scope blocks publication'
+ $extra=& (Join-Path $PSScriptRoot 'release-reliability.ps1')|ConvertFrom-Json
+ if($LASTEXITCODE -ne 0 -or -not $extra -or $extra.failed){throw 'Release reliability regressions failed'}
+ $passed+=[int]$extra.passed
  Write-Host "PORTABLE TESTS: $passed passed / 0 failed"
  exit 0
 } catch {Write-Host $_.Exception.Message;exit 1}

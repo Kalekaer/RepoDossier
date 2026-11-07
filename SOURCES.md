@@ -1,5 +1,7 @@
 # 数据源与检索式
 
+2026-11-07：官方 API 仍是主源；镜像名单、实测和边界见 [镜像与联网稳定性](docs/network-and-query-reliability.md)。代理按参数/环境选择，不要求其他机器配置 2080。当前工作区要求认证，匿名兼容预算 45/日、认证预算 180/日；连接失败整队暂停，明确未连通的预占会退回。先运行 `daily-network -Action Status` 检查身份与冷却。下文涉及旧机器网络的记录均为注明日期的历史实测。
+
 请求**按宿主能力选择通道**：DSH 优先 `web_fetch`；Codex 优先原生网页/HTTP 工具，没有时使用 `gh api` 或经授权的 `curl.exe`。本机代理（`http://127.0.0.1:2080`）可用：**`curl.exe` 与 Python `urllib` 走代理可达**（2026-10-23 实测 HTTPS 200 / search remaining=10），但普通沙箱会被拒绝，需宿主终端或申请网络权限。**PowerShell 的 `Invoke-RestMethod/-WebRequest`（.NET/schannel）当前实测不通**，不应作为默认 GitHub 通道。**批量/额度**场景才用本机脚本，token 可选（`GITHUB_TOKEN`；旧的 `DSH_GITHUB_TOKEN` 仍兼容）。
 
 ## 1. 主源：GitHub Search API
@@ -170,17 +172,17 @@ Search 返回体包含仓库基本事实，但不能代替 README、发行包、
 
 间隔超过 3 天的快照标记为 `stale`，只做参考、不参与排序。
 
-## 6. README 取数：三级降级链（2026-10-16 定稿）
+## 6. README 取数与镜像边界（2026-11-07）
 
-日报与「补人话层」都依赖 README。本机网络环境会变（2026-10-15 曾整天 `fetch failed`，2026-10-16 用户挂梯子后恢复），因此**固定按下面的顺序试，命中即停，不重试超过 1 次**：
+正式审阅统一使用 `fetch-review-readmes.ps1` / `evidence-store.ps1` 的官方 API 证据、版本与已校验缓存。以下 raw/CDN 是公开文件的辅助通道，不是已自动接入的完整备用采集器；不能用一次 HTTP 200 代替内容版本核实或绕开审阅门禁。
 
 | 顺序 | 通道 | 说明 |
 |---|---|---|
-| ① | `https://raw.githubusercontent.com/{owner}/{repo}/{branch}/README.md` | **首选**。纯文本、不占 GitHub API 额度。分支先 `main`，404 再 `master` |
-| ② | `https://cdn.jsdelivr.net/gh/{owner}/{repo}@{branch}/README.md` | 镜像。**只服务"已被缓存过"的文件**：命中返回 200；未命中会 **302 跳回 `raw.githubusercontent.com`**（此时直接放弃本通道，不要重试） |
-| ③ | `GET /repos/{owner}/{repo}/readme`（`api.github.com`） | 兜底。返回 **base64**，需本地解码；响应较大时会落 spill 文件，可从文件解码。**占 core 额度** |
+| ① | `GET /repos/{owner}/{repo}/readme`（`api.github.com`）及同版本有效缓存 | 当前正式补证入口，返回 base64 与官方 blob SHA；按 core 额度、共享预算和冷却执行 |
+| ② | `https://raw.githubusercontent.com/{owner}/{repo}/{commitSHA}/{path}` | 已知路径与固定提交下的公开文件；不使用 main/master 猜测来证明版本一致 |
+| ③ | `https://cdn.jsdelivr.net/gh/{owner}/{repo}@{commitSHA}/{path}` | 固定完整 commit SHA；与已知官方 blob hash/原始证据核对后才可作为等价内容。国际 CDN 的国内可达性须实测，不传 token；不能以 latest/版本范围的缓存回退冒充新版本 |
 
-**已知不可用（不要再试）**：`cdn.statically.io`、`raw.githack.com`、`rawcdn.githack.com`、`gitcdn.link`、`r.jina.ai`、`fastly.jsdelivr.net`（与主域同样 302）；`github.com/.../blob/...` 页面能打开但返回的是导航壳，正文在截断之后，不可用。
+**历史故障记录（2026-10-16，并非永久可用性结论）**：`cdn.statically.io`、`raw.githack.com`、`rawcdn.githack.com`、`gitcdn.link`、`r.jina.ai`、`fastly.jsdelivr.net` 曾不可用或重定向；当时 `github.com/.../blob/...` 正文也未完整取得。不将这些未重新验证的通道加入自动重试。jsDelivr 本次样例实测见上述联网文档。
 
 **分支与文件名**：默认分支以 `GET /repos/{o}/{r}` 的 `default_branch` 为准；文件名除 `README.md` 外，也可能是 `README.zh-CN.md`、`readme.md`。
 

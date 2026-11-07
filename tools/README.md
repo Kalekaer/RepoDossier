@@ -1,5 +1,7 @@
 # tools/ — 流水线脚本一览
 
+开源案卷 · RepoDossier v1.3.0：认证、预算结算、共享冷却、README自动续采及宿主文件模式见 [联网与查询执行说明](../docs/network-and-query-reliability.md)。技能口令保持兼容。
+
 质量闭环入口（2026-10-29）：`review-workbench prepare/verify` 准备并校验真实评审证据，
 不自动猜分；`workspace-diff -Source <路径>` 输出逐键数据差异与输入SHA，不覆盖任何原始记录。
 `release-readiness -Date <日期>` 或 `check-all -Publish -Date <日期>` 才给出发布判定。

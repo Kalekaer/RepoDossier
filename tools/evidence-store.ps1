@@ -100,7 +100,7 @@ function Test-EvidenceBody([string]$Body,[string]$Kind,[string]$Repo){
  }catch{return $false};return $false
 }
 function Invoke-EvidenceTasks($Store,[string[]]$Repos=@(),[string[]]$Kinds=@(),[int]$MaxRequests=20,[string]$Proxy='',[int]$MaxWaitSeconds=0,[int]$MinRemaining=0,[double]$DelaySeconds=1,[string[]]$TaskIds=@()){
- $token=Get-GitHubReadCredential;$count=0;$waited=0;$stop='complete'
+ $token=Get-GitHubReadCredential -Root $Store.root;$count=0;$waited=0;$stop='complete'
  $queue=@($Store.state.tasks.Values|Where-Object{$_.state -in @('pending','retry','running') -and (-not $Repos.Count -or $_.repo -in $Repos) -and (-not $Kinds.Count -or $_.kind -in $Kinds) -and (-not $TaskIds.Count -or $_.id -in $TaskIds)}|Sort-Object @{Expression={if($_.kind -eq 'metadata'){0}else{1}}},created_at,id)
  foreach($t in $queue){
   if($count -ge $MaxRequests){$stop='request-budget';break}
@@ -115,11 +115,12 @@ function Invoke-EvidenceTasks($Store,[string[]]$Repos=@(),[string[]]$Kinds=@(),[
   $t.state='running';$t.attempts++;Save-EvidenceStore $Store
   $timer=[Diagnostics.Stopwatch]::StartNew()
   $r=Invoke-GitHubPublicGet -Root $Store.root -Url $url -BodyPath ($tmp+'.json') -HeaderPath ($tmp+'.headers') -Token $token -Proxy $Proxy -ETag $(if($c){$c.etag}else{''})
-  if($r.BudgetExhausted){$t.attempts--;$t.state='pending';Save-EvidenceStore $Store;$stop='daily-api-budget';break}
+  if($r.BudgetExhausted -or $r.Paused){$t.attempts--;$t.state='pending';Save-EvidenceStore $Store;$stop=if($r.BudgetExhausted){'daily-api-budget'}else{$r.Reason};break}
   $timer.Stop();$count++
   $headers=if(Test-Path ($tmp+'.headers')){Get-GitHubResponseHeaders ([IO.File]::ReadAllText($tmp+'.headers'))}else{@{}}
   $body=if(Test-Path ($tmp+'.json')){[IO.File]::ReadAllText($tmp+'.json')}else{''}
-  $policy=Get-GitHubRetryPolicy $r.Status $headers $body $t.failures
+  $policy=Get-GitHubRetryPolicy $r.Status $headers $body ([int]$t.rate_failures)
+  if($policy.Limited){Set-GitHubTransportGate $Store.root core $Proxy $token $r.Status $r.ExitCode $headers $body ([int]$t.rate_failures)}
   $Store.state.next_allowed=[datetimeoffset]::UtcNow.AddSeconds([math]::Max($DelaySeconds,$policy.Delay)).ToString('o')
   $accepted=$false
   if($r.ExitCode -eq 0 -and $r.Status -eq 304 -and $c){
@@ -131,18 +132,23 @@ function Invoke-EvidenceTasks($Store,[string[]]$Repos=@(),[string[]]$Kinds=@(),[
    $null=Save-EvidenceResult $Store $t '{"verified_absence":true}' $headers 'absent' 404 $timer.Elapsed.TotalSeconds;$accepted=$true
   }
   if(-not $accepted){
-   $t.failures++;$t.state=if($r.Status -in @(401,403,404,422) -and -not $policy.Limited){'blocked'}elseif($t.failures -ge 3 -and -not $policy.Limited){'blocked'}else{'retry'}
+   if($policy.Limited){$t.rate_failures=[int]$t.rate_failures+1}
+   if(-not $r.NetworkFailure -and -not $policy.Limited -and $r.Status -notin @(401,403)){$t.failures++}
+   $t.state=if($r.Status -in @(404,422) -and -not $policy.Limited){'blocked'}elseif($t.failures -ge 3 -and -not $policy.Limited){'blocked'}else{'retry'}
    $t.next_attempt=[datetimeoffset]::UtcNow.AddSeconds([math]::Max($policy.Delay,60*[math]::Pow(2,[math]::Min(5,$t.failures-1)))).ToString('o')
-   $t.history+=@{at=[datetimeoffset]::UtcNow.ToString('o');status=$r.Status;outcome='failed';seconds=$timer.Elapsed.TotalSeconds}
+   $t.history+=@{at=[datetimeoffset]::UtcNow.ToString('o');status=$r.Status;curl_exit=$r.ExitCode;request_id=$r.RequestId;outcome='failed';seconds=$timer.Elapsed.TotalSeconds}
    # Invalid/private/error bodies are never persisted as usable evidence.
    if(Test-Path ($tmp+'.json')){[IO.File]::WriteAllText(($tmp+'.json'),'{"evidence_response_rejected":true}')}
   }
+  if($accepted){$t.rate_failures=0}
   Save-EvidenceStore $Store
   Write-Host ("证据 {0} {1}：{2} (HTTP {3})" -f $t.repo,$t.kind,$t.state,$r.Status)
-  if($policy.Limited -or $r.Status -in @(401,403,422)){$stop='http-pause';break}
+  if($r.NetworkFailure){$stop='network-unavailable';break}
+  if($r.Status -in @(401,403,422) -and -not $policy.Limited){$stop='http-fatal';break}
+  if($policy.Limited){$stop='http-pause';break}
   if($headers.ContainsKey('x-ratelimit-remaining') -and [int]$headers['x-ratelimit-remaining'] -le $MinRemaining){$stop='remaining-budget';break}
  }
- return @{requests=$count;stop=$stop;pending=@($Store.state.tasks.Values|Where-Object{$_.state -in @('pending','retry','running','blocked') -and (-not $Repos.Count -or $_.repo -in $Repos) -and (-not $Kinds.Count -or $_.kind -in $Kinds)}).Count}
+ return @{requests=$count;stop=$stop;pending=@($Store.state.tasks.Values|Where-Object{$_.state -in @('pending','retry','running','blocked') -and (-not $Repos.Count -or $_.repo -in $Repos) -and (-not $Kinds.Count -or $_.kind -in $Kinds) -and (-not $TaskIds.Count -or $_.id -in $TaskIds)}).Count}
 }
 function Sync-EvidenceEvents($Store,[string]$EventsFile){
  $added=0

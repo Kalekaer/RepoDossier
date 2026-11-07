@@ -5,7 +5,7 @@ param([ValidateRange(0,200)][int]$MaxRequests=50,[int]$MinRemaining=5,[double]$D
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'evidence-store.ps1')
 # Resolve locally before selecting the SLA. Never inherit a caller's $token.
-$readCredential=Get-GitHubReadCredential
+$readCredential=Get-GitHubReadCredential -Root $Root
 $sla=if($readCredential){@{hot=1;warm=3;cold=14}}else{@{hot=4;warm=7;cold=30}}
 if(-not $SeriesDate){$SeriesDate=[datetime]::UtcNow.AddHours(8).ToString('yyyy-MM-dd')}
 $null=[datetime]::ParseExact($SeriesDate,'yyyy-MM-dd',[Globalization.CultureInfo]::InvariantCulture)

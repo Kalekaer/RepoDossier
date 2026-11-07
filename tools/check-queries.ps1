@@ -16,12 +16,14 @@
 param(
   [string]$Date = '',
   [switch]$Static,
-  [switch]$Json
+  [switch]$Json,
+  [string]$Root = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$root = [IO.Path]::GetFullPath($Root)
 . (Join-Path $PSScriptRoot 'github-transport.ps1')
+. (Join-Path $PSScriptRoot 'query-contract.ps1')
 function P($r) { Join-Path $root $r }
 $enc = New-Object System.Text.UTF8Encoding($false)
 
@@ -29,6 +31,20 @@ if (-not $Date) { $Date = (Get-Date).ToString('yyyy-MM-dd') }
 $specPath = P 'data\queries.json'
 if (-not (Test-Path $specPath)) { Write-Host '✗ 缺 data/queries.json' -ForegroundColor Red; exit 3 }
 $spec = Get-Content $specPath -Raw -Encoding UTF8 | ConvertFrom-Json
+$contractRequired=Test-QueryContractRequired $spec $Date
+function Save-QueryCoverage($Coverage){
+ $base=P "data/raw/$Date";New-Item -ItemType Directory -Force $base|Out-Null
+ [IO.File]::WriteAllText((Join-Path $base 'coverage.json'),($Coverage|ConvertTo-Json -Depth 8),$enc)
+ $run=P 'data/runs';New-Item -ItemType Directory -Force $run|Out-Null
+ $Coverage|ConvertTo-Json -Depth 8|Set-Content (Join-Path $run ($Date+'.collection-status.json')) -Encoding UTF8
+}
+function Stop-MissingQueryPlan([string]$Reason){
+ $expected=if($contractRequired){@(Get-DailyQueryPlanItems $root $Date $spec)}else{@()}
+ $cov=[ordered]@{date=$Date;status='fail';reason=$Reason;fail=1;warn=0;queries=@($expected|ForEach-Object{@{id=$_.id;status='missing';required=$_.required}});checked_at=[datetimeoffset]::UtcNow.ToString('o')}
+ Save-QueryCoverage $cov
+ if($Json){$cov|ConvertTo-Json -Depth 8}else{Write-Host ('查询覆盖失败：'+$Reason)}
+ exit 1
+}
 
 # ---------- 静态 ----------
 if ($Static) {
@@ -65,23 +81,23 @@ if ($Date -lt [string]$spec.enforce_from) {
 
 $base = P ("data\raw\{0}" -f $Date)
 if (-not (Test-Path $base)) {
-  if ($Json) { [ordered]@{ date = $Date; status = 'fail'; reason = '没有 raw 目录（当天计划未生成）' } | ConvertTo-Json -Compress }
-  Write-Host ("✗ {0} 没有 data/raw 目录 —— 当天计划没生成，视为漏跑" -f $Date) -ForegroundColor Red
-  exit 1
+  Stop-MissingQueryPlan '没有 raw 目录（当天计划未生成，不能宣称完成）'
 }
 $rounds = Get-ChildItem $base -Directory | Where-Object { $_.Name -match '^r(\d+)$' } | Sort-Object { [int]($_.Name -replace '^r', '') }
 $roundDir = $null
 for ($i = $rounds.Count - 1; $i -ge 0; $i--) { if (Test-Path (Join-Path $rounds[$i].FullName 'plan.json')) { $roundDir = $rounds[$i]; break } }
 if (-not $roundDir) {
-  Write-Host ("✗ {0} 没有 plan.json" -f $Date) -ForegroundColor Red
-  exit 1
+  Stop-MissingQueryPlan '没有 plan.json（不能用没有计划证明没有漏跑）'
 }
 $plan = Get-Content (Join-Path $roundDir.FullName 'plan.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$planIssues=@(Get-QueryPlanIssues $root $Date $plan ([int]$roundDir.Name.Substring(1)))
+$itemsToCheck=if($contractRequired){@(Get-DailyQueryPlanItems $root $Date $spec)}else{@($plan.items)}
 $metaPath = Join-Path $roundDir.FullName 'meta.json'
 $imports = @()
 if (Test-Path $metaPath) { $imports = @((Get-Content $metaPath -Raw -Encoding UTF8 | ConvertFrom-Json).imports) }
 $byId = @{}
 $invalidRaw = @{}
+$partialRaw = @{}
 foreach ($m in $imports) {
   $id = [string]$m.id
   if ([bool]$m.ok) {
@@ -94,6 +110,16 @@ foreach ($m in $imports) {
       if ($response.incomplete_results) { throw 'GitHub returned incomplete results' }
       if (-not $response.PSObject.Properties['items'] -or $response.items -isnot [array]) { throw 'Invalid raw response' }
       if (@($response.items).Count -ne [int]$m.items) { throw 'Raw item count mismatch' }
+      if($contractRequired){
+        if(-not(Test-GitHubSearchResponse ([IO.File]::ReadAllText($rawFile)))){throw 'Invalid or private search response'}
+        if($m.plan_sha256 -ne (Get-FileHash (Join-Path $roundDir.FullName 'plan.json')).Hash){throw 'Import is not bound to the canonical plan'}
+        $definition=@($itemsToCheck|Where-Object id -eq $id)
+        if($definition.Count -ne 1 -or -not $m.request_url){throw 'Missing query request receipt'}
+        $size=[regex]::Match([string]$m.request_url,'[?&]per_page=(\d+)')
+        if(-not $size.Success -or [int]$size.Groups[1].Value -ne [int]$definition[0].per_page){throw 'Reduced page size is not canonical coverage'}
+        $assessment=Get-GitHubSearchPageAssessment -Body ([IO.File]::ReadAllText($rawFile)) -Url $m.request_url
+        if(-not $assessment.Complete){$partialRaw[$id]=$true;continue}
+      }
     } catch { $invalidRaw[$id] = $true; continue }
   }
   $cur = $byId[$id]
@@ -108,8 +134,8 @@ $seenPath = P 'data\seen.jsonl'
 if (Test-Path $seenPath) { foreach ($line in (Get-Content $seenPath -Encoding UTF8 | Where-Object { $_.Trim() })) { try { $o = $line | ConvertFrom-Json; $seen[([string]$o.full_name).ToLower()] = 1 } catch { } } }
 
 $results = @()
-$fail = 0; $warn = 0
-foreach ($it in @($plan.items)) {
+$fail = $planIssues.Count; $warn = 0
+foreach ($it in $itemsToCheck) {
   $id = [string]$it.id
   $m = $byId[$id]
   $isCond = ($it.kind -eq 'conditional')
@@ -139,9 +165,11 @@ foreach ($it in @($plan.items)) {
   } else {
     if ($m -and $m.ok) { $st = 'ok' } elseif ($m) { $st = 'failed' } else { $st = 'missing' }
   }
+  if($st -eq 'missing' -and $partialRaw[$id]){$st='partial'}
 
   if ($st -in @('missing','blocked') -and [bool]$it.required) { $fail++ }
-  if ($st -eq 'failed') { $warn++ }
+  if ($st -eq 'failed') { if($contractRequired -and [bool]$it.required){$fail++}else{$warn++} }
+  if ($st -eq 'partial' -and [bool]$it.required) { $fail++ }
   $progressPath=Join-Path $roundDir.FullName "search-progress-$id.json"
   $progress=if(Test-Path $progressPath){Get-Content $progressPath -Raw|ConvertFrom-Json}else{$null}
   $results += [ordered]@{ id = $id; status = $st; required = [bool]$it.required; reason = $(if ($invalidRaw[$id] -and $st -eq 'missing') { 'raw missing, corrupt or changed' } elseif ($isCond) { $condWhy } else { '' }); coverage_mode=$(if($progress -and @($progress.pending).Count){'budgeted-sampling'}elseif($progress){'observed-cycle-complete'}else{'single-response'}); remaining_tasks=$(if($progress){@($progress.pending).Count}else{$null});cohort=$(if($progress){$progress.cohort}else{$null});expires=$(if($progress){$progress.expires}else{$null}) }
@@ -152,9 +180,14 @@ $cov = [ordered]@{
   date = $Date; round = [int]$plan.round; status = $status
   fail = $fail; warn = $warn
   queries = $results
+  plan_issues = $planIssues
+  planned = $results.Count
+  successful = @($results|Where-Object status -eq 'ok').Count
+  conditional_or_probe_skipped = @($results|Where-Object status -eq 'skipped').Count
+  unfinished = @($results|Where-Object status -in @('missing','failed','blocked','partial')|ForEach-Object id)
   checked_at = (Get-Date).ToString('s')
 }
-[IO.File]::WriteAllText((Join-Path $base 'coverage.json'), ($cov | ConvertTo-Json -Depth 6), $enc)
+Save-QueryCoverage $cov
 
 if ($Json) { $cov | ConvertTo-Json -Depth 6; exit $(if ($status -eq 'fail') { 1 } elseif ($status -eq 'warn') { 2 } else { 0 }) }
 switch ($status) {

@@ -1,5 +1,7 @@
 # 运维手册
 
+开源案卷 · RepoDossier v1.3.0：认证、预算结算、共享冷却、README自动续采及宿主文件模式见 [联网与查询执行说明](docs/network-and-query-reliability.md)。技能口令保持兼容。
+
 ## 改时间 / 改频率
 
 按宿主能力管理：

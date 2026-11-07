@@ -62,10 +62,17 @@ if (-not $Date) {
 $pickPath = Join-Path $pickDir "$Date.jsonl"
 if (-not (Test-Path $pickPath)) { Fail "找不到 $pickPath" }
 $dt = [datetime]::ParseExact($Date, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture)
+$querySpecPath=P 'data/queries.json'
+if((Test-Path $querySpecPath) -and (Test-Path (P "reports/$Date.md"))){
+  $querySpec=Get-Content $querySpecPath -Raw|ConvertFrom-Json
+  if($querySpec.execution_contract_from -and $Date -ge [string]$querySpec.execution_contract_from){
+    & (P 'tools/check-queries.ps1') -Date $Date -Root $Root
+    if($LASTEXITCODE -ne 0){Fail '必跑查询未齐或计划被改动，不能生成正式日报页面；原页面保留。'}
+  }
+}
 $searchPolicy=P 'data/search-policy.json'
 $editorialApproved=$false
-$hasEditorialScope = Test-Path (P "data/audit/editorial/$Date.json")
-if($hasEditorialScope -and (Test-Path $searchPolicy) -and (Test-Path (P "reports/$Date.md"))) {
+if((Test-Path $searchPolicy) -and (Test-Path (P "reports/$Date.md"))) {
   $policy=Get-Content $searchPolicy -Raw -Encoding UTF8|ConvertFrom-Json
   if($Date -ge $policy.disposition_enforce_from -and @($Layout|ForEach-Object{$_.ToLower()}) -contains 'c') {
     if($policy.publication_mode -eq 'declared-editorial-batch'){

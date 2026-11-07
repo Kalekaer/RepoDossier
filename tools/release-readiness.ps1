@@ -17,7 +17,7 @@ $policyPath=Join-Path $Root 'data/search-policy.json'
 if((Test-Path $policyPath) -and (Get-Content $policyPath -Raw|ConvertFrom-Json).publication_mode -eq 'declared-editorial-batch'){
  $reviewGate=@{name='dispositions';script='editorial-batch.ps1';args=@{Date=$Date;Root=$Root;Action='check'}}
 }
-foreach($gate in @(@{name='queries';script='check-queries.ps1';args=@{Date=$Date}},$reviewGate)){
+foreach($gate in @(@{name='queries';script='check-queries.ps1';args=@{Date=$Date;Root=$Root}},$reviewGate)){
  $global:LASTEXITCODE=0;$gateArgs=$gate.args
  try{& (Join-Path $Root ('tools/'+$gate.script)) @gateArgs|Out-Host;$code=$LASTEXITCODE}catch{$code=1}
  $results[$gate.name]=@{code=$code;ok=($code -eq 0)}

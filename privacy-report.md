@@ -1,4 +1,4 @@
-# Privacy report · v1.2.2
+# Privacy report · v1.3.0
 
 Release builder checks the final ZIP, not an earlier working directory.
 
@@ -8,4 +8,4 @@ Release builder checks the final ZIP, not an earlier working directory.
 - Automated text scan rejects personal user/workspace paths, fixed session identifiers and common GitHub/OpenAI credential patterns. This is a bounded scan, not a claim of exhaustive forensic analysis.
 - No automatic upload or telemetry is added to the product. GitHub collection is an explicit workflow action.
 
-Reproduce: `python tools/build-distribution.py --source <clean-public-checkout> --output <output-directory> --version 1.2.2`. The build must pass source and extracted-package checks before publication.
+Reproduce: `python tools/build-distribution.py --source <clean-public-checkout> --output <output-directory> --version 1.3.0`. The build must pass source and extracted-package checks before publication.

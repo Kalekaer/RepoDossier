@@ -1,7 +1,7 @@
 # Stable, bounded entry for the daily workflow's existing network scripts.
 # This is an invocation convenience, NOT a sandbox or permission grant.
 param(
- [ValidateSet('Plan','Collect','Maintain','Readmes','Evidence')][string]$Action='Plan',
+ [ValidateSet('Plan','Status','Collect','Maintain','Readmes','Evidence')][string]$Action='Plan',
  [string]$Date='',
  [ValidateRange(0,999)][int]$Round=0,
  [string]$Batch='',
@@ -18,6 +18,7 @@ try {
  $parameters=@{}
  $scriptName=switch($Action){
   'Plan' {''}
+  'Status' {'check-daily-network.ps1'}
   'Collect' {$parameters=@{Date=$Date};if($Round){$parameters.Round=$Round};'collect-daily.ps1'}
   'Maintain' {$parameters=@{Date=$Date};'daily-maintenance.ps1'}
   'Evidence' {$parameters=@{Action='run';MaxRequests=20;MaxWaitSeconds=60};'evidence-queue.ps1'}
@@ -32,11 +33,11 @@ try {
     if($part.Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Batch must not traverse a junction or symbolic link'}
     $part=$part.Parent
    }
-   $parameters=@{Batch=$batchPath};'fetch-review-readmes.ps1'
+   $parameters=@{Batch=$batchPath;MaxRequests=200;MaxWaitSeconds=1800};'fetch-review-readmes.ps1'
   }
  }
  if($Action -eq 'Plan' -or $PlanOnly){
-  [ordered]@{action=$Action;date=$Date;script=$scriptName;parameters=$parameters;network_executed=$false;permissions_changed=$false;available_actions=@('Collect','Maintain','Readmes','Evidence')}|ConvertTo-Json -Depth 4
+  [ordered]@{action=$Action;date=$Date;script=$scriptName;parameters=$parameters;network_executed=$false;permissions_changed=$false;available_actions=@('Status','Collect','Maintain','Readmes','Evidence')}|ConvertTo-Json -Depth 4
   exit 0
  }
  Push-Location $root

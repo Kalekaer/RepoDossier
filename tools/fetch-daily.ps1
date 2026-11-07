@@ -22,6 +22,8 @@ param(
   [string]$File = '',
   [string]$RequestUrl = '',
   [string]$QueryTask = '',
+  [int]$HttpStatus = 0,
+  [string]$HeaderFile = '',
   [switch]$Json
 )
 
@@ -38,73 +40,11 @@ $specPath = P 'data\queries.json'
 if (-not (Test-Path $specPath)) { Write-Host '✗ 缺 data/queries.json' -ForegroundColor Red; exit 2 }
 $spec = Get-Content $specPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
-function Get-IsoWeekday([datetime]$d) { $n = [int]$d.DayOfWeek; if ($n -eq 0) { 7 } else { $n } }
 $dt = [datetime]::ParseExact($Date, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture)
-$wd = [string](Get-IsoWeekday $dt)
+$wd = [string]$(if ([int]$dt.DayOfWeek -eq 0) { 7 } else { [int]$dt.DayOfWeek })
 $dayCfg = $spec.weekdays.$wd
-if (-not $dayCfg) { Write-Host "✗ queries.json 缺星期 $wd" -ForegroundColor Red; exit 2 }
-
-function Resolve-Q([string]$q) {
-  $q = $q.Replace('{D7}', $dt.AddDays(-7).ToString('yyyy-MM-dd'))
-  $q = $q.Replace('{D8}', $dt.AddDays(-8).ToString('yyyy-MM-dd'))
-  $q = $q.Replace('{D14}', $dt.AddDays(-14).ToString('yyyy-MM-dd'))
-  $q = $q.Replace('{D30}', $dt.AddDays(-30).ToString('yyyy-MM-dd'))
-  $q = $q.Replace('{D180}', $dt.AddDays(-180).ToString('yyyy-MM-dd'))
-  $q = $q.Replace('{TODAY_TOPIC}', [string]$dayCfg.topic)
-  $q = $q.Replace('{TODAY_TOPIC2}', [string]$dayCfg.topic2)
-  return $q
-}
-
-function Build-Url($item, $partition = $null) {
-  $q = Resolve-Q $item.q
-  if ($partition) { $q = $q.Replace('stars:200..800', ('stars:{0}..{1}' -f $partition.low,$partition.high)) }
-  $u = 'https://api.github.com/search/repositories?q=' + ($q.Replace(' ', '+').Replace('>', '%3E'))
-  if ($item.sort) { $u += "&sort=$($item.sort)&order=$($item.order)" }
-  if ($item.per_page) { $u += "&per_page=$($item.per_page)" }
-  if ($partition) { $u += "&page=$($partition.page)" }
-  elseif ($item.page) { $u += "&page=$($item.page)" }
-  elseif ($item.page_rotate) {
-    $pg = ($dt.DayOfYear % [int]$item.page_rotate) + 1
-    $u += "&page=$pg"
-  }
-  return $u
-}
-
-# ---------- 组当天计划 ----------
-function New-Plan {
-  $items = @()
-  foreach ($q in $spec.queries) {
-    if ($q.enabled -eq $false) { continue }
-    $freq = [string]$q.frequency
-    $take = $false
-    if ($freq -eq 'daily') { $take = $true }
-    elseif ($freq -eq 'conditional') { $take = $true }
-    elseif ($freq -match '^weekly:(.+)$') { $take = (@($Matches[1].Split(',')) -contains $wd) }
-    elseif ($freq -eq 'manual') { $take = $false }
-    if (-not $take) { continue }
-
-    $isCond = ($freq -eq 'conditional')
-    $partition = $null
-    if ($q.adaptive_star_partition -and -not $q.acquisition) {
-      $observations = @(Get-SearchPartitionEvidence -RawRoot (P 'data\raw') -QueryId $q.id -Date $Date)
-      $partition = Get-NextSearchPartition -Observations $observations -PageSize $q.per_page -Reverse:($q.sort -eq 'updated')
-      if ($partition.blocked) { throw "Query $($q.id) exceeds 1000 results even at one star value; add a pushed-date split before continuing." }
-    }
-    $items += [ordered]@{
-      id          = [string]$q.id
-      name        = [string]$q.name
-      kind        = if ($isCond) { 'conditional' } elseif ($q.mode -eq 'probe') { 'probe' } else { 'search' }
-      url         = if ($q.mode -eq 'search') { Build-Url $q $partition } else { '' }
-      per_page    = [int]$q.per_page
-      required    = [bool]$q.required
-      conditional = if ($isCond) { $q.when } else { $null }
-      partition   = $partition
-      acquisition = $q.acquisition
-    }
-  }
-  # 计划里永远包含 Q3s 的条件说明；是否真的跑由 coverage 判定
-  return $items
-}
+. (P 'tools/query-contract.ps1')
+. (P 'tools/github-transport.ps1')
 
 function Get-RoundDir([int]$r) { P ("data\raw\{0}\r{1}" -f $Date, $r) }
 function Get-MaxRound {
@@ -134,6 +74,9 @@ if ($Import) {
   New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
   $ok = ($resp -and $resp.PSObject.Properties['items'])
+  if ($Import -notmatch '^Q[A-Za-z0-9]+$') { throw 'Invalid query ID' }
+  if ($ok) { Assert-QueryImport -Root $root -Date $Date -Round $r -Id $Import -RequestUrl $RequestUrl -QueryTask $QueryTask -Body (Extract-Json $raw) }
+
   $items = if ($ok) { @($resp.items) } else { @() }
 
   # attempt 自增：同一 Q 重试不覆盖旧文件（raw 只增不改）
@@ -148,7 +91,8 @@ if ($Import) {
   if ($ok) {
     [IO.File]::WriteAllText((Join-Path $dir $fileName), (Extract-Json $raw), $enc)
   } else {
-    [IO.File]::WriteAllText((Join-Path $dir $fileName), $raw.Substring(0, [Math]::Min(2000, $raw.Length)), $enc)
+    $errorBody=if(Test-QueryContractRequired $spec $Date){'{"query_response_rejected":true}'}else{$raw.Substring(0, [Math]::Min(2000, $raw.Length))}
+    [IO.File]::WriteAllText((Join-Path $dir $fileName), $errorBody, $enc)
   }
   $newFaces = $null
   $queryTotal = if($ok){[int]$resp.total_count}else{$null}
@@ -173,9 +117,28 @@ if ($Import) {
     request_url = $RequestUrl
     query_task = $QueryTask
     query_total_count = $queryTotal
+    plan_sha256 = $(if(Test-Path (Join-Path $dir 'plan.json')){(Get-FileHash (Join-Path $dir 'plan.json')).Hash}else{$null})
   }
   $meta | Add-Member -NotePropertyName imports -NotePropertyValue $list -Force
   [IO.File]::WriteAllText($metaPath, ($meta | ConvertTo-Json -Depth 8), $enc)
+
+  $nextPath=Join-Path $dir 'next-request.json'
+  if(Test-Path $nextPath){
+    $pending=Get-Content $nextPath -Raw|ConvertFrom-Json
+    if($pending.kind -eq 'request' -and $pending.query -eq $Import -and $pending.url -eq $RequestUrl -and [int]$pending.attempt -eq $next){
+      $headers=if($HeaderFile -and (Test-Path $HeaderFile)){Get-GitHubResponseHeaders ([IO.File]::ReadAllText($HeaderFile))}else{@{}}
+      $status=if($HttpStatus){$HttpStatus}elseif($ok){200}else{0}
+      $policy=Get-GitHubRetryPolicy $status $headers $raw
+      $delay=if($status -eq 0 -or $policy.Fatal){60}else{[math]::Max(7,$policy.Delay)}
+      @{next_allowed=[datetimeoffset]::UtcNow.AddSeconds($delay).ToString('o');date=$Date;round=$r;reason=$(if($policy.Limited){'host-rate-limit'}elseif($ok){'host-pace'}else{'host-error'});source='host-file'}|ConvertTo-Json|Set-Content (P 'data/raw/.collector-state.json') -Encoding UTF8
+      @{id=$Import;at=[datetimeoffset]::UtcNow.ToString('o');channel='host-file';http_status=$status;status_inferred=(-not [bool]$HttpStatus);reservation=$pending.reservation;items=$items.Count;ok=[bool]$ok;request_url=$RequestUrl;query_task=$QueryTask}|ConvertTo-Json -Compress|Add-Content (Join-Path $dir 'requests.jsonl') -Encoding UTF8
+    }
+  }
+
+  if(Test-QueryContractRequired $spec $Date){
+    $coverage=& (P 'tools/check-queries.ps1') -Date $Date -Root $root -Json|ConvertFrom-Json
+    Write-Host ("查询登记进度：成功 {0} / 计划 {1}；未完成 {2}。登记一条不代表日报完成。" -f $coverage.successful,$coverage.planned,(@($coverage.unfinished)-join ', '))
+  }
 
   if ($Json) { [ordered]@{ ok = $ok; id = $Import; round = $r; items = $items.Count } | ConvertTo-Json -Compress }
   if ($ok) { Write-Host ("✓ 已登记 {0}：{1} 条 → {2}" -f $Import, $items.Count, (Split-Path $dir -Leaf)) -ForegroundColor Green }
@@ -197,12 +160,13 @@ $dir = Get-RoundDir $r
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
 $planPath = Join-Path $dir 'plan.json'
-$items = New-Plan
+$items = @(Get-DailyQueryPlanItems -Root $root -Date $Date -Spec $spec)
 $plan = [ordered]@{
   date = $Date; round = $r; weekday = [int]$wd
   topic = [string]$dayCfg.topic; topic2 = [string]$dayCfg.topic2
   generated_at = (Get-Date).ToString('s')
   items = $items
+  spec_sha256 = (Get-FileHash $specPath).Hash
 }
 if (Test-Path $planPath) { throw 'Plan already exists; use a new round instead of overwriting history.' }
 [IO.File]::WriteAllText($planPath, ($plan | ConvertTo-Json -Depth 8), $enc)

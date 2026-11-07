@@ -1,7 +1,7 @@
 {
   "_说明": "推荐偏好配置（机器可读）。这是 RUBRIC.md 的可调参数层，不替代它。硬性排除、每维分值、分档阈值仍在 RUBRIC.md；本文件的 fail_closed 会自动校验两边不冲突，冲突时以 RUBRIC.md 为准。",
-  "_版本": "1.2.0",
-  "_更新时间": "2026-10-18",
+  "_版本": "1.3.0",
+  "_更新时间": "2026-11-07",
   "output": {
     "daily_limit": 5,
     "hard_max": 8,
@@ -37,7 +37,10 @@
     "extra_queries": {
       "周三": "cli",
       "周六": "cli"
-    }
+    },
+    "authenticated_daily_api_ceiling": 180,
+    "reuse_git_login": true,
+    "require_auth_for_daily": true
   },
   "filters": {
     "exclude_topics": [
@@ -223,5 +226,6 @@
       "name": "techjarves/Portable-Local-Studio",
       "url": "https://github.com/techjarves/Portable-Local-Studio"
     }
-  ]
+  ],
+  "_产品": "RepoDossier"
 }

@@ -4,7 +4,7 @@
 <base href="data/site/">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>本地开源项目 · 档案站</title>
+<title>开源案卷 · RepoDossier</title>
 <style>
 @font-face{font-family:"Big";src:url("../../assets/anton-latin.woff2") format("woff2");font-display:swap}
 :root{--ink:#0a0a0a;--paper:#f4f1e4;--fluoro:#e9ff2e;--magenta:#ff1f6b;--mono:SFMono-Regular,Consolas,monospace;--shell-bottom:86px}
@@ -155,7 +155,7 @@ html,body{margin:0;height:100%;background:#080807;color:var(--paper);font:14px/1
 }
 </style>
   <link rel="stylesheet" href="../../assets/ui/motion.css">
-<!-- BUILD-STAMP: build 2026-11-05 11:27 ｜ 数据指纹 8840E9F5E00B ｜ 15 条 -->
+<!-- BUILD-STAMP: build 2026-11-07 17:25 ｜ 数据指纹 C24E49A9AFF1 ｜ 15 条 -->
 </head>
 <body data-motion-page="shell">
 <div class="load" id="load">ARCHIVE<span style="color:var(--magenta)">//</span>LOADING</div>
@@ -314,7 +314,7 @@ html,body{margin:0;height:100%;background:#080807;color:var(--paper);font:14px/1
         a.classList.toggle('on', p.route === 'daily' && a.getAttribute('data-l') === curL);
       });
     }
-    document.title = '档案站 · ' + ({ home: '首页', daily: '每日精选', library: '全库', plans: '计划' }[p.route]);
+    document.title = '开源案卷 · ' + ({ home: '首页', daily: '每日精选', library: '全库', plans: '计划' }[p.route]);
   }
   window.addEventListener('hashchange', render);
   [].forEach.call(dock.querySelectorAll('a'), function (a) {

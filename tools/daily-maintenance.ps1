@@ -8,7 +8,7 @@ if(-not $Date){$Date=[datetime]::UtcNow.AddHours(8).ToString('yyyy-MM-dd')}
 if($Date -ne [datetime]::UtcNow.AddHours(8).ToString('yyyy-MM-dd') -and -not $PlanOnly){throw 'Live refresh must use current Beijing date; historical runs must not label current API facts as historical'}
 $steps=@{}
 if(-not $PlanOnly){
- $budget=Reserve-GitHubRequest $Root 'maintenance-plan' -Peek
+ $budget=Reserve-GitHubRequest $Root 'maintenance-plan' -Peek -Authenticated:([bool](Get-GitHubReadCredential -Root $Root))
  $reserve=5;$config=Join-Path $Root 'config.json';if(Test-Path $config){$v=(Get-Content $config -Raw|ConvertFrom-Json).sources.verify_max_calls;if($null -ne $v){$reserve=[int]$v}}
  $available=[math]::Max(0,$budget.remaining-$reserve)
  $SeriesRequests=[math]::Min($SeriesRequests,$available)

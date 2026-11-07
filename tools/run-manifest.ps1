@@ -72,7 +72,6 @@ if ($Sync) {
   $coverageCode = $global:LASTEXITCODE
   $coverageOutput | Out-Host
   if ($coverageCode -eq 0) { $covStatus = 'pass' }
-  elseif ($coverageCode -eq 2 -and $report -and ([IO.File]::ReadAllText((P "reports\$Date.md")) -match '不完整')) { $covStatus = 'warn' }
   else { $covStatus = 'fail' }
   # A 层：收工时刷新候选池 + 渠道贡献；只写 data/audit，失败不阻塞收工
   $poolPath = P "data\audit\pool\$Date-all.jsonl"
@@ -94,9 +93,8 @@ if ($Sync) {
   }
   if ($covStatus) { $m.steps['queries'] = [ordered]@{ status = $(if ($covStatus -eq 'fail') { 'fail' } else { 'ok' }); at = (Get-Date).ToString('o'); note = "coverage: $covStatus" } }
   $m.steps['discovery'] = [ordered]@{ status = $(if ($disc) { 'ok' } else { 'fail' }); at = (Get-Date).ToString('o'); note = 'discovery-refresh.ps1' }
-  $candidateCode=0
-  $hasEditorialScope = Test-Path (P "data\audit\editorial\$Date.json")
-  if($disc -and $hasEditorialScope){
+  $candidateCode=1
+  if($disc){
     $candidateArgs=@{Action='check';Date=$Date;Root=$root}
     $policyPath=P 'data/search-policy.json'
     if($report -and (Test-Path $policyPath)){$policy=Get-Content $policyPath -Raw|ConvertFrom-Json;if($Date -ge $policy.disposition_enforce_from){$candidateArgs.Publish=$true}}
@@ -105,7 +103,7 @@ if ($Sync) {
     }else{& (P 'tools/candidate-ledger.ps1') @candidateArgs | Out-Host}
     $candidateCode=$LASTEXITCODE
   }
-  $m.steps['candidates']=[ordered]@{status=$(if($candidateCode -eq 0){'ok'}else{'fail'});at=[datetimeoffset]::UtcNow.ToString('o');note=$(if($hasEditorialScope){'candidate-ledger accounting/publication check'}else{'skipped: editorial scope not initialized (legacy DSH mode)'})}
+  $m.steps['candidates']=[ordered]@{status=$(if($candidateCode -eq 0){'ok'}else{'fail'});at=[datetimeoffset]::UtcNow.ToString('o');note='candidate-ledger accounting/publication check'}
   if (-not $report -and $m.steps['report'].status -ne 'skipped') { $m.steps['report'] = [ordered]@{ status = 'fail'; at = (Get-Date).ToString('o'); note = 'Report missing; backfill or explicitly record a skipped day.' } }
   $m.updated_at = (Get-Date).ToString('o')
   [IO.File]::WriteAllText($mp, ($m | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding($false)))

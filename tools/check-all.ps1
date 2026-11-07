@@ -25,6 +25,7 @@ function Run-Gate([string]$Name, [string]$Script, [hashtable]$GateArgs = @{}) {
 }
 
 Run-Gate 'validate-lib' 'tools\validate-lib.ps1'
+Run-Gate 'site-assets' 'tools\check-site-assets.ps1' @{Root=$Root}
 if(Test-Path (P 'distribution.json')) {
   # A distribution has its own portable checks, never inferred from missing files.
   Run-Gate 'distribution-integrity' 'tools\check-distribution.ps1'

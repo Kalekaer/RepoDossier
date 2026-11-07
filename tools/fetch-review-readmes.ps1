@@ -1,6 +1,6 @@
 # Compatibility entry point; all network/cache/retry state belongs to evidence-store.
 param([string]$Batch='',[string]$Proxy='', [switch]$NoProxy,
-  [ValidateRange(1,200)][int]$MaxRequests=24,[ValidateRange(0,900)][int]$MaxWaitSeconds=60)
+  [ValidateRange(1,200)][int]$MaxRequests=24,[ValidateRange(0,3600)][int]$MaxWaitSeconds=60)
 $ErrorActionPreference='Stop'
 if([string]::IsNullOrWhiteSpace($Batch)){throw 'Batch is required; pass -Batch with a workspace review directory'}
 $root=Split-Path -Parent $PSScriptRoot
@@ -27,7 +27,27 @@ try{
   $t=Add-EvidenceTask $store $item.id readme $version 'README for frozen evidence packet';$wanted[$item.id]=$t.id;$missing+=$item.id
  }
  Save-EvidenceStore $store
- $result=if($missing.Count){Invoke-EvidenceTasks $store -Repos $missing -Kinds readme -MaxRequests $MaxRequests -Proxy $Proxy -MaxWaitSeconds $MaxWaitSeconds}else{@{pending=0;requests=0}}
+ $requests=0;$waited=0;$rounds=0
+ do{
+  $result=if($missing.Count){Invoke-EvidenceTasks $store -Repos $missing -Kinds readme -TaskIds @($wanted.Values) -MaxRequests ($MaxRequests-$requests) -Proxy $Proxy -MaxWaitSeconds 0}else{@{pending=0;requests=0;stop='complete'}}
+  $requests+=$result.requests;$rounds++
+  if(-not $result.pending -or $requests -ge $MaxRequests -or $rounds -ge 200 -or $result.stop -in @('daily-api-budget','network-unavailable','network-busy','request-budget','remaining-budget','http-fatal','authentication-required')){break}
+  $active=@($store.state.tasks.Values|Where-Object{$_.id -in @($wanted.Values) -and $_.state -in @('pending','retry','running')})
+  if(-not $active.Count){break}
+  $now=[datetimeoffset]::UtcNow
+  $earliest=($active|ForEach-Object{ConvertTo-EvidenceInstant $_.next_attempt}|Sort-Object|Select-Object -First 1)
+  $next=ConvertTo-EvidenceInstant $store.state.next_allowed
+  if($earliest -gt $next){$next=$earliest}
+  $token=Get-GitHubReadCredential -Root $root
+  $gate=Get-GitHubTransportGate $root core $Proxy $token
+  $token=$null
+  if($gate.paused -and $gate.reason -eq 'network-unavailable'){break}
+  if($gate.paused -and [datetimeoffset]::Parse($gate.next_allowed) -gt $next){$next=[datetimeoffset]::Parse($gate.next_allowed)}
+  $delay=[int][math]::Ceiling([math]::Max(1,($next-$now).TotalSeconds))
+  if($waited+$delay -gt $MaxWaitSeconds){break}
+  Write-Host "README队列将在 $($next.ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz')) 自动续采；已保存断点。"
+  while($delay -gt 0){$chunk=[math]::Min(30,$delay);Start-Sleep -Seconds $chunk;$waited+=$chunk;$delay-=$chunk}
+ }while($true)
  foreach($id in $missing){
   $c=Get-EvidenceCache $store $id readme
   $t=$store.state.tasks[$wanted[$id]]
@@ -39,7 +59,7 @@ try{
   @{id=$id;path=$name;sha256=(Get-FileHash $target).Hash;fetched_at=$c.fetched_at;checked_at=$c.checked_at;source=$c.path;api_sha=$body.sha}|ConvertTo-Json -Compress|Add-Content $index -Encoding UTF8
  }
  Update-EvidenceReviews $store;Save-EvidenceStore $store
- Write-Host "README补证：本次请求 $($result.requests)，待补 $($result.pending)。"
+ Write-Host "README补证：本次尝试 $requests，待补 $($result.pending)，停止原因 $($result.stop)。"
  if($result.pending){exit 2}
 }finally{$store.guard.Dispose()}
 exit 0

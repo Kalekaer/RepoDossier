@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "execution_contract_from": "2026-11-07",
   "enforce_from": "2026-10-24",
   "timezone": "Asia/Shanghai",
   "_说明": "检索式唯一真源。文档由 tools/gen-query-docs.ps1 生成；不要手改生成的表格。",
@@ -40,7 +41,7 @@
       "order": "desc",
       "per_page": 100,
       "frequency": "daily",
-      "required": false,
+      "required": true,
       "note": "低星新项目每日探索；保留质量标准，自动分页",
       "acquisition": {
         "max_requests": 2,
@@ -277,7 +278,7 @@
       "order": "desc",
       "per_page": 100,
       "frequency": "weekly:6",
-      "required": false,
+      "required": true,
       "note": "不带 created；先观察，不设 required",
       "acquisition": {
         "max_requests": 2,
